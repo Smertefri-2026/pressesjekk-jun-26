@@ -1,52 +1,115 @@
 import Link from "next/link";
 
+const pageLinks = [
+  { href: "/pressesjekk", label: "Start sjekk" },
+  { href: "/hvordan-det-fungerer", label: "Slik fungerer det" },
+  { href: "/eksempelrapport", label: "Eksempelrapport" },
+  { href: "/priser", label: "Priser" },
+  { href: "/journalister", label: "Journalister" },
+  { href: "/advokater", label: "Advokater" },
+  { href: "/min-side", label: "Min Side" },
+  { href: "/kontakt", label: "Kontakt" },
+];
+
+const trustLinks = [
+  { href: "/personvern", label: "Personvern" },
+  { href: "/vilkar", label: "Vilkår" },
+];
+
+const socialLinks = [
+  { href: "#", label: "Facebook" },
+  { href: "#", label: "YouTube" },
+  { href: "#", label: "TikTok" },
+];
+
 export function LightPublicFooter() {
   return (
     <footer className="border-t border-slate-200 bg-white">
-      <div className="mx-auto grid max-w-7xl gap-8 px-6 py-10 text-sm text-slate-600 lg:grid-cols-[1fr_auto] lg:px-8">
-        <div>
-          <p className="text-lg font-black text-slate-950">PresseSjekk</p>
-          <p className="mt-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
-            Strukturert kontroll av medieomtale
-          </p>
-          <p className="mt-4 max-w-2xl leading-7">
-            PresseSjekk gir veiledende analyser og dokumenthjelp. Tjenesten
-            erstatter ikke advokat, PFU, redaktøransvar eller domstolene.
-          </p>
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <section>
+            <Link href="/" className="block">
+              <p className="text-2xl font-black tracking-tight text-slate-950">
+                PresseSjekk
+              </p>
+              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
+                Strukturert kontroll av medieomtale
+              </p>
+            </Link>
+
+            <p className="mt-5 max-w-md text-sm leading-7 text-slate-600">
+              PresseSjekk gir veiledende analyser og dokumenthjelp. Tjenesten
+              erstatter ikke advokat, PFU, redaktøransvar eller domstolene.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-sm font-black uppercase tracking-[0.22em] text-slate-950">
+              Sider
+            </h2>
+            <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-600">
+              {pageLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="hover:text-slate-950"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </section>
+
+          <section>
+            <h2 className="text-sm font-black uppercase tracking-[0.22em] text-slate-950">
+              Trygghet
+            </h2>
+            <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-600">
+              {trustLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="hover:text-slate-950"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+
+  
+          </section>
+
+          <section>
+            <h2 className="text-sm font-black uppercase tracking-[0.22em] text-slate-950">
+              Følg oss
+            </h2>
+            <p className="mt-5 text-sm leading-7 text-slate-600">
+            </p>
+
+            <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-600">
+              {socialLinks.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="hover:text-slate-950"
+                  aria-label={`${item.label} kommer senere`}
+                >
+                  {item.label}
+                  <span className="ml-2 text-xs font-bold text-slate-400">
+                    kommer
+                  </span>
+                </a>
+              ))}
+            </nav>
+          </section>
         </div>
 
-        <nav className="flex flex-wrap gap-4 font-semibold lg:justify-end">
-          <Link href="/pressesjekk" className="hover:text-slate-950">
-            Start sjekk
-          </Link>
-          <Link href="/hvordan-det-fungerer" className="hover:text-slate-950">
-            Slik fungerer det
-          </Link>
-          <Link href="/journalister" className="hover:text-slate-950">
-            Journalister
-          </Link>
-          <Link href="/advokater" className="hover:text-slate-950">
-            Advokater
-          </Link>
-          <Link href="/eksempelrapport" className="hover:text-slate-950">
-            Eksempelrapport
-          </Link>
-          <Link href="/priser" className="hover:text-slate-950">
-            Priser
-          </Link>
-          <Link href="/min-side" className="hover:text-slate-950">
-            Min Side
-          </Link>
-          <Link href="/kontakt" className="hover:text-slate-950">
-            Kontakt
-          </Link>
-          <Link href="/personvern" className="hover:text-slate-950">
-            Personvern
-          </Link>
-          <Link href="/vilkar" className="hover:text-slate-950">
-            Vilkår
-          </Link>
-        </nav>
+        <div className="mt-10 border-t border-slate-200 pt-6 text-sm leading-7 text-slate-500">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>© {new Date().getFullYear()} PresseSjekk. Alle rettigheter forbeholdt.</p>
+            <p>Veiledende analyser og dokumenthjelp for mediesaker.</p>
+          </div>
+        </div>
       </div>
     </footer>
   );
