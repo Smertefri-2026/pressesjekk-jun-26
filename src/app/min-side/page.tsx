@@ -1,36 +1,7 @@
 import Link from "next/link";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
-
-const cases = [
-  {
-    title: "VG-artikkel om større mediesak",
-    media: "VG",
-    date: "18.06.2026",
-    status: "Full rapport kjøpt",
-    nextStep: "Generer PFU-klage",
-    risk: "Høy",
-    href: "/min-side/saker/demo-1",
-  },
-  {
-    title: "Lokalavis-artikkel med manglende tilsvar",
-    media: "Lokalavis",
-    date: "14.06.2026",
-    status: "Gratis forhåndssjekk",
-    nextStep: "Lås opp full rapport",
-    risk: "Middels",
-    href: "/min-side/saker/demo-1",
-  },
-  {
-    title: "Artikkel om rettssak og identifisering",
-    media: "Nettavis",
-    date: "09.06.2026",
-    status: "PFU-klageutkast klart",
-    nextStep: "Last ned klage",
-    risk: "Middels/høy",
-    href: "/min-side/saker/demo-1",
-  },
-];
+import { demoCaseSummaries } from "@/data/demoCases";
 
 export default function MinSidePage() {
   return (
@@ -76,7 +47,9 @@ export default function MinSidePage() {
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
               <p className="text-sm text-slate-400">Aktive saker</p>
-              <p className="mt-3 text-4xl font-bold">3</p>
+              <p className="mt-3 text-4xl font-bold">
+                {demoCaseSummaries.length}
+              </p>
             </div>
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
               <p className="text-sm text-slate-400">Rapporter</p>
@@ -101,9 +74,9 @@ export default function MinSidePage() {
               </div>
 
               <div className="space-y-4">
-                {cases.map((item) => (
+                {demoCaseSummaries.map((item) => (
                   <Link
-                    key={item.title}
+                    key={item.id}
                     href={item.href}
                     className="block rounded-3xl border border-white/10 bg-white/[0.03] p-6 hover:border-cyan-300/50"
                   >

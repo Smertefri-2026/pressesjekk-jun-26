@@ -1,63 +1,7 @@
 import Link from "next/link";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
-
-const stats = [
-  { label: "Brukere", value: "128", note: "+24 siste 7 dager" },
-  { label: "Saker", value: "312", note: "47 aktive saker" },
-  { label: "Analyser", value: "1 284", note: "183 siste døgn" },
-  { label: "Betalinger", value: "42 180 kr", note: "Dummy tall" },
-  { label: "OpenAI-kostnad", value: "1 940 kr", note: "Må overvåkes" },
-  { label: "Feilede jobber", value: "7", note: "Krever sjekk" },
-];
-
-const popularArticles = [
-  {
-    title: "VG-artikkel om større mediesak",
-    media: "VG",
-    checks: 47,
-    risk: "Høy",
-  },
-  {
-    title: "Lokalavis-artikkel med manglende tilsvar",
-    media: "Lokalavis",
-    checks: 31,
-    risk: "Middels",
-  },
-  {
-    title: "Artikkel om rettssak og identifisering",
-    media: "Nettavis",
-    checks: 22,
-    risk: "Middels/høy",
-  },
-];
-
-const latestCases = [
-  {
-    user: "Privatperson",
-    case: "Ny artikkel lagt inn",
-    status: "Venter på analyse",
-    time: "07:12",
-  },
-  {
-    user: "Advokatkonto",
-    case: "PFU-klage generert",
-    status: "Ferdig",
-    time: "06:48",
-  },
-  {
-    user: "Bedrift",
-    case: "Full rapport kjøpt",
-    status: "Betalt",
-    time: "06:21",
-  },
-  {
-    user: "Journalist",
-    case: "Før publisering-sjekk",
-    status: "Gratis preview",
-    time: "05:55",
-  },
-];
+import { adminStats, latestCases, popularArticles } from "@/data/adminStats";
 
 export default function AdminPage() {
   return (
@@ -91,7 +35,7 @@ export default function AdminPage() {
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {stats.map((item) => (
+            {adminStats.map((item) => (
               <div
                 key={item.label}
                 className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
@@ -157,7 +101,7 @@ export default function AdminPage() {
                 <li>✓ Køsystem for analyser</li>
                 <li>✓ Cache for samme URL</li>
                 <li>✓ Begrense gratisbruk</li>
-                <li>✓ Logge OpenAI-kostnad per rapport</li>
+                <li>✓ Logge AI-kostnad per rapport</li>
                 <li>✓ Varsle ved feilede analyser</li>
                 <li>✓ Vise inntekt mot AI-kostnad</li>
               </ul>
