@@ -15,7 +15,7 @@ export function TurnstileBox() {
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="w-full max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
       <p className="mb-3 text-sm font-bold text-slate-700">
         Bekreft at du er et menneske
       </p>
@@ -25,11 +25,14 @@ export function TurnstileBox() {
         strategy="afterInteractive"
       />
 
-      <div
-        className="cf-turnstile"
-        data-sitekey={siteKey}
-        data-theme="light"
-      />
+      <div className="w-full max-w-full overflow-hidden">
+        <div
+          className="cf-turnstile"
+          data-sitekey={siteKey}
+          data-theme="light"
+          data-size="compact"
+        />
+      </div>
     </div>
   );
 }
