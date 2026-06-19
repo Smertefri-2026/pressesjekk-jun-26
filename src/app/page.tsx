@@ -1,20 +1,301 @@
-import { PublicFooter } from "@/components/layout/PublicFooter";
-import { PublicHeader } from "@/components/layout/PublicHeader";
-import { HeroSection } from "@/components/sections/HeroSection";
-import { HowItWorksSection } from "@/components/sections/HowItWorksSection";
-import { PricingPreviewSection } from "@/components/sections/PricingPreviewSection";
+import Link from "next/link";
+import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
+import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 
-export default function Home() {
+const mainBenefits = [
+  {
+    title: "Sjekk artikkelen",
+    text: "Lim inn URL, artikkeltekst eller last opp dokumentasjon. PresseSjekk hjelper deg å strukturere hva saken faktisk handler om.",
+  },
+  {
+    title: "Vurder tilsvar",
+    text: "Se om du ble kontaktet før publisering, om beskyldningene var konkrete, og om svaret ditt ble tatt med på en ryddig måte.",
+  },
+  {
+    title: "Bygg dokumentasjon",
+    text: "Samle e-post, SMS, skjermbilder, rettsstatus, vedlegg og tidslinje på ett sted før du går videre.",
+  },
+  {
+    title: "Få rapport og klageutkast",
+    text: "Full rapport kan gi mulige problemområder, anbefalt neste steg og strukturert utkast til PFU-klage.",
+  },
+];
+
+const audiences = [
+  {
+    title: "For deg som er omtalt",
+    text: "Få oversikt over hva som er skrevet, hva du svarte, og hvilke punkter som bør vurderes videre.",
+    href: "/pressesjekk",
+    label: "Start sjekk",
+  },
+  {
+    title: "For journalister",
+    text: "Bruk PresseSjekk før publisering som et ekstra kontrollpunkt i krevende saker.",
+    href: "/journalister",
+    label: "Les mer",
+  },
+  {
+    title: "For advokater og rådgivere",
+    text: "Strukturer klientmapper, artikler, dokumentasjon, rapporter og klageutkast.",
+    href: "/advokater",
+    label: "Se proffløsning",
+  },
+];
+
+const checks = [
+  "Samtidig imøtegåelse",
+  "Tilsvar",
+  "Kildebruk",
+  "Tittel og ingress",
+  "Identifisering",
+  "Privatliv",
+  "Rettsstatus",
+  "Oppdateringsbehov",
+];
+
+export default function HomePage() {
   return (
-    <main className="min-h-screen bg-slate-950">
-      <section className="mx-auto flex min-h-screen max-w-7xl flex-col px-6 py-8 lg:px-8">
-        <PublicHeader />
-        <HeroSection />
+    <main className="min-h-screen bg-slate-50 text-slate-950">
+      <LightPublicHeader />
+
+      <section className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-[1fr_420px] lg:items-center">
+          <section>
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+              Presseetikk, tilsvar og dokumentasjon
+            </p>
+
+            <h1 className="mt-5 max-w-5xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+              Når media skriver om deg, bør du kunne sjekke dem tilbake.
+            </h1>
+
+            <p className="mt-7 max-w-3xl text-xl leading-9 text-slate-700">
+              PresseSjekk hjelper deg å vurdere medieomtale, tilsvar,
+              dokumentasjon og mulige presseetiske problemstillinger på ett
+              sted. Start med en gratis forhåndssjekk, og gå videre til rapport
+              eller klageutkast hvis saken bør følges opp.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/pressesjekk"
+                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
+              >
+                Start gratis sjekk
+              </Link>
+              <Link
+                href="/eksempelrapport"
+                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+              >
+                Se eksempelrapport
+              </Link>
+            </div>
+
+            <div className="mt-8 flex flex-wrap gap-3 text-sm font-semibold text-slate-600">
+              <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
+                For privatpersoner
+              </span>
+              <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
+                For bedrifter
+              </span>
+              <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
+                For advokater
+              </span>
+              <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
+                For redaksjoner
+              </span>
+            </div>
+          </section>
+
+          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-7 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              Gratis forhåndssjekk
+            </p>
+
+            <h2 className="mt-4 text-3xl font-black text-slate-950">
+              Lim inn artikkel og få første vurdering
+            </h2>
+
+            <p className="mt-4 leading-8 text-slate-700">
+              I første steg får du en foreløpig oversikt over mulige
+              problemområder. Senere kan du låse opp full rapport,
+              dokumentasjonsliste og PFU-klageutkast.
+            </p>
+
+            <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
+              <label className="text-sm font-semibold text-slate-600">
+                Artikkel-URL
+              </label>
+              <div className="mt-3 rounded-xl border border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-500">
+                https://avis.no/artikkel/...
+              </div>
+
+              <Link
+                href="/pressesjekk"
+                className="mt-4 block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
+              >
+                Start sjekk
+              </Link>
+            </div>
+
+            <p className="mt-5 text-xs leading-6 text-slate-600">
+              PresseSjekk gir veiledende dokumenthjelp. Tjenesten erstatter ikke
+              advokat, PFU, redaktøransvar eller domstolene.
+            </p>
+          </aside>
+        </div>
+
+        <section className="mt-18 mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {mainBenefits.map((item) => (
+            <article
+              key={item.title}
+              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            >
+              <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-100 text-lg font-black text-cyan-800">
+                ✓
+              </div>
+              <h2 className="text-xl font-black text-slate-950">
+                {item.title}
+              </h2>
+              <p className="mt-4 leading-7 text-slate-600">{item.text}</p>
+            </article>
+          ))}
+        </section>
+
+        <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
+          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              Hva sjekkes?
+            </p>
+            <h2 className="mt-3 text-4xl font-black text-slate-950">
+              PresseSjekk ser på mer enn bare artikkelteksten
+            </h2>
+            <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+              Mange mediesaker handler ikke bare om ordene som står i
+              artikkelen. Det handler også om prosessen før publisering, om
+              beskyldningene ble forelagt tydelig, om svaret ble tatt med, og om
+              rettsstatus er presist forklart.
+            </p>
+
+            <div className="mt-8 grid gap-3 md:grid-cols-2">
+              {checks.map((item) => (
+                <div
+                  key={item}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
+                >
+                  <span className="mr-2 text-cyan-700">✓</span>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <aside className="rounded-3xl border border-amber-200 bg-amber-50 p-8 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
+              Viktig forbehold
+            </p>
+            <h2 className="mt-3 text-3xl font-black text-slate-950">
+              Ikke en dom – men et bedre grunnlag
+            </h2>
+            <p className="mt-4 leading-8 text-slate-700">
+              PresseSjekk avgjør ikke om pressen har brutt god presseskikk, og
+              tjenesten lover ikke et bestemt resultat. Den hjelper deg å
+              strukturere saken, dokumentasjonen og mulige punkter som bør
+              vurderes videre.
+            </p>
+
+            <ul className="mt-6 space-y-3 text-sm font-medium text-slate-700">
+              <li>• Veiledende analyse</li>
+              <li>• Strukturert dokumentasjon</li>
+              <li>• Mulige presseetiske problemområder</li>
+              <li>• Utkast som må kontrolleres før bruk</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section className="mt-16 rounded-3xl bg-slate-950 p-8 text-white shadow-sm">
+          <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                Bygget som saksflyt
+              </p>
+              <h2 className="mt-3 text-4xl font-black">
+                Fra artikkel til rapport og klageutkast
+              </h2>
+              <p className="mt-5 max-w-3xl leading-8 text-slate-300">
+                PresseSjekk bør ikke bare være en enkel URL-sjekk. Den bør være
+                en trygg saksflyt der artikkel, tilsvar, rettsstatus,
+                dokumentasjon og vedlegg kobles sammen før rapporten lages.
+              </p>
+            </div>
+
+            <div className="grid gap-3">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
+                1. Legg inn artikkel
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
+                2. Svar på tilsvar-spørsmål
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
+                3. Legg til dokumentasjon
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
+                4. Få rapport og videre forslag
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-16 grid gap-6 lg:grid-cols-3">
+          {audiences.map((item) => (
+            <article
+              key={item.title}
+              className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+            >
+              <h2 className="text-2xl font-black text-slate-950">
+                {item.title}
+              </h2>
+              <p className="mt-4 leading-8 text-slate-700">{item.text}</p>
+              <Link
+                href={item.href}
+                className="mt-6 inline-block rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-950 hover:bg-slate-100"
+              >
+                {item.label}
+              </Link>
+            </article>
+          ))}
+        </section>
+
+        <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            Klar til å prøve?
+          </p>
+          <h2 className="mt-3 text-4xl font-black text-slate-950">
+            Start med en gratis forhåndssjekk
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-700">
+            Du kan starte enkelt med URL eller artikkeltekst. Senere kan du
+            legge til dokumentasjon, låse opp rapport og bygge klageutkast.
+          </p>
+
+          <div className="mt-7 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/pressesjekk"
+              className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950 hover:bg-cyan-400"
+            >
+              Start gratis sjekk
+            </Link>
+            <Link
+              href="/priser"
+              className="rounded-xl border border-slate-300 px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+            >
+              Se priser
+            </Link>
+          </div>
+        </section>
       </section>
 
-      <HowItWorksSection />
-      <PricingPreviewSection />
-      <PublicFooter />
+      <LightPublicFooter />
     </main>
   );
 }
