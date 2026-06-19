@@ -1,37 +1,7 @@
 import Link from "next/link";
 import { PublicFooter } from "@/components/layout/PublicFooter";
 import { PublicHeader } from "@/components/layout/PublicHeader";
-
-const timeline = [
-  {
-    date: "18.06.2026 kl. 09:12",
-    title: "Journalist tok kontakt",
-    text: "Bruker oppgir at henvendelsen kom på e-post med kort svarfrist.",
-  },
-  {
-    date: "18.06.2026 kl. 11:30",
-    title: "Bruker svarte",
-    text: "Bruker oppgir at det ble sendt tilsvar, men at svaret bare delvis ble tatt med.",
-  },
-  {
-    date: "18.06.2026 kl. 14:05",
-    title: "Artikkel publisert",
-    text: "Artikkelen ble publisert samme dag. Bruker mener saken inneholder sterke faktiske beskyldninger.",
-  },
-  {
-    date: "18.06.2026 kl. 18:22",
-    title: "PresseSjekk opprettet",
-    text: "Saken er registrert i PresseSjekk med artikkel, tilsvar og foreløpig vurdering.",
-  },
-];
-
-const findings = [
-  "Mulig mangelfull samtidig imøtegåelse",
-  "Kort svarfrist før publisering",
-  "Spørsmål om identifisering",
-  "Mulig behov for oppdatering etter rettslig utvikling",
-  "Tittel/ingress bør vurderes mot innholdet i artikkelen",
-];
+import { demoCase } from "@/data/demoCases";
 
 export default function DemoCasePage() {
   return (
@@ -54,7 +24,7 @@ export default function DemoCasePage() {
               </p>
 
               <h1 className="mt-3 max-w-4xl text-4xl font-bold tracking-tight md:text-6xl">
-                VG-artikkel om større mediesak
+                {demoCase.title}
               </h1>
 
               <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
@@ -67,16 +37,18 @@ export default function DemoCasePage() {
                 <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
                   <p className="text-sm text-slate-400">Status</p>
                   <p className="mt-2 font-bold text-cyan-300">
-                    Full rapport kjøpt
+                    {demoCase.status}
                   </p>
                 </div>
                 <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
                   <p className="text-sm text-slate-400">Risiko</p>
-                  <p className="mt-2 font-bold text-amber-300">Høy</p>
+                  <p className="mt-2 font-bold text-amber-300">
+                    {demoCase.risk}
+                  </p>
                 </div>
                 <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
                   <p className="text-sm text-slate-400">Neste steg</p>
-                  <p className="mt-2 font-bold">Generer PFU-klage</p>
+                  <p className="mt-2 font-bold">{demoCase.nextStep}</p>
                 </div>
               </div>
 
@@ -86,20 +58,24 @@ export default function DemoCasePage() {
                 <div className="mt-5 grid gap-4 md:grid-cols-2">
                   <div>
                     <p className="text-sm text-slate-400">Medium</p>
-                    <p className="mt-1 font-semibold">VG</p>
+                    <p className="mt-1 font-semibold">{demoCase.media}</p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-400">Publisert</p>
-                    <p className="mt-1 font-semibold">18.06.2026</p>
+                    <p className="mt-1 font-semibold">
+                      {demoCase.publishedAt}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-400">Artikkeltype</p>
-                    <p className="mt-1 font-semibold">Nyhetsartikkel</p>
+                    <p className="mt-1 font-semibold">
+                      {demoCase.articleType}
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm text-slate-400">Sjekket før</p>
                     <p className="mt-1 font-semibold text-cyan-300">
-                      47 ganger
+                      {demoCase.checkedCount} ganger
                     </p>
                   </div>
                 </div>
@@ -107,7 +83,7 @@ export default function DemoCasePage() {
                 <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900 p-5">
                   <p className="text-sm text-slate-400">URL</p>
                   <p className="mt-2 break-words text-slate-300">
-                    https://eksempel.no/artikkel/demo
+                    {demoCase.url}
                   </p>
                 </div>
               </section>
@@ -116,7 +92,7 @@ export default function DemoCasePage() {
                 <h2 className="text-2xl font-bold">Tidslinje</h2>
 
                 <div className="mt-6 space-y-4">
-                  {timeline.map((item) => (
+                  {demoCase.timeline.map((item) => (
                     <div
                       key={item.title}
                       className="rounded-2xl border border-white/10 bg-slate-900 p-5"
@@ -164,7 +140,7 @@ export default function DemoCasePage() {
                 <h2 className="text-2xl font-bold">Mulige funn</h2>
 
                 <ul className="mt-5 space-y-3 text-slate-300">
-                  {findings.map((finding) => (
+                  {demoCase.findings.map((finding) => (
                     <li key={finding} className="flex gap-3">
                       <span className="text-cyan-300">✓</span>
                       <span>{finding}</span>
@@ -217,7 +193,7 @@ export default function DemoCasePage() {
               <div className="mt-6 rounded-2xl bg-slate-950 p-5">
                 <p className="text-sm text-slate-400">Søkt på</p>
                 <p className="mt-2 text-4xl font-bold text-cyan-300">
-                  47 ganger
+                  {demoCase.checkedCount} ganger
                 </p>
                 <p className="mt-3 text-sm leading-6 text-slate-400">
                   I ekte versjon lagres samme artikkel slik at grunnanalyse kan
