@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { CaseCard } from "@/components/dashboard/CaseCard";
 import { demoCaseSummaries } from "@/data/demoCases";
 
@@ -23,33 +24,7 @@ const activity = [
 export default function MinSidePage() {
   return (
     <main className="min-h-screen bg-slate-100 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
-          <Link href="/" className="block">
-            <h1 className="text-2xl font-black tracking-tight text-slate-950">
-              PresseSjekk
-            </h1>
-            <p className="mt-1 hidden text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 sm:block">
-              Min Side
-            </p>
-          </Link>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/pressesjekk"
-              className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
-            >
-              Ny sjekk
-            </Link>
-            <Link
-              href="/"
-              className="hidden rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-slate-100 sm:block"
-            >
-              Forside
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1fr_360px]">

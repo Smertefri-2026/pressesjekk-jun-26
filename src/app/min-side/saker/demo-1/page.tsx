@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { demoCase } from "@/data/demoCases";
 
 const caseActions = [
@@ -35,33 +36,7 @@ const reportVersions = [
 export default function DemoCasePage() {
   return (
     <main className="min-h-screen bg-slate-100 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
-          <Link href="/min-side" className="block">
-            <h1 className="text-2xl font-black tracking-tight text-slate-950">
-              PresseSjekk
-            </h1>
-            <p className="mt-1 hidden text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 sm:block">
-              Sak
-            </p>
-          </Link>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/min-side"
-              className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-slate-100"
-            >
-              Min Side
-            </Link>
-            <Link
-              href="/pressesjekk"
-              className="hidden rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800 sm:block"
-            >
-              Ny sjekk
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
         <Link
