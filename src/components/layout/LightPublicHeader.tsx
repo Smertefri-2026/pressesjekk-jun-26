@@ -5,13 +5,10 @@ export function LightPublicHeader() {
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
         <Link href="/" className="block">
-          <p className="text-xs font-bold uppercase tracking-[0.35em] text-cyan-700">
-            PresseSjekk.no
-          </p>
-          <h1 className="mt-2 text-2xl font-black text-slate-950">
+          <h1 className="text-2xl font-black tracking-tight text-slate-950">
             PresseSjekk
           </h1>
-          <p className="mt-1 hidden text-xs font-medium text-slate-500 sm:block">
+          <p className="mt-1 hidden text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700 sm:block">
             Strukturert kontroll av medieomtale
           </p>
         </Link>
@@ -20,11 +17,14 @@ export function LightPublicHeader() {
           <Link href="/hvordan-det-fungerer" className="hover:text-slate-950">
             Slik fungerer det
           </Link>
-          <Link href="/for-journalister" className="hover:text-slate-950">
-            For journalister
+          <Link href="/journalister" className="hover:text-slate-950">
+            Journalister
           </Link>
-          <Link href="/for-advokater" className="hover:text-slate-950">
-            For advokater
+          <Link href="/advokater" className="hover:text-slate-950">
+            Advokater
+          </Link>
+          <Link href="/eksempelrapport" className="hover:text-slate-950">
+            Eksempelrapport
           </Link>
           <Link href="/priser" className="hover:text-slate-950">
             Priser

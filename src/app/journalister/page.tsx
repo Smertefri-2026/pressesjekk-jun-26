@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
+import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 
 const benefits = [
   {
@@ -42,30 +44,7 @@ const useCases = [
 export default function ForJournalisterPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-8">
-          <Link href="/" className="block">
-            <p className="text-xs font-bold uppercase tracking-[0.35em] text-cyan-700">
-              PresseSjekk.no
-            </p>
-            <h1 className="mt-2 text-2xl font-bold text-slate-950">
-              PresseSjekk
-            </h1>
-          </Link>
-
-          <nav className="hidden gap-8 text-sm font-medium text-slate-600 md:flex">
-            <Link href="/hvordan-det-fungerer" className="hover:text-slate-950">
-              Slik fungerer det
-            </Link>
-            <Link href="/priser" className="hover:text-slate-950">
-              Priser
-            </Link>
-            <Link href="/pressesjekk" className="hover:text-slate-950">
-              Start sjekk
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
         <Link href="/" className="text-sm font-semibold text-cyan-700 hover:text-cyan-900">
@@ -256,10 +235,7 @@ export default function ForJournalisterPage() {
         </section>
       </section>
 
-      <footer className="border-t border-slate-200 bg-white px-6 py-10 text-center text-sm text-slate-500">
-        PresseSjekk gir veiledende analyser og dokumenthjelp. Tjenesten
-        erstatter ikke redaktøransvar, advokat, PFU eller domstolene.
-      </footer>
+      <LightPublicFooter />
     </main>
   );
 }
