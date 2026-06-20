@@ -6,11 +6,20 @@ import { supabase } from "@/lib/supabase/client";
 
 type AuthMode = "login" | "signup";
 
+const roleOptions = [
+  { value: "private_person", label: "Privatperson" },
+  { value: "advisor", label: "Rådgiver" },
+  { value: "lawyer", label: "Advokat" },
+  { value: "journalist", label: "Journalist/redaksjon" },
+  { value: "organization", label: "Organisasjon/bedrift" },
+];
+
 export function AuthForm() {
   const router = useRouter();
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [fullName, setFullName] = useState("");
+  const [roleType, setRoleType] = useState("private_person");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -32,7 +41,8 @@ export function AuthForm() {
           password,
           options: {
             data: {
-              full_name: fullName,
+              full_name: fullName.trim(),
+              role_type: roleType,
             },
             emailRedirectTo:
               typeof window !== "undefined"
@@ -82,7 +92,7 @@ export function AuthForm() {
         <p className="mt-4 leading-8 text-slate-700">
           {mode === "login"
             ? "Logg inn for å se lagrede saker, rapporter og dokumentasjon."
-            : "Opprett konto for å kunne lagre PresseSjekk-saker og komme tilbake senere."}
+            : "Opprett konto for å kunne lagre PresseSjekk-saker, rapporter og PFU-utkast."}
         </p>
       </div>
 
@@ -121,23 +131,50 @@ export function AuthForm() {
 
       <form onSubmit={handleSubmit} className="mt-8 grid gap-5">
         {mode === "signup" ? (
-          <div>
-            <label
-              htmlFor="fullName"
-              className="text-sm font-bold text-slate-800"
-            >
-              Navn
-            </label>
-            <input
-              id="fullName"
-              type="text"
-              autoComplete="name"
-              value={fullName}
-              onChange={(event) => setFullName(event.target.value)}
-              placeholder="Ditt navn"
-              className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
-            />
-          </div>
+          <>
+            <div>
+              <label
+                htmlFor="fullName"
+                className="text-sm font-bold text-slate-800"
+              >
+                Navn
+              </label>
+              <input
+                id="fullName"
+                type="text"
+                autoComplete="name"
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+                placeholder="Ditt navn"
+                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="roleType"
+                className="text-sm font-bold text-slate-800"
+              >
+                Rolle
+              </label>
+              <select
+                id="roleType"
+                value={roleType}
+                onChange={(event) => setRoleType(event.target.value)}
+                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+              >
+                {roleOptions.map((role) => (
+                  <option key={role.value} value={role.value}>
+                    {role.label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Rollen brukes senere for å tilpasse Min Side, rapporter og
+                PFU-utkast.
+              </p>
+            </div>
+          </>
         ) : null}
 
         <div>

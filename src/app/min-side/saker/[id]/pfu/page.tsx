@@ -74,7 +74,6 @@ function legalStatusLabel(status: string | null) {
 function roleTypeLabel(roleType: string | null) {
   if (!roleType) return "Ikke satt";
   if (roleType === "private_person") return "Privatperson";
-  if (roleType === "mentioned_person") return "Omtalt person";
   if (roleType === "advisor") return "Rådgiver";
   if (roleType === "lawyer") return "Advokat";
   if (roleType === "journalist") return "Journalist/redaksjon";

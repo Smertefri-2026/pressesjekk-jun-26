@@ -251,7 +251,6 @@ export default function ProfilePage() {
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
                 >
                   <option value="private_person">Privatperson</option>
-                  <option value="mentioned_person">Omtalt person</option>
                   <option value="advisor">Rådgiver</option>
                   <option value="lawyer">Advokat</option>
                   <option value="journalist">Journalist/redaksjon</option>
