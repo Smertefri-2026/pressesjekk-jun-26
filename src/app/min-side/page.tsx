@@ -112,7 +112,7 @@ export default function MinSidePage() {
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/pressesjekk"
+                href="/min-side/saker/ny"
                 className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
               >
                 + Opprett ny sak
@@ -169,7 +169,7 @@ export default function MinSidePage() {
               </div>
 
               <Link
-                href="/pressesjekk"
+                href="/min-side/saker/ny"
                 className="rounded-xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800"
               >
                 + Opprett ny sak
@@ -194,7 +194,7 @@ export default function MinSidePage() {
 
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Link
-                    href="/pressesjekk"
+                    href="/min-side/saker/ny"
                     className="rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400"
                   >
                     Start ny sak
