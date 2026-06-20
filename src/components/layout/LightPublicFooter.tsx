@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/layout/BrandLogo";
 
 const pageLinks = [
   { href: "/pressesjekk", label: "Start sjekk" },
@@ -29,14 +30,7 @@ export function LightPublicFooter() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <section>
-            <Link href="/" className="block">
-              <p className="text-2xl font-black tracking-tight text-slate-950">
-                PresseSjekk
-              </p>
-              <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
-                Strukturert kontroll av medieomtale
-              </p>
-            </Link>
+            <BrandLogo size="footer" />
 
             <p className="mt-5 max-w-md text-sm leading-7 text-slate-600">
               PresseSjekk gir veiledende analyser og dokumenthjelp. Tjenesten
