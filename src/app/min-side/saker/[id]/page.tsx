@@ -43,6 +43,19 @@ type CaseReportRow = {
   created_at: string;
 };
 
+type PfuDecisionRow = {
+  id: string;
+  pfu_complaint_sent: boolean | null;
+  pfu_sent_date: string | null;
+  pfu_case_number: string | null;
+  pfu_case_url: string | null;
+  decision_received: boolean | null;
+  decision_date: string | null;
+  decision_result: string | null;
+  uploaded_file_name: string | null;
+  next_step_interest: string | null;
+};
+
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
   if (status === "in_progress") return "Under arbeid";
@@ -60,6 +73,17 @@ function legalStatusLabel(status: string | null) {
   if (status === "court_case") return "Rettssak";
   if (status === "judgment") return "Dom/avgjørelse";
   if (status === "appeal") return "Klage/anke";
+  return status;
+}
+
+function pfuDecisionResultLabel(status: string | null) {
+  if (!status) return "Ikke satt";
+  if (status === "upheld") return "Felt";
+  if (status === "partly_upheld") return "Delvis felt";
+  if (status === "not_upheld") return "Ikke felt";
+  if (status === "dismissed") return "Avvist";
+  if (status === "withdrawn") return "Trukket";
+  if (status === "other") return "Annet";
   return status;
 }
 
@@ -99,6 +123,7 @@ export default function CaseDetailPage() {
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
+  const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -157,6 +182,18 @@ export default function CaseDetailPage() {
 
       if (!reportsError) {
         setReports((reportsData ?? []) as CaseReportRow[]);
+      }
+
+      const { data: pfuDecisionData, error: pfuDecisionError } = await supabase
+        .from("pfu_decisions")
+        .select(
+          "id,pfu_complaint_sent,pfu_sent_date,pfu_case_number,pfu_case_url,decision_received,decision_date,decision_result,uploaded_file_name,next_step_interest"
+        )
+        .eq("case_id", params.id)
+        .maybeSingle();
+
+      if (!pfuDecisionError) {
+        setPfuDecision((pfuDecisionData as PfuDecisionRow | null) ?? null);
       }
 
       setIsLoading(false);
@@ -279,6 +316,13 @@ export default function CaseDetailPage() {
                 className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
               >
                 Lag PFU-utkast
+              </Link>
+
+              <Link
+                href={`/min-side/saker/${params.id}/pfu-avgjorelse`}
+                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+              >
+                PFU-avgjørelse
               </Link>
             </div>
           </section>
@@ -490,6 +534,47 @@ export default function CaseDetailPage() {
                 className="mt-6 inline-flex rounded-xl bg-cyan-400 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-300"
               >
                 {reports.length > 0 ? "Åpne rapportutkast" : "Lag rapportutkast"}
+              </Link>
+            </div>
+
+            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                PFU-status
+              </p>
+              <h2 className="mt-3 text-3xl font-black text-slate-950">
+                {pfuDecision?.decision_received
+                  ? pfuDecisionResultLabel(pfuDecision.decision_result)
+                  : pfuDecision?.pfu_complaint_sent
+                    ? "PFU-klage sendt"
+                    : "Ikke registrert"}
+              </h2>
+
+              <div className="mt-5 grid gap-3 text-sm font-semibold text-slate-700">
+                <p>
+                  Klage sendt:{" "}
+                  <span className="font-black text-slate-950">
+                    {pfuDecision?.pfu_complaint_sent ? "Ja" : "Nei / ikke satt"}
+                  </span>
+                </p>
+                <p>
+                  Avgjørelse mottatt:{" "}
+                  <span className="font-black text-slate-950">
+                    {pfuDecision?.decision_received ? "Ja" : "Nei / ikke satt"}
+                  </span>
+                </p>
+                <p>
+                  Opplastet fil:{" "}
+                  <span className="font-black text-slate-950">
+                    {pfuDecision?.uploaded_file_name || "Ingen fil"}
+                  </span>
+                </p>
+              </div>
+
+              <Link
+                href={`/min-side/saker/${params.id}/pfu-avgjorelse`}
+                className="mt-6 inline-flex rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800"
+              >
+                Åpne PFU-avgjørelse
               </Link>
             </div>
           </aside>
