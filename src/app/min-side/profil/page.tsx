@@ -282,20 +282,6 @@ export default function ProfilePage() {
           </form>
 
           <aside className="grid gap-6">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-                Viktig
-              </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                Ikke legg inn sensitive personopplysninger
-              </h2>
-              <p className="mt-4 leading-8 text-slate-700">
-                Denne profilsiden er foreløpig enkel. Sensitive opplysninger og
-                dokumentasjon bør kun håndteres når sikker opplasting er på
-                plass.
-              </p>
-            </div>
-
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
                 Konto

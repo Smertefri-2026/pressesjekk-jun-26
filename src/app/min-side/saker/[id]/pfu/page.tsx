@@ -33,6 +33,13 @@ type CaseInputRow = {
   desired_outcome: string | null;
 };
 
+type ProfileRow = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  role_type: string | null;
+};
+
 type CaseReportRow = {
   id: string;
   version: number;
@@ -64,10 +71,22 @@ function legalStatusLabel(status: string | null) {
   return status;
 }
 
+function roleTypeLabel(roleType: string | null) {
+  if (!roleType) return "Ikke satt";
+  if (roleType === "private_person") return "Privatperson";
+  if (roleType === "mentioned_person") return "Omtalt person";
+  if (roleType === "advisor") return "Rådgiver";
+  if (roleType === "lawyer") return "Advokat";
+  if (roleType === "journalist") return "Journalist/redaksjon";
+  if (roleType === "organization") return "Organisasjon/bedrift";
+  return roleType;
+}
+
 export default function PfuDraftPage() {
   const params = useParams<{ id: string }>();
 
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [pfuDrafts, setPfuDrafts] = useState<CaseReportRow[]>([]);
@@ -93,6 +112,14 @@ export default function PfuDraftPage() {
       }
 
       setUser(user);
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("id,full_name,email,role_type")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setProfile((profileData as ProfileRow | null) ?? null);
 
       const { data: caseData, error: caseError } = await supabase
         .from("cases")
@@ -156,8 +183,17 @@ export default function PfuDraftPage() {
 Dette er et foreløpig utkast basert på opplysninger registrert i PresseSjekk. Utkastet må kontrolleres og tilpasses før eventuell innsending.
 
 1. Klager
-Navn / rolle:
-${caseInput?.your_role || "[Fyll inn navn og rolle]"}
+Navn:
+${profile?.full_name || "[Fyll inn navn]"}
+
+E-post:
+${profile?.email || user?.email || "[Fyll inn e-post]"}
+
+Profilrolle:
+${roleTypeLabel(profile?.role_type ?? null)}
+
+Rolle i saken:
+${caseInput?.your_role || "[Fyll inn rolle i denne konkrete saken]"}
 
 2. Innklaget medium
 Medium:
@@ -211,7 +247,7 @@ Basert på de registrerte opplysningene kan følgende temaer være relevante å 
 
 10. Forbehold
 Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetisk vurdering. Utkastet bør kvalitetssikres før bruk.`;
-  }, [caseItem, caseInput]);
+  }, [caseItem, caseInput, profile, user]);
 
   async function handleSavePfuDraft() {
     if (!caseItem) return;
