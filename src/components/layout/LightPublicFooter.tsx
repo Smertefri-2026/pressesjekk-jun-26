@@ -7,6 +7,7 @@ const pageLinks = [
   { href: "/priser", label: "Priser" },
   { href: "/journalister", label: "Journalister" },
   { href: "/advokater", label: "Advokater" },
+  { href: "/om", label: "Om PresseSjekk" },
   { href: "/min-side", label: "Min Side" },
   { href: "/kontakt", label: "Kontakt" },
 ];

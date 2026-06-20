@@ -9,6 +9,7 @@ const navLinks = [
   { href: "/advokater", label: "Advokater" },
   { href: "/eksempelrapport", label: "Eksempelrapport" },
   { href: "/priser", label: "Priser" },
+  { href: "/om", label: "Om" },
 ];
 
 const mobileLinks = [
