@@ -166,6 +166,22 @@ export default function CaseDetailPage() {
                 <span className="text-slate-950">{user.email}</span>
               </p>
             ) : null}
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/min-side"
+                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+              >
+                Til Min Side
+              </Link>
+
+              <Link
+                href={`/min-side/saker/${params.id}/rediger`}
+                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
+              >
+                Rediger sak
+              </Link>
+            </div>
           </section>
 
           <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
