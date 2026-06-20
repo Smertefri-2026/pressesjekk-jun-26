@@ -35,6 +35,14 @@ type CaseInputRow = {
   desired_outcome: string | null;
 };
 
+type CaseReportRow = {
+  id: string;
+  version: number;
+  report_type: "free_check" | "full_report" | "pfu_draft";
+  status: "draft" | "ready" | "archived";
+  created_at: string;
+};
+
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
   if (status === "in_progress") return "Under arbeid";
@@ -90,6 +98,7 @@ export default function CaseDetailPage() {
   const [user, setUser] = useState<User | null>(null);
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
+  const [reports, setReports] = useState<CaseReportRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -138,6 +147,16 @@ export default function CaseDetailPage() {
         setErrorMessage(inputError.message);
       } else {
         setCaseInput((inputData as CaseInputRow | null) ?? null);
+      }
+
+      const { data: reportsData, error: reportsError } = await supabase
+        .from("case_reports")
+        .select("id,version,report_type,status,created_at")
+        .eq("case_id", params.id)
+        .order("version", { ascending: false });
+
+      if (!reportsError) {
+        setReports((reportsData ?? []) as CaseReportRow[]);
       }
 
       setIsLoading(false);
@@ -416,12 +435,22 @@ export default function CaseDetailPage() {
                 Rapport
               </p>
               <h2 className="mt-3 text-3xl font-black">
-                Rapport kommer senere
+                {reports.length > 0
+                  ? `${reports.length} rapport lagret`
+                  : "Ingen rapport lagret"}
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Når analyse og rapportgenerering kobles på, vil rapporter og
-                rapportversjoner vises her.
+                {reports.length > 0
+                  ? `Siste rapportversjon er v${reports[0]?.version}. Du kan åpne rapportutkastet eller lage en ny versjon.`
+                  : "Når saksopplysninger er lagt inn, kan du lage første rapportutkast."}
               </p>
+
+              <Link
+                href={`/min-side/saker/${params.id}/rapport`}
+                className="mt-6 inline-flex rounded-xl bg-cyan-400 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-300"
+              >
+                {reports.length > 0 ? "Åpne rapportutkast" : "Lag rapportutkast"}
+              </Link>
             </div>
           </aside>
         </section>
