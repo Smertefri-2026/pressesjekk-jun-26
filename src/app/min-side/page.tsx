@@ -30,6 +30,8 @@ function statusLabel(status: CaseRow["status"]) {
 export default function MinSidePage() {
   const [user, setUser] = useState<User | null>(null);
   const [cases, setCases] = useState<CaseRow[]>([]);
+  const [reportCount, setReportCount] = useState(0);
+  const [pfuDraftCount, setPfuDraftCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -59,7 +61,20 @@ export default function MinSidePage() {
       if (error) {
         setErrorMessage(error.message);
       } else {
-        setCases((data ?? []) as CaseRow[]);
+        const caseRows = (data ?? []) as CaseRow[];
+        setCases(caseRows);
+
+        const { data: reportsData, error: reportsError } = await supabase
+          .from("case_reports")
+          .select("id,report_type");
+
+        if (!reportsError) {
+          setReportCount((reportsData ?? []).length);
+          setPfuDraftCount(
+            (reportsData ?? []).filter((item) => item.report_type === "pfu_draft")
+              .length
+          );
+        }
       }
 
       setIsLoading(false);
@@ -148,11 +163,15 @@ export default function MinSidePage() {
           </div>
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="font-bold text-slate-500">Rapporter</p>
-            <p className="mt-4 text-5xl font-black text-slate-950">0</p>
+            <p className="mt-4 text-5xl font-black text-slate-950">
+              {reportCount}
+            </p>
           </div>
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="font-bold text-slate-500">PFU-utkast</p>
-            <p className="mt-4 text-5xl font-black text-slate-950">0</p>
+            <p className="mt-4 text-5xl font-black text-slate-950">
+              {pfuDraftCount}
+            </p>
           </div>
         </section>
 
