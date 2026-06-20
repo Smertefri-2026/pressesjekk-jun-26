@@ -24,6 +24,15 @@ type ReportRow = {
   case_id: string;
   version: number;
   report_type: "free_check" | "full_report" | "pfu_draft";
+  created_at: string;
+};
+
+type ActivityItem = {
+  id: string;
+  title: string;
+  description: string;
+  created_at: string;
+  href: string;
 };
 
 function statusLabel(status: CaseRow["status"]) {
@@ -32,6 +41,16 @@ function statusLabel(status: CaseRow["status"]) {
   if (status === "report_ready") return "Rapport klar";
   if (status === "closed") return "Lukket";
   return status;
+}
+
+function formatActivityDate(date: string) {
+  return new Intl.DateTimeFormat("nb-NO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(date));
 }
 
 export default function MinSidePage() {
@@ -74,7 +93,7 @@ export default function MinSidePage() {
 
         const { data: reportsData, error: reportsError } = await supabase
           .from("case_reports")
-          .select("id,case_id,version,report_type");
+          .select("id,case_id,version,report_type,created_at");
 
         if (!reportsError) {
           const reportRows = (reportsData ?? []) as ReportRow[];
@@ -91,6 +110,34 @@ export default function MinSidePage() {
 
     loadDashboard();
   }, []);
+
+  const activityItems: ActivityItem[] = [
+    ...reports.map((report) => {
+      const linkedCase = cases.find((caseItem) => caseItem.id === report.case_id);
+
+      return {
+        id: `report-${report.id}`,
+        title: `Rapport v${report.version} lagret`,
+        description: linkedCase
+          ? linkedCase.title
+          : "Rapportutkast lagret på en sak",
+        created_at: report.created_at,
+        href: `/min-side/saker/${report.case_id}/rapport`,
+      };
+    }),
+    ...cases.map((caseItem) => ({
+      id: `case-${caseItem.id}`,
+      title: "Sak opprettet",
+      description: caseItem.title,
+      created_at: caseItem.created_at,
+      href: `/min-side/saker/${caseItem.id}`,
+    })),
+  ]
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+    .slice(0, 5);
 
   if (isLoading) {
     return (
@@ -312,9 +359,30 @@ export default function MinSidePage() {
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
                 Siste aktivitet
               </p>
-              <p className="mt-4 leading-8 text-slate-300">
-                Aktivitet vises her når du har opprettet din første sak.
-              </p>
+
+              {activityItems.length === 0 ? (
+                <p className="mt-4 leading-8 text-slate-300">
+                  Aktivitet vises her når du har opprettet din første sak.
+                </p>
+              ) : (
+                <div className="mt-5 grid gap-3">
+                  {activityItems.map((item) => (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-4 hover:bg-white/10"
+                    >
+                      <p className="font-black text-white">{item.title}</p>
+                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-300">
+                        {item.description}
+                      </p>
+                      <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">
+                        {formatActivityDate(item.created_at)}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </aside>
         </section>
