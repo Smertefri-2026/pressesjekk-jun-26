@@ -282,63 +282,93 @@ export default function CaseDetailPage() {
               </p>
             ) : null}
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
               <Link
                 href="/min-side"
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:px-5 sm:py-3"
               >
                 Til Min Side
               </Link>
 
               <Link
                 href={`/min-side/saker/${params.id}/rediger`}
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
+                className="rounded-xl bg-slate-950 px-4 py-3 text-center text-sm font-bold text-white hover:bg-slate-800 sm:px-5 sm:py-3"
               >
                 Rediger sak
-              </Link>
-
-              <Link
-                href={`/min-side/saker/${params.id}/opplysninger`}
-                className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950 hover:bg-cyan-400"
-              >
-                {caseInput ? "Rediger opplysninger" : "Saksopplysninger"}
-              </Link>
-
-              <Link
-                href={`/min-side/saker/${params.id}/rapport`}
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                Lag rapportutkast
-              </Link>
-
-              <Link
-                href={`/min-side/saker/${params.id}/pfu`}
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                Lag PFU-utkast
-              </Link>
-
-              <Link
-                href={`/min-side/saker/${params.id}/pfu-avgjorelse`}
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                PFU-avgjørelse
               </Link>
             </div>
           </section>
 
           <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Status
+              Saksgang
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
               {statusLabel(caseItem.status)}
             </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              {caseInput
-                ? "Saken har lagrede saksopplysninger og er klar for videre strukturering."
-                : "Saken har grunninformasjon, men mangler fortsatt tilsvar, rettsstatus og dokumentasjon."}
-            </p>
+
+            <div className="mt-6 grid gap-3">
+              {[
+                {
+                  label: "Sak registrert",
+                  done: true,
+                  href: `/min-side/saker/${params.id}/rediger`,
+                },
+                {
+                  label: "Saksopplysninger",
+                  done: Boolean(caseInput),
+                  href: `/min-side/saker/${params.id}/opplysninger`,
+                },
+                {
+                  label: "Rapport",
+                  done: reports.some((report) => report.report_type !== "pfu_draft"),
+                  href: `/min-side/saker/${params.id}/rapport`,
+                },
+                {
+                  label: "PFU-klage",
+                  done: reports.some((report) => report.report_type === "pfu_draft"),
+                  href: `/min-side/saker/${params.id}/pfu`,
+                },
+                {
+                  label: "PFU-avgjørelse",
+                  done: Boolean(pfuDecision?.decision_received || pfuDecision?.uploaded_file_name),
+                  href: `/min-side/saker/${params.id}/pfu-avgjorelse`,
+                },
+                {
+                  label: "Politianmeldelse",
+                  done: false,
+                  href: `/min-side/saker/${params.id}/politianmeldelse`,
+                },
+              ].map((step, index) => (
+                <Link
+                  key={step.label}
+                  href={step.href}
+                  className={`rounded-2xl border p-3 transition ${
+                    step.done
+                      ? "border-cyan-300 bg-white text-slate-950 hover:bg-cyan-50"
+                      : "border-cyan-100 bg-white/50 text-slate-400 hover:bg-white/70"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
+                        step.done
+                          ? "bg-cyan-500 text-slate-950"
+                          : "bg-slate-200 text-slate-500"
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="font-black">{step.label}</p>
+                      <p className="mt-0.5 text-xs leading-5">
+                        {step.done ? "Utført / påbegynt" : "Ikke påbegynt"}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </aside>
         </div>
 
