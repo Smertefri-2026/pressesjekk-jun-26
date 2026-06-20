@@ -181,6 +181,13 @@ export default function CaseDetailPage() {
               >
                 Rediger sak
               </Link>
+
+              <Link
+                href={`/min-side/saker/${params.id}/opplysninger`}
+                className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950 hover:bg-cyan-400"
+              >
+                Legg til opplysninger
+              </Link>
             </div>
           </section>
 
