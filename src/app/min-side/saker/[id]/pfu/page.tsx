@@ -92,6 +92,7 @@ export default function PfuDraftPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [copyMessage, setCopyMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -248,6 +249,20 @@ Basert på de registrerte opplysningene kan følgende temaer være relevante å 
 Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetisk vurdering. Utkastet bør kvalitetssikres før bruk.`;
   }, [caseItem, caseInput, profile, user]);
 
+  async function handleCopyDraft() {
+    setCopyMessage("");
+    setErrorMessage("");
+
+    try {
+      await navigator.clipboard.writeText(draftText);
+      setCopyMessage("PFU-utkastet er kopiert.");
+    } catch {
+      setErrorMessage(
+        "Kunne ikke kopiere automatisk. Marker teksten og kopier manuelt."
+      );
+    }
+  }
+
   async function handleSavePfuDraft() {
     if (!caseItem) return;
 
@@ -351,6 +366,14 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
               <button
                 type="button"
+                onClick={handleCopyDraft}
+                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+              >
+                Kopier PFU-utkast
+              </button>
+
+              <button
+                type="button"
                 onClick={handleSavePfuDraft}
                 disabled={isSaving}
                 className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
@@ -390,6 +413,12 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
             {errorMessage ? (
               <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
                 {errorMessage}
+              </div>
+            ) : null}
+
+            {copyMessage ? (
+              <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold text-cyan-800">
+                {copyMessage}
               </div>
             ) : null}
 
