@@ -359,49 +359,95 @@ export default function CaseDetailPage() {
               </h2>
 
               {caseInput ? (
-                <div className="mt-8 grid gap-4">
-                  <InfoBlock label="Din rolle">
-                    {caseInput.your_role || "Ikke lagt inn ennå."}
-                  </InfoBlock>
-
-                  <InfoBlock label="Hva skjedde?">
-                    {caseInput.what_happened || "Ikke lagt inn ennå."}
-                  </InfoBlock>
-
-                  <InfoBlock label="Artikkeltekst eller utdrag">
-                    {caseInput.article_text || "Ikke lagt inn ennå."}
-                  </InfoBlock>
-
-                  <InfoBlock label="Tilsvar sendt">
-                    {caseInput.reply_sent ? "Ja" : "Nei / ikke registrert"}
-                  </InfoBlock>
-
-                  <InfoBlock label="Tilsvar eller henvendelse">
-                    {caseInput.reply_text || "Ikke lagt inn ennå."}
-                  </InfoBlock>
-
-                  <InfoBlock label="Svar fra redaksjonen">
-                    {caseInput.editor_response || "Ikke lagt inn ennå."}
-                  </InfoBlock>
-
-                  <InfoBlock label="Rettsstatus">
-                    <p className="text-xl font-black text-slate-950">
-                      {legalStatusLabel(caseInput.legal_status)}
+                <div className="mt-8 grid gap-6">
+                  <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 sm:p-6">
+                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                      Nøkkelopplysninger
                     </p>
-                  </InfoBlock>
 
-                  <InfoBlock label="Detaljer om rettsstatus">
-                    {caseInput.legal_status_details || "Ikke lagt inn ennå."}
-                  </InfoBlock>
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                      <div className="rounded-2xl bg-white/80 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                          Rolle i saken
+                        </p>
+                        <p className="mt-2 text-xl font-black text-slate-950">
+                          {caseInput.your_role || "Ikke satt"}
+                        </p>
+                      </div>
 
-                  <InfoBlock label="Dokumentasjonsoppsummering">
-                    {caseInput.documentation_summary ||
-                      "Ikke lagt inn ennå."}
-                  </InfoBlock>
+                      <div className="rounded-2xl bg-white/80 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                          Tilsvar sendt
+                        </p>
+                        <p className="mt-2 text-xl font-black text-slate-950">
+                          {caseInput.reply_sent ? "Ja" : "Nei / ikke registrert"}
+                        </p>
+                      </div>
 
-                  <InfoBlock label="Ønsket resultat">
-                    {caseInput.desired_outcome || "Ikke lagt inn ennå."}
-                  </InfoBlock>
+                      <div className="rounded-2xl bg-white/80 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                          Rettsstatus
+                        </p>
+                        <p className="mt-2 text-xl font-black text-slate-950">
+                          {legalStatusLabel(caseInput.legal_status)}
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl bg-white/80 p-4">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                          Ønsket resultat
+                        </p>
+                        <p className="mt-2 text-lg font-black leading-7 text-slate-950">
+                          {caseInput.desired_outcome || "Ikke satt"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4">
+                    <InfoBlock label="Rolle i saken">
+                      {caseInput.your_role || "Ikke lagt inn ennå."}
+                    </InfoBlock>
+
+                    <InfoBlock label="Hva skjedde?">
+                      {caseInput.what_happened || "Ikke lagt inn ennå."}
+                    </InfoBlock>
+
+                    <InfoBlock label="Artikkeltekst eller utdrag">
+                      {caseInput.article_text || "Ikke lagt inn ennå."}
+                    </InfoBlock>
+
+                    <InfoBlock label="Tilsvar sendt">
+                      {caseInput.reply_sent ? "Ja" : "Nei / ikke registrert"}
+                    </InfoBlock>
+
+                    <InfoBlock label="Tilsvar eller henvendelse">
+                      {caseInput.reply_text || "Ikke lagt inn ennå."}
+                    </InfoBlock>
+
+                    <InfoBlock label="Svar fra redaksjonen">
+                      {caseInput.editor_response || "Ikke lagt inn ennå."}
+                    </InfoBlock>
+
+                    <InfoBlock label="Rettsstatus">
+                      <p className="text-xl font-black text-slate-950">
+                        {legalStatusLabel(caseInput.legal_status)}
+                      </p>
+                    </InfoBlock>
+
+                    <InfoBlock label="Detaljer om rettsstatus">
+                      {caseInput.legal_status_details || "Ikke lagt inn ennå."}
+                    </InfoBlock>
+
+                    <InfoBlock label="Dokumentasjonsoppsummering">
+                      {caseInput.documentation_summary ||
+                        "Ikke lagt inn ennå."}
+                    </InfoBlock>
+
+                    <InfoBlock label="Ønsket resultat">
+                      {caseInput.desired_outcome || "Ikke lagt inn ennå."}
+                    </InfoBlock>
+                  </div>
                 </div>
               ) : (
                 <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8">
