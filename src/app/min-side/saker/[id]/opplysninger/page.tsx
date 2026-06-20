@@ -30,6 +30,17 @@ type CaseInputRow = {
   desired_outcome: string | null;
 };
 
+const caseRoleOptions = [
+  "Omtalt person",
+  "Pårørende",
+  "Rådgiver",
+  "Advokat",
+  "Journalist/redaksjon",
+  "Bedrift/organisasjon",
+  "Leser/publikum",
+  "Annet",
+];
+
 export default function CaseInputsPage() {
   const params = useParams<{ id: string }>();
 
@@ -331,14 +342,26 @@ export default function CaseInputsPage() {
                 >
                   Din rolle i saken
                 </label>
-                <input
+                <select
                   id="yourRole"
-                  type="text"
                   value={yourRole}
                   onChange={(event) => setYourRole(event.target.value)}
-                  placeholder="F.eks. omtalt person, pårørende, advokat, rådgiver..."
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
-                />
+                >
+                  <option value="">Velg rolle i saken</option>
+                  {yourRole && !caseRoleOptions.includes(yourRole) ? (
+                    <option value={yourRole}>{yourRole}</option>
+                  ) : null}
+                  {caseRoleOptions.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Dette gjelder rollen din i denne konkrete saken. Profilrollen
+                  din lagres separat på profilsiden.
+                </p>
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">

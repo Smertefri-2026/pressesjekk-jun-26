@@ -264,7 +264,7 @@ export default function CaseDetailPage() {
                 href={`/min-side/saker/${params.id}/opplysninger`}
                 className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950 hover:bg-cyan-400"
               >
-                {caseInput ? "Rediger opplysninger" : "Legg til opplysninger"}
+                {caseInput ? "Rediger opplysninger" : "Saksopplysninger"}
               </Link>
 
               <Link
@@ -416,7 +416,7 @@ export default function CaseDetailPage() {
                     href={`/min-side/saker/${params.id}/opplysninger`}
                     className="mt-6 inline-flex rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400"
                   >
-                    Legg til opplysninger
+                    Saksopplysninger
                   </Link>
                 </div>
               )}
