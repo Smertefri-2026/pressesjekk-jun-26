@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "PresseSjekk – strukturert kontroll av medieomtale",
+    default: "PresseSjekk – Din kontroll av medieomtale",
     template: "%s | PresseSjekk",
   },
   description:
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   publisher: "PresseSjekk",
   metadataBase: new URL("https://pressesjekk.no"),
   openGraph: {
-    title: "PresseSjekk – strukturert kontroll av medieomtale",
+    title: "PresseSjekk – Din kontroll av medieomtale",
     description:
       "Vurder medieomtale, tilsvar, dokumentasjon og mulige presseetiske problemstillinger på ett sted.",
     url: "https://pressesjekk.no",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "PresseSjekk – strukturert kontroll av medieomtale",
+    title: "PresseSjekk – Din kontroll av medieomtale",
     description:
       "Vurder medieomtale, tilsvar, dokumentasjon og mulige presseetiske problemstillinger på ett sted.",
   },
