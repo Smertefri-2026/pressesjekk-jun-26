@@ -273,6 +273,13 @@ export default function CaseDetailPage() {
               >
                 Lag rapportutkast
               </Link>
+
+              <Link
+                href={`/min-side/saker/${params.id}/pfu`}
+                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+              >
+                Lag PFU-utkast
+              </Link>
             </div>
           </section>
 

@@ -188,6 +188,14 @@ export default function MinSidePage() {
               >
                 + Opprett ny sak
               </Link>
+
+              <Link
+                href="/min-side/profil"
+                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+              >
+                Profil
+              </Link>
+
               <SignOutButton />
             </div>
           </section>
