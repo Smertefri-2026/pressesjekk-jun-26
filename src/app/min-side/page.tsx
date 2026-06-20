@@ -19,6 +19,13 @@ type CaseRow = {
   created_at: string;
 };
 
+type ReportRow = {
+  id: string;
+  case_id: string;
+  version: number;
+  report_type: "free_check" | "full_report" | "pfu_draft";
+};
+
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
   if (status === "in_progress") return "Under arbeid";
@@ -30,6 +37,7 @@ function statusLabel(status: CaseRow["status"]) {
 export default function MinSidePage() {
   const [user, setUser] = useState<User | null>(null);
   const [cases, setCases] = useState<CaseRow[]>([]);
+  const [reports, setReports] = useState<ReportRow[]>([]);
   const [reportCount, setReportCount] = useState(0);
   const [pfuDraftCount, setPfuDraftCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,13 +74,14 @@ export default function MinSidePage() {
 
         const { data: reportsData, error: reportsError } = await supabase
           .from("case_reports")
-          .select("id,report_type");
+          .select("id,case_id,version,report_type");
 
         if (!reportsError) {
-          setReportCount((reportsData ?? []).length);
+          const reportRows = (reportsData ?? []) as ReportRow[];
+          setReports(reportRows);
+          setReportCount(reportRows.length);
           setPfuDraftCount(
-            (reportsData ?? []).filter((item) => item.report_type === "pfu_draft")
-              .length
+            reportRows.filter((item) => item.report_type === "pfu_draft").length
           );
         }
       }
@@ -141,32 +150,54 @@ export default function MinSidePage() {
               Neste anbefalte steg
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Opprett første ekte sak
+              {cases.length === 0
+                ? "Opprett første ekte sak"
+                : reportCount > 0
+                  ? "Fortsett med rapporten"
+                  : "Legg til opplysninger"}
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
-              Nå som innlogging fungerer, er neste steg å lagre en ekte
-              PresseSjekk-sak i databasen.
+              {cases.length === 0
+                ? "Neste steg er å lagre din første PresseSjekk-sak i databasen."
+                : reportCount > 0
+                  ? `Du har ${cases.length} lagret sak og ${reportCount} rapport. Åpne saken for å legge til flere opplysninger, redigere rapportgrunnlaget eller lage ny rapportversjon.`
+                  : "Du har opprettet en sak. Neste steg er å legge til tilsvar, rettsstatus og dokumentasjon før du lager rapportutkast."}
             </p>
           </aside>
         </div>
 
-        <section className="mt-14 grid gap-6 md:grid-cols-4">
+        <section className="mt-14 grid gap-6 md:grid-cols-4" id="oversikt">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="font-bold text-slate-500">Credits igjen</p>
             <p className="mt-4 text-5xl font-black text-cyan-700">0</p>
           </div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+
+          <a
+            href="#mine-saker"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
             <p className="font-bold text-slate-500">Aktive saker</p>
             <p className="mt-4 text-5xl font-black text-slate-950">
               {cases.length}
             </p>
-          </div>
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="mt-3 text-sm font-semibold text-cyan-700">
+              Se sakslisten
+            </p>
+          </a>
+
+          <a
+            href="#mine-saker"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
             <p className="font-bold text-slate-500">Rapporter</p>
             <p className="mt-4 text-5xl font-black text-slate-950">
               {reportCount}
             </p>
-          </div>
+            <p className="mt-3 text-sm font-semibold text-cyan-700">
+              Se rapporter
+            </p>
+          </a>
+
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="font-bold text-slate-500">PFU-utkast</p>
             <p className="mt-4 text-5xl font-black text-slate-950">
@@ -175,7 +206,7 @@ export default function MinSidePage() {
           </div>
         </section>
 
-        <section className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px]">
+        <section id="mine-saker" className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px]">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -252,12 +283,23 @@ export default function MinSidePage() {
                         </p>
                       </div>
 
-                      <Link
-                        href={`/min-side/saker/${item.id}`}
-                        className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
-                      >
-                        Åpne sak
-                      </Link>
+                      <div className="flex flex-col gap-2">
+                        <Link
+                          href={`/min-side/saker/${item.id}`}
+                          className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                        >
+                          Åpne sak
+                        </Link>
+
+                        {reports.some((report) => report.case_id === item.id) ? (
+                          <Link
+                            href={`/min-side/saker/${item.id}/rapport`}
+                            className="rounded-xl bg-cyan-500 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-cyan-400"
+                          >
+                            Åpne rapport
+                          </Link>
+                        ) : null}
+                      </div>
                     </div>
                   </article>
                 ))}
@@ -266,19 +308,6 @@ export default function MinSidePage() {
           </div>
 
           <aside className="grid gap-6">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-                Viktig
-              </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                Saken kan oppdateres
-              </h2>
-              <p className="mt-4 leading-8 text-slate-700">
-                Når vi kobler skjemaet til databasen, kan du lagre nye
-                opplysninger og senere lage nye rapportversjoner.
-              </p>
-            </div>
-
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
                 Siste aktivitet
