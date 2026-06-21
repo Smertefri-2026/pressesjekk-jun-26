@@ -445,6 +445,92 @@ export default function MinSidePage() {
     setCaseCount((current) => current + 1);
   }
 
+
+  async function permanentlyDeleteItem(item: ArchiveItem) {
+    const confirmation = window.prompt(
+      `Dette kan ikke angres. Skriv SLETT for å slette "${item.name}" permanent.`
+    );
+
+    if (confirmation !== "SLETT") return;
+
+    setErrorMessage("");
+
+    if (item.type === "Mappe") {
+      const hasChildFolders = folders.some(
+        (folder) => folder.parent_folder_id === item.rawId
+      );
+
+      const hasCases = cases.some((caseItem) => caseItem.folder_id === item.rawId);
+
+      if (hasChildFolders || hasCases) {
+        setErrorMessage(
+          "Mappen kan ikke slettes permanent fordi den inneholder undermapper eller saker. Flytt eller slett innholdet først."
+        );
+        return;
+      }
+
+      const { error } = await supabase
+        .from("case_folders")
+        .delete()
+        .eq("id", item.rawId);
+
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      setFolders((current) =>
+        current.filter((folder) => folder.id !== item.rawId)
+      );
+
+      return;
+    }
+
+    const { error: pfuError } = await supabase
+      .from("pfu_decisions")
+      .delete()
+      .eq("case_id", item.rawId);
+
+    if (pfuError) {
+      setErrorMessage(pfuError.message);
+      return;
+    }
+
+    const { error: reportsError } = await supabase
+      .from("case_reports")
+      .delete()
+      .eq("case_id", item.rawId);
+
+    if (reportsError) {
+      setErrorMessage(reportsError.message);
+      return;
+    }
+
+    const { error: inputsError } = await supabase
+      .from("case_inputs")
+      .delete()
+      .eq("case_id", item.rawId);
+
+    if (inputsError) {
+      setErrorMessage(inputsError.message);
+      return;
+    }
+
+    const { error: caseError } = await supabase
+      .from("cases")
+      .delete()
+      .eq("id", item.rawId);
+
+    if (caseError) {
+      setErrorMessage(caseError.message);
+      return;
+    }
+
+    setCases((current) =>
+      current.filter((caseItem) => caseItem.id !== item.rawId)
+    );
+  }
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -813,13 +899,23 @@ export default function MinSidePage() {
 
                       <div className="flex justify-start md:justify-end">
                         {archiveMode === "trash" ? (
-                          <button
-                            type="button"
-                            onClick={() => restoreFromTrash(item)}
-                            className="rounded-lg border border-cyan-200 bg-white px-3 py-2 text-xs font-black text-cyan-700 hover:bg-cyan-50"
-                          >
-                            Gjenopprett
-                          </button>
+                          <div className="flex flex-wrap gap-2 md:justify-end">
+                            <button
+                              type="button"
+                              onClick={() => restoreFromTrash(item)}
+                              className="rounded-lg border border-cyan-200 bg-white px-3 py-2 text-xs font-black text-cyan-700 hover:bg-cyan-50"
+                            >
+                              Gjenopprett
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => permanentlyDeleteItem(item)}
+                              className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-black text-red-800 hover:bg-red-100"
+                            >
+                              Slett permanent
+                            </button>
+                          </div>
                         ) : (
                           <button
                             type="button"
