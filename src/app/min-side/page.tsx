@@ -63,6 +63,7 @@ type ArchiveItem = {
 
 type SortKey = "name" | "type" | "status" | "date";
 type ArchiveMode = "active" | "trash";
+type ViewMode = "list" | "grid";
 
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
@@ -114,6 +115,7 @@ export default function MinSidePage() {
     return sessionStorage.getItem("pressesjekkSelectedFolderId");
   });
   const [archiveMode, setArchiveMode] = useState<ArchiveMode>("active");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -853,6 +855,38 @@ export default function MinSidePage() {
                 {errorMessage}
               </div>
             ) : null}
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+              <p className="text-sm font-bold text-slate-500">
+                {viewMode === "list" ? "Listevisning" : "Symbolvisning"}
+              </p>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={`rounded-xl px-4 py-2 text-sm font-black ${
+                    viewMode === "list"
+                      ? "bg-slate-950 text-white"
+                      : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
+                  }`}
+                >
+                  Liste
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={`rounded-xl px-4 py-2 text-sm font-black ${
+                    viewMode === "grid"
+                      ? "bg-slate-950 text-white"
+                      : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
+                  }`}
+                >
+                  Symboler
+                </button>
+              </div>
+            </div>
 
             {archiveItems.length === 0 ? (
               <div className="p-6 sm:p-8">
