@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
@@ -9,8 +8,7 @@ import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 
 export default function NewCasePage() {
-  const searchParams = useSearchParams();
-  const folderId = searchParams.get("folderId");
+  const [folderId, setFolderId] = useState<string | null>(null);
 
   const [user, setUser] = useState<User | null>(null);
   const [isCheckingUser, setIsCheckingUser] = useState(true);
@@ -25,6 +23,8 @@ export default function NewCasePage() {
   const [shortDescription, setShortDescription] = useState("");
 
   useEffect(() => {
+    setFolderId(new URLSearchParams(window.location.search).get("folderId"));
+
     async function checkUser() {
       const {
         data: { user },

@@ -635,7 +635,7 @@ export default function MinSidePage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Saksarkiv
+              Min Side
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">

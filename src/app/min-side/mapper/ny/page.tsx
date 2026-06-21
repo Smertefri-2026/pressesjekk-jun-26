@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
@@ -72,8 +71,7 @@ function getFolderConfig(roleType: string | null) {
 }
 
 export default function NewFolderPage() {
-  const searchParams = useSearchParams();
-  const parentFolderId = searchParams.get("parentFolderId");
+  const [parentFolderId, setParentFolderId] = useState<string | null>(null);
 
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
@@ -88,6 +86,10 @@ export default function NewFolderPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    setParentFolderId(
+      new URLSearchParams(window.location.search).get("parentFolderId")
+    );
+
     async function loadProfile() {
       setIsLoading(true);
       setErrorMessage("");
