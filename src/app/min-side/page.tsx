@@ -784,19 +784,7 @@ export default function MinSidePage() {
                       : "Mapper og saker"}
                 </h2>
 
-                {selectedFolder && archiveMode === "active" ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sessionStorage.removeItem("pressesjekkSelectedFolderId");
-                      sessionStorage.removeItem("pressesjekkSelectedFolderId");
-                    setSelectedFolderId(null);
-                    }}
-                    className="mt-3 text-sm font-black text-cyan-700 hover:text-cyan-900"
-                  >
-                    ← Tilbake til mapper og saker
-                  </button>
-                ) : null}
+                
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
@@ -859,6 +847,21 @@ export default function MinSidePage() {
             {errorMessage ? (
               <div className="m-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
                 {errorMessage}
+              </div>
+            ) : null}
+
+            {selectedFolder && archiveMode === "active" ? (
+              <div className="border-b border-slate-200 px-5 py-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sessionStorage.removeItem("pressesjekkSelectedFolderId");
+                    setSelectedFolderId(null);
+                  }}
+                  className="text-sm font-black text-cyan-700 hover:text-cyan-900"
+                >
+                  ← Tilbake til mapper og saker
+                </button>
               </div>
             ) : null}
 
@@ -1079,11 +1082,15 @@ export default function MinSidePage() {
               </div>
             ) : (
               <div className="overflow-hidden">
+                <div className="grid grid-cols-[minmax(0,1fr)_116px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:hidden">
+                  <div className="pl-12">Navn</div>
+                  <div className="text-right">Flytt / Handling</div>
+                </div>
                 <div className="hidden grid-cols-[1fr_110px_120px_120px_230px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
                   <button
                     type="button"
                     onClick={() => handleSort("name")}
-                    className="text-left hover:text-cyan-700"
+                    className="pl-12 text-left hover:text-cyan-700"
                   >
                     Navn{sortLabel("name")}
                   </button>
@@ -1108,7 +1115,7 @@ export default function MinSidePage() {
                   >
                     Dato{sortLabel("date")}
                   </button>
-                  <div className="text-right">Handling</div>
+                  <div className="text-right">Flytt / Handling</div>
                 </div>
 
                 <div className="divide-y divide-slate-200">
@@ -1237,7 +1244,7 @@ export default function MinSidePage() {
                               onClick={() => moveToTrash(item)}
                               className="text-xs font-black text-red-700 underline-offset-4 hover:underline"
                             >
-                              Slett
+                              Papirkurv
                             </button>
                           </>
                         )}
