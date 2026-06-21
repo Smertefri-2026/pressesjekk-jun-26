@@ -115,7 +115,13 @@ export default function MinSidePage() {
     return sessionStorage.getItem("pressesjekkSelectedFolderId");
   });
   const [archiveMode, setArchiveMode] = useState<ArchiveMode>("active");
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window === "undefined") return "list";
+
+    const savedViewMode = localStorage.getItem("pressesjekkArchiveViewMode");
+
+    return savedViewMode === "grid" ? "grid" : "list";
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -864,7 +870,10 @@ export default function MinSidePage() {
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setViewMode("list")}
+                  onClick={() => {
+                    localStorage.setItem("pressesjekkArchiveViewMode", "list");
+                    setViewMode("list");
+                  }}
                   className={`rounded-xl px-4 py-2 text-sm font-black ${
                     viewMode === "list"
                       ? "bg-slate-950 text-white"
@@ -876,7 +885,10 @@ export default function MinSidePage() {
 
                 <button
                   type="button"
-                  onClick={() => setViewMode("grid")}
+                  onClick={() => {
+                    localStorage.setItem("pressesjekkArchiveViewMode", "grid");
+                    setViewMode("grid");
+                  }}
                   className={`rounded-xl px-4 py-2 text-sm font-black ${
                     viewMode === "grid"
                       ? "bg-slate-950 text-white"
