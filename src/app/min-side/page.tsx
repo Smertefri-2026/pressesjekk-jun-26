@@ -499,7 +499,7 @@ export default function MinSidePage() {
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )
-    .slice(0, 6);
+    .slice(0, 5);
 
 
   async function restoreFromTrash(item: ArchiveItem) {
