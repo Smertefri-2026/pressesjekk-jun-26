@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
@@ -71,6 +72,9 @@ function getFolderConfig(roleType: string | null) {
 }
 
 export default function NewFolderPage() {
+  const searchParams = useSearchParams();
+  const parentFolderId = searchParams.get("parentFolderId");
+
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
 
@@ -141,6 +145,7 @@ export default function NewFolderPage() {
       user_id: user.id,
       title: title.trim(),
       folder_type: config.folderType,
+      parent_folder_id: parentFolderId || null,
       client_name: clientName.trim() || null,
       organization_name: organizationName.trim() || null,
       description: description.trim() || null,
@@ -153,7 +158,7 @@ export default function NewFolderPage() {
       return;
     }
 
-    window.location.href = "/min-side/mapper";
+    window.location.href = "/min-side";
   }
 
   if (isLoading) {
@@ -206,8 +211,8 @@ export default function NewFolderPage() {
               Koble saker til mappe
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
-              Etter at mappen er opprettet, blir neste steg å la nye saker
-              plasseres i en mappe.
+              Etter at mappen er opprettet, kommer du tilbake til Min Side.
+              Der kan du navigere videre i arkivet.
             </p>
           </aside>
         </div>

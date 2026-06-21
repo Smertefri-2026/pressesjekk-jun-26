@@ -21,10 +21,12 @@ type CaseRow = {
 
 type CaseFolderRow = {
   id: string;
+  parent_folder_id: string | null;
   title: string;
   folder_type: string | null;
-  status: "active" | "archived" | "closed";
+  status: "active" | "archived" | "closed" | "trashed";
   created_at: string;
+  deleted_at: string | null;
 };
 
 type ReportRow = {
@@ -45,6 +47,7 @@ type ActivityItem = {
 
 type ArchiveItem = {
   id: string;
+  rawId: string;
   icon: string;
   name: string;
   subtitle: string;
@@ -69,6 +72,7 @@ function folderStatusLabel(status: CaseFolderRow["status"]) {
   if (status === "active") return "Aktiv";
   if (status === "archived") return "Arkivert";
   if (status === "closed") return "Lukket";
+  if (status === "trashed") return "Papirkurv";
   return status;
 }
 
@@ -130,16 +134,18 @@ export default function MinSidePage() {
               "id,folder_id,title,status,media_name,article_title,published_date,created_at",
               { count: "exact" }
             )
+            .is("deleted_at", null)
             .order("created_at", { ascending: false })
             .limit(50),
 
           supabase
             .from("case_folders")
-            .select("id,title,folder_type,status,created_at", {
+            .select("id,parent_folder_id,title,folder_type,status,created_at,deleted_at", {
               count: "exact",
             })
+            .is("deleted_at", null)
             .order("created_at", { ascending: false })
-            .limit(50),
+            .limit(100),
 
           supabase
             .from("case_reports")
@@ -197,19 +203,24 @@ export default function MinSidePage() {
   }, [folders, selectedFolderId]);
 
   const archiveItems = useMemo<ArchiveItem[]>(() => {
-    const folderItems: ArchiveItem[] = selectedFolderId
-      ? []
-      : folders.map((folder) => ({
-          id: `folder-${folder.id}`,
-          icon: "📁",
-          name: folder.title,
-          subtitle: "Saksmappe",
-          type: "Mappe",
-          status: folderStatusLabel(folder.status),
-          date: formatDate(folder.created_at),
-          href: "#",
-          folderId: folder.id,
-        }));
+    const folderItems: ArchiveItem[] = folders
+      .filter((folder) =>
+        selectedFolderId
+          ? folder.parent_folder_id === selectedFolderId
+          : !folder.parent_folder_id
+      )
+      .map((folder) => ({
+        id: `folder-${folder.id}`,
+        rawId: folder.id,
+        icon: "📁",
+        name: folder.title,
+        subtitle: selectedFolderId ? "Undermappe" : "Saksmappe",
+        type: "Mappe",
+        status: folderStatusLabel(folder.status),
+        date: formatDate(folder.created_at),
+        href: "#",
+        folderId: folder.id,
+      }));
 
     const caseItems: ArchiveItem[] = cases
       .filter((caseItem) =>
@@ -219,6 +230,7 @@ export default function MinSidePage() {
       )
       .map((caseItem) => ({
         id: `case-${caseItem.id}`,
+        rawId: caseItem.id,
         icon: "📄",
         name: caseItem.title,
         subtitle: caseItem.media_name ?? "Ukjent medie",
@@ -251,6 +263,56 @@ export default function MinSidePage() {
   function sortLabel(key: SortKey) {
     if (sortKey !== key) return "";
     return sortDirection === "asc" ? " ↑" : " ↓";
+  }
+
+  async function moveToTrash(item: ArchiveItem) {
+    const confirmed = window.confirm(
+      `Vil du flytte "${item.name}" til papirkurven?`
+    );
+
+    if (!confirmed) return;
+
+    setErrorMessage("");
+
+    if (item.type === "Mappe") {
+      const { error } = await supabase
+        .from("case_folders")
+        .update({
+          status: "trashed",
+          deleted_at: new Date().toISOString(),
+        })
+        .eq("id", item.rawId);
+
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      setFolders((current) =>
+        current.filter((folder) => folder.id !== item.rawId)
+      );
+
+      if (selectedFolderId === item.rawId) {
+        setSelectedFolderId(null);
+      }
+
+      return;
+    }
+
+    const { error } = await supabase
+      .from("cases")
+      .update({
+        deleted_at: new Date().toISOString(),
+      })
+      .eq("id", item.rawId);
+
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+
+    setCases((current) => current.filter((caseItem) => caseItem.id !== item.rawId));
+    setCaseCount((current) => Math.max(0, current - 1));
   }
 
   const activityItems: ActivityItem[] = [
@@ -338,10 +400,14 @@ export default function MinSidePage() {
 
             <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
               <Link
-                href="/min-side/mapper/ny"
+                href={
+                  selectedFolderId
+                    ? `/min-side/mapper/ny?parentFolderId=${selectedFolderId}`
+                    : "/min-side/mapper/ny"
+                }
                 className="w-full rounded-xl bg-slate-950 px-5 py-3 text-center text-sm font-bold text-white hover:bg-slate-800 sm:w-auto"
               >
-                + Ny mappe
+                {selectedFolderId ? "+ Ny mappe her" : "+ Ny mappe"}
               </Link>
 
               <Link
@@ -463,10 +529,14 @@ export default function MinSidePage() {
 
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/min-side/mapper/ny"
+                  href={
+                    selectedFolderId
+                      ? `/min-side/mapper/ny?parentFolderId=${selectedFolderId}`
+                      : "/min-side/mapper/ny"
+                  }
                   className="rounded-xl bg-slate-950 px-5 py-3 text-center text-sm font-black text-white hover:bg-slate-800"
                 >
-                  + Ny mappe
+                  {selectedFolderId ? "+ Ny mappe her" : "+ Ny mappe"}
                 </Link>
 
                 <Link
@@ -499,10 +569,14 @@ export default function MinSidePage() {
                   <div className="mt-6 flex flex-wrap gap-3">
                     {!selectedFolder ? (
                       <Link
-                        href="/min-side/mapper/ny"
+                        href={
+                          selectedFolderId
+                            ? `/min-side/mapper/ny?parentFolderId=${selectedFolderId}`
+                            : "/min-side/mapper/ny"
+                        }
                         className="rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400"
                       >
-                        + Ny mappe
+                        {selectedFolderId ? "+ Ny mappe her" : "+ Ny mappe"}
                       </Link>
                     ) : null}
 
@@ -517,7 +591,7 @@ export default function MinSidePage() {
               </div>
             ) : (
               <div className="overflow-hidden">
-                <div className="hidden grid-cols-[1fr_130px_140px_130px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
+                <div className="hidden grid-cols-[1fr_120px_130px_120px_100px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
                   <button
                     type="button"
                     onClick={() => handleSort("name")}
@@ -546,13 +620,21 @@ export default function MinSidePage() {
                   >
                     Dato{sortLabel("date")}
                   </button>
+                  <div className="text-right">Handling</div>
                 </div>
 
                 <div className="divide-y divide-slate-200">
-                  {archiveItems.map((item) => {
-                    const rowContent = (
-                      <>
-                        <div className="flex min-w-0 items-start gap-3">
+                  {archiveItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="grid gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_120px_130px_120px_100px] md:items-center"
+                    >
+                      {item.type === "Mappe" ? (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedFolderId(item.folderId ?? null)}
+                          className="flex min-w-0 items-start gap-3 text-left"
+                        >
                           <span className="text-2xl leading-none">
                             {item.icon}
                           </span>
@@ -564,45 +646,49 @@ export default function MinSidePage() {
                               {item.subtitle}
                             </p>
                           </div>
-                        </div>
-
-                        <div className="text-sm font-bold text-slate-600">
-                          {item.type}
-                        </div>
-
-                        <div className="text-sm font-bold text-slate-600">
-                          {item.status}
-                        </div>
-
-                        <div className="text-sm font-semibold text-slate-500">
-                          {item.date}
-                        </div>
-                      </>
-                    );
-
-                    if (item.type === "Mappe") {
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => setSelectedFolderId(item.folderId ?? null)}
-                          className="grid w-full gap-3 px-5 py-4 text-left transition hover:bg-cyan-50 md:grid-cols-[1fr_130px_140px_130px] md:items-center"
-                        >
-                          {rowContent}
                         </button>
-                      );
-                    }
+                      ) : (
+                        <Link
+                          href={item.href}
+                          className="flex min-w-0 items-start gap-3"
+                        >
+                          <span className="text-2xl leading-none">
+                            {item.icon}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="truncate text-base font-black text-slate-950">
+                              {item.name}
+                            </p>
+                            <p className="mt-1 truncate text-sm font-semibold text-slate-500">
+                              {item.subtitle}
+                            </p>
+                          </div>
+                        </Link>
+                      )}
 
-                    return (
-                      <Link
-                        key={item.id}
-                        href={item.href}
-                        className="grid gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_130px_140px_130px] md:items-center"
-                      >
-                        {rowContent}
-                      </Link>
-                    );
-                  })}
+                      <div className="text-sm font-bold text-slate-600">
+                        {item.type}
+                      </div>
+
+                      <div className="text-sm font-bold text-slate-600">
+                        {item.status}
+                      </div>
+
+                      <div className="text-sm font-semibold text-slate-500">
+                        {item.date}
+                      </div>
+
+                      <div className="flex justify-start md:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => moveToTrash(item)}
+                          className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                        >
+                          Slett
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
