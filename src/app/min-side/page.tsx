@@ -209,6 +209,13 @@ export default function MinSidePage() {
               </Link>
 
               <Link
+                href="/min-side/mapper"
+                className="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:w-auto"
+              >
+                Mapper
+              </Link>
+
+              <Link
                 href="/min-side/profil"
                 className="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:w-auto"
               >
