@@ -674,7 +674,7 @@ export default function MinSidePage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+          <aside className="hidden rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7 lg:block">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
               Konto
             </p>
@@ -1283,6 +1283,36 @@ export default function MinSidePage() {
 
           </aside>
         </section>
+        <section className="mt-8 lg:hidden">
+          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              Konto
+            </p>
+
+            <h2 className="mt-4 text-3xl font-black text-slate-950">
+              {profile?.full_name?.trim() || "Din profil"}
+            </h2>
+
+            {user?.email ? (
+              <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
+                Innlogget som:{" "}
+                <span className="text-slate-950">{user.email}</span>
+              </p>
+            ) : null}
+
+            <div className="mt-6 grid gap-3">
+              <Link
+                href="/min-side/profil"
+                className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+              >
+                Profil
+              </Link>
+
+              <SignOutButton />
+            </div>
+          </aside>
+        </section>
+
       </section>
 
       <LightPublicFooter />
