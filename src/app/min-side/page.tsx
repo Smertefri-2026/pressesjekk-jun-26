@@ -933,6 +933,146 @@ export default function MinSidePage() {
                   </div>
                 </div>
               </div>
+            ) : viewMode === "grid" ? (
+              <div className="p-5">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {archiveItems.map((item) => (
+                    <article
+                      key={item.id}
+                      className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-cyan-50 hover:shadow-md"
+                    >
+                      {item.type === "Mappe" ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (item.folderId) {
+                              sessionStorage.setItem(
+                                "pressesjekkSelectedFolderId",
+                                item.folderId
+                              );
+                            }
+                            setSelectedFolderId(item.folderId ?? null);
+                          }}
+                          className="flex w-full items-start gap-4 text-left"
+                        >
+                          <span className="text-4xl leading-none">
+                            {item.icon}
+                          </span>
+                          <div className="min-w-0">
+                            <h3 className="truncate text-xl font-black text-slate-950">
+                              {item.name}
+                            </h3>
+                            <p className="mt-1 truncate text-sm font-semibold text-slate-500">
+                              {item.subtitle}
+                            </p>
+                          </div>
+                        </button>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          className="flex w-full items-start gap-4"
+                        >
+                          <span className="text-4xl leading-none">
+                            {item.icon}
+                          </span>
+                          <div className="min-w-0">
+                            <h3 className="truncate text-xl font-black text-slate-950">
+                              {item.name}
+                            </h3>
+                            <p className="mt-1 truncate text-sm font-semibold text-slate-500">
+                              {item.subtitle}
+                            </p>
+                          </div>
+                        </Link>
+                      )}
+
+                      <div className="mt-5 rounded-2xl bg-white p-4">
+                        <div className="grid gap-2 text-sm font-semibold text-slate-600">
+                          <p>Type: {item.type}</p>
+                          <p>Status: {item.status}</p>
+                          <p>Dato: {item.date}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid gap-3">
+                        {archiveMode === "trash" ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => restoreFromTrash(item)}
+                              className="rounded-xl border border-cyan-200 bg-white px-4 py-3 text-sm font-black text-cyan-700 hover:bg-cyan-50"
+                            >
+                              Gjenopprett
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => permanentlyDeleteItem(item)}
+                              className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-black text-red-800 hover:bg-red-100"
+                            >
+                              Slett permanent
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <label className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                              Flytt til
+                            </label>
+
+                            {item.type === "Sak" ? (
+                              <select
+                                value={item.currentFolderId ?? ""}
+                                onChange={(event) =>
+                                  moveCaseToFolder(
+                                    item.rawId,
+                                    event.target.value || null
+                                  )
+                                }
+                                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-black text-slate-700 outline-none hover:bg-slate-50"
+                              >
+                                <option value="">Min Side</option>
+                                {activeFolders.map((folder) => (
+                                  <option key={folder.id} value={folder.id}>
+                                    {folder.title}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <select
+                                value={item.currentParentFolderId ?? ""}
+                                onChange={(event) =>
+                                  moveFolderToFolder(
+                                    item.rawId,
+                                    event.target.value || null
+                                  )
+                                }
+                                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-black text-slate-700 outline-none hover:bg-slate-50"
+                              >
+                                <option value="">Min Side</option>
+                                {activeFolders
+                                  .filter((folder) => folder.id !== item.rawId)
+                                  .map((folder) => (
+                                    <option key={folder.id} value={folder.id}>
+                                      {folder.title}
+                                    </option>
+                                  ))}
+                              </select>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => moveToTrash(item)}
+                              className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-black text-red-700 hover:bg-red-50"
+                            >
+                              Papirkurv
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
             ) : (
               <div className="overflow-hidden">
                 <div className="hidden grid-cols-[1fr_110px_120px_120px_230px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
