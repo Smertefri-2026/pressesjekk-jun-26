@@ -58,6 +58,7 @@ type ArchiveItem = {
   href: string;
   folderId?: string;
   currentFolderId?: string | null;
+  currentParentFolderId?: string | null;
 };
 
 type SortKey = "name" | "type" | "status" | "date";
@@ -246,6 +247,7 @@ export default function MinSidePage() {
         date: formatDate(folder.deleted_at ?? folder.created_at),
         href: "#",
         folderId: folder.id,
+        currentParentFolderId: folder.parent_folder_id,
       }));
 
     const caseItems: ArchiveItem[] = cases
@@ -300,6 +302,46 @@ export default function MinSidePage() {
   function sortLabel(key: SortKey) {
     if (sortKey !== key) return "";
     return sortDirection === "asc" ? " ↑" : " ↓";
+  }
+
+  async function moveFolderToFolder(folderId: string, parentFolderId: string | null) {
+    setErrorMessage("");
+
+    if (folderId === parentFolderId) {
+      setErrorMessage("En mappe kan ikke flyttes inn i seg selv.");
+      return;
+    }
+
+    const selectedParent = parentFolderId
+      ? folders.find((folder) => folder.id === parentFolderId)
+      : null;
+
+    if (selectedParent?.parent_folder_id === folderId) {
+      setErrorMessage(
+        "En mappe kan ikke flyttes inn i sin egen undermappe."
+      );
+      return;
+    }
+
+    const { error } = await supabase
+      .from("case_folders")
+      .update({
+        parent_folder_id: parentFolderId,
+      })
+      .eq("id", folderId);
+
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+
+    setFolders((current) =>
+      current.map((folder) =>
+        folder.id === folderId
+          ? { ...folder, parent_folder_id: parentFolderId }
+          : folder
+      )
+    );
   }
 
   async function moveCaseToFolder(caseId: string, folderId: string | null) {
@@ -990,7 +1032,27 @@ export default function MinSidePage() {
                                   </option>
                                 ))}
                               </select>
-                            ) : null}
+                            ) : (
+                              <select
+                                value={item.currentParentFolderId ?? ""}
+                                onChange={(event) =>
+                                  moveFolderToFolder(
+                                    item.rawId,
+                                    event.target.value || null
+                                  )
+                                }
+                                className="max-w-[140px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50"
+                              >
+                                <option value="">Rotnivå</option>
+                                {activeFolders
+                                  .filter((folder) => folder.id !== item.rawId)
+                                  .map((folder) => (
+                                    <option key={folder.id} value={folder.id}>
+                                      {folder.title}
+                                    </option>
+                                  ))}
+                              </select>
+                            )}
 
                             <button
                               type="button"
