@@ -704,7 +704,7 @@ export default function MinSidePage() {
         </div>
 
         <section
-          className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-5"
+          className="mt-14 hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-5"
           id="oversikt"
         >
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
