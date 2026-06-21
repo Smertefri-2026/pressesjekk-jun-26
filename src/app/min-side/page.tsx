@@ -998,14 +998,6 @@ export default function MinSidePage() {
                         </Link>
                       )}
 
-                      <div className="mt-5 rounded-2xl bg-white p-4">
-                        <div className="grid gap-2 text-sm font-semibold text-slate-600">
-                          <p>Type: {item.type}</p>
-                          <p>Status: {item.status}</p>
-                          <p>Dato: {item.date}</p>
-                        </div>
-                      </div>
-
                       <div className="mt-4 grid gap-3">
                         {archiveMode === "trash" ? (
                           <>
@@ -1123,7 +1115,7 @@ export default function MinSidePage() {
                   {archiveItems.map((item) => (
                     <div
                       key={item.id}
-                      className="grid gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_110px_120px_120px_230px] md:items-center"
+                      className="grid grid-cols-[minmax(0,1fr)_116px] gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_110px_120px_120px_230px] md:items-center"
                     >
                       {item.type === "Mappe" ? (
                         <button
@@ -1167,19 +1159,19 @@ export default function MinSidePage() {
                         </Link>
                       )}
 
-                      <div className="text-sm font-bold text-slate-600">
+                      <div className="hidden text-sm font-bold text-slate-600 md:block">
                         {item.type}
                       </div>
 
-                      <div className="text-sm font-bold text-slate-600">
+                      <div className="hidden text-sm font-bold text-slate-600 md:block">
                         {item.status}
                       </div>
 
-                      <div className="text-sm font-semibold text-slate-500">
+                      <div className="hidden text-sm font-semibold text-slate-500 md:block">
                         {item.date}
                       </div>
 
-                      <div className="flex flex-wrap justify-start gap-2 md:justify-end">
+                      <div className="flex flex-col items-end gap-2 md:flex-row md:flex-wrap md:justify-end">
                         {archiveMode === "trash" ? (
                           <>
                             <button
@@ -1209,7 +1201,7 @@ export default function MinSidePage() {
                                     event.target.value || null
                                   )
                                 }
-                                className="max-w-[140px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50"
+                                className="w-[108px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50 md:w-auto md:max-w-[140px]"
                               >
                                 <option value="">Min Side</option>
                                 {activeFolders.map((folder) => (
@@ -1227,7 +1219,7 @@ export default function MinSidePage() {
                                     event.target.value || null
                                   )
                                 }
-                                className="max-w-[140px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50"
+                                className="w-[108px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50 md:w-auto md:max-w-[140px]"
                               >
                                 <option value="">Min Side</option>
                                 {activeFolders
@@ -1243,7 +1235,7 @@ export default function MinSidePage() {
                             <button
                               type="button"
                               onClick={() => moveToTrash(item)}
-                              className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                              className="text-xs font-black text-red-700 underline-offset-4 hover:underline"
                             >
                               Slett
                             </button>
