@@ -26,7 +26,7 @@ export function LightPublicHeader() {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/85">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur supports-backdrop-filter:bg-white/85">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-4 sm:py-5">
             <BrandLogo size="header" />
@@ -105,7 +105,7 @@ export function LightPublicHeader() {
         </div>
       </header>
 
-      <div className="h-[73px] sm:h-[92px]" aria-hidden="true" />
+      <div className="h-18.25 sm:h-23" aria-hidden="true" />
     </>
   );
 }

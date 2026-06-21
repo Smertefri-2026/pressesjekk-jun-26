@@ -21,7 +21,7 @@ export function HowItWorksSection() {
           {steps.map((step, index) => (
             <div
               key={step}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-white"
+              className="rounded-2xl border border-white/10 bg-white/3 p-5 text-white"
             >
               <span className="text-sm text-cyan-300">Steg {index + 1}</span>
               <h3 className="mt-3 font-semibold">{step}</h3>

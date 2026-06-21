@@ -3,7 +3,7 @@ import Link from "next/link";
 export function HeroSection() {
   return (
     <div className="grid flex-1 items-center gap-10 py-14 lg:grid-cols-[1fr_360px]">
-      <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-2xl lg:p-12">
+      <section className="rounded-3xl border border-white/10 bg-white/3 p-8 shadow-2xl lg:p-12">
         <p className="mb-5 inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-200">
           AI-basert analyse av medieartikler
         </p>
@@ -33,15 +33,15 @@ export function HeroSection() {
         </div>
 
         <div className="mt-8 grid gap-4 text-sm text-slate-300 md:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/3 p-4">
             <strong className="block text-white">Artikkelsjekk</strong>
             URL, PDF eller tekst.
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/3 p-4">
             <strong className="block text-white">Tilsvar-sjekk</strong>
             Ble du kontaktet før publisering?
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/3 p-4">
             <strong className="block text-white">PFU-klage</strong>
             Få strukturert klageutkast.
           </div>

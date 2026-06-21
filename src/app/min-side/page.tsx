@@ -1025,7 +1025,7 @@ export default function MinSidePage() {
                                 }
                                 className="max-w-[140px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50"
                               >
-                                <option value="">Uten mappe</option>
+                                <option value="">Min Side</option>
                                 {activeFolders.map((folder) => (
                                   <option key={folder.id} value={folder.id}>
                                     {folder.title}
@@ -1043,7 +1043,7 @@ export default function MinSidePage() {
                                 }
                                 className="max-w-[140px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50"
                               >
-                                <option value="">Rotnivå</option>
+                                <option value="">Min Side</option>
                                 {activeFolders
                                   .filter((folder) => folder.id !== item.rawId)
                                   .map((folder) => (

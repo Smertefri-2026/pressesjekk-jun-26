@@ -265,7 +265,7 @@ export default function PersonvernPage() {
               {laterTasks.map((item) => (
                 <div
                   key={item}
-                  className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200"
+                  className="rounded-2xl border border-white/10 bg-white/4 p-4 text-sm font-semibold text-slate-200"
                 >
                   {item}
                 </div>
