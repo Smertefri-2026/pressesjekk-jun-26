@@ -65,6 +65,7 @@ export default function MinSidePage() {
   useEffect(() => {
     async function loadDashboard() {
       setIsLoading(true);
+      setErrorMessage("");
 
       const {
         data: { user },
@@ -78,32 +79,50 @@ export default function MinSidePage() {
 
       setUser(user);
 
-      const { data, error } = await supabase
-        .from("cases")
-        .select(
-          "id,title,status,media_name,article_title,article_url,published_date,created_at"
-        )
-        .order("created_at", { ascending: false });
+      const [casesResult, reportsResult, pfuDraftCountResult] =
+        await Promise.all([
+          supabase
+            .from("cases")
+            .select(
+              "id,title,status,media_name,article_title,article_url,published_date,created_at",
+              { count: "exact" }
+            )
+            .order("created_at", { ascending: false })
+            .limit(20),
 
-      if (error) {
-        setErrorMessage(error.message);
-      } else {
-        const caseRows = (data ?? []) as CaseRow[];
-        setCases(caseRows);
+          supabase
+            .from("case_reports")
+            .select("id,case_id,version,report_type,created_at", {
+              count: "exact",
+            })
+            .order("created_at", { ascending: false })
+            .limit(50),
 
-        const { data: reportsData, error: reportsError } = await supabase
-          .from("case_reports")
-          .select("id,case_id,version,report_type,created_at");
+          supabase
+            .from("case_reports")
+            .select("id", { count: "exact", head: true })
+            .eq("report_type", "pfu_draft"),
+        ]);
 
-        if (!reportsError) {
-          const reportRows = (reportsData ?? []) as ReportRow[];
-          setReports(reportRows);
-          setReportCount(reportRows.length);
-          setPfuDraftCount(
-            reportRows.filter((item) => item.report_type === "pfu_draft").length
-          );
-        }
+      if (casesResult.error) {
+        setErrorMessage(casesResult.error.message);
+        setIsLoading(false);
+        return;
       }
+
+      if (reportsResult.error) {
+        setErrorMessage(reportsResult.error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      const caseRows = (casesResult.data ?? []) as CaseRow[];
+      const reportRows = (reportsResult.data ?? []) as ReportRow[];
+
+      setCases(caseRows);
+      setReports(reportRows);
+      setReportCount(reportsResult.count ?? reportRows.length);
+      setPfuDraftCount(pfuDraftCountResult.count ?? 0);
 
       setIsLoading(false);
     }
@@ -181,17 +200,17 @@ export default function MinSidePage() {
               </p>
             ) : null}
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
               <Link
                 href="/min-side/saker/ny"
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
+                className="w-full rounded-xl bg-slate-950 px-5 py-3 text-center text-sm font-bold text-white hover:bg-slate-800 sm:w-auto"
               >
                 + Opprett ny sak
               </Link>
 
               <Link
                 href="/min-side/profil"
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+                className="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:w-auto"
               >
                 Profil
               </Link>
