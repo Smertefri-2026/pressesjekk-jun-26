@@ -404,7 +404,7 @@ export default function ProfilePage() {
                       className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-100 px-4 py-4 text-slate-500"
                     />
                     <p className="mt-2 text-sm leading-6 text-slate-500">
-                      E-post hentes fra innloggingen og kan ikke endres her ennå.
+                      E-post kan ikke endres. For å endre e-post, kontakt PresseSjekk eller registrer en ny konto.
                     </p>
                   </div>
 
