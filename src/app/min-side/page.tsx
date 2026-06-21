@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
@@ -10,12 +10,20 @@ import { supabase } from "@/lib/supabase/client";
 
 type CaseRow = {
   id: string;
+  folder_id: string | null;
   title: string;
   status: "draft" | "in_progress" | "report_ready" | "closed";
   media_name: string | null;
   article_title: string | null;
-  article_url: string | null;
   published_date: string | null;
+  created_at: string;
+};
+
+type CaseFolderRow = {
+  id: string;
+  title: string;
+  folder_type: string | null;
+  status: "active" | "archived" | "closed";
   created_at: string;
 };
 
@@ -35,12 +43,41 @@ type ActivityItem = {
   href: string;
 };
 
+type ArchiveItem = {
+  id: string;
+  icon: string;
+  name: string;
+  subtitle: string;
+  type: "Mappe" | "Sak";
+  status: string;
+  date: string;
+  href: string;
+  folderId?: string;
+};
+
+type SortKey = "name" | "type" | "status" | "date";
+
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
   if (status === "in_progress") return "Under arbeid";
   if (status === "report_ready") return "Rapport klar";
   if (status === "closed") return "Lukket";
   return status;
+}
+
+function folderStatusLabel(status: CaseFolderRow["status"]) {
+  if (status === "active") return "Aktiv";
+  if (status === "archived") return "Arkivert";
+  if (status === "closed") return "Lukket";
+  return status;
+}
+
+function formatDate(date: string) {
+  return new Intl.DateTimeFormat("nb-NO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(date));
 }
 
 function formatActivityDate(date: string) {
@@ -56,9 +93,15 @@ function formatActivityDate(date: string) {
 export default function MinSidePage() {
   const [user, setUser] = useState<User | null>(null);
   const [cases, setCases] = useState<CaseRow[]>([]);
+  const [folders, setFolders] = useState<CaseFolderRow[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
+  const [caseCount, setCaseCount] = useState(0);
+  const [folderCount, setFolderCount] = useState(0);
   const [reportCount, setReportCount] = useState(0);
   const [pfuDraftCount, setPfuDraftCount] = useState(0);
+  const [sortKey, setSortKey] = useState<SortKey>("date");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -79,16 +122,24 @@ export default function MinSidePage() {
 
       setUser(user);
 
-      const [casesResult, reportsResult, pfuDraftCountResult] =
+      const [casesResult, foldersResult, reportsResult, pfuDraftCountResult] =
         await Promise.all([
           supabase
             .from("cases")
             .select(
-              "id,title,status,media_name,article_title,article_url,published_date,created_at",
+              "id,folder_id,title,status,media_name,article_title,published_date,created_at",
               { count: "exact" }
             )
             .order("created_at", { ascending: false })
-            .limit(20),
+            .limit(50),
+
+          supabase
+            .from("case_folders")
+            .select("id,title,folder_type,status,created_at", {
+              count: "exact",
+            })
+            .order("created_at", { ascending: false })
+            .limit(50),
 
           supabase
             .from("case_reports")
@@ -110,6 +161,12 @@ export default function MinSidePage() {
         return;
       }
 
+      if (foldersResult.error) {
+        setErrorMessage(foldersResult.error.message);
+        setIsLoading(false);
+        return;
+      }
+
       if (reportsResult.error) {
         setErrorMessage(reportsResult.error.message);
         setIsLoading(false);
@@ -117,10 +174,14 @@ export default function MinSidePage() {
       }
 
       const caseRows = (casesResult.data ?? []) as CaseRow[];
+      const folderRows = (foldersResult.data ?? []) as CaseFolderRow[];
       const reportRows = (reportsResult.data ?? []) as ReportRow[];
 
       setCases(caseRows);
+      setFolders(folderRows);
       setReports(reportRows);
+      setCaseCount(casesResult.count ?? caseRows.length);
+      setFolderCount(foldersResult.count ?? folderRows.length);
       setReportCount(reportsResult.count ?? reportRows.length);
       setPfuDraftCount(pfuDraftCountResult.count ?? 0);
 
@@ -130,18 +191,86 @@ export default function MinSidePage() {
     loadDashboard();
   }, []);
 
+  const selectedFolder = useMemo(() => {
+    if (!selectedFolderId) return null;
+    return folders.find((folder) => folder.id === selectedFolderId) ?? null;
+  }, [folders, selectedFolderId]);
+
+  const archiveItems = useMemo<ArchiveItem[]>(() => {
+    const folderItems: ArchiveItem[] = selectedFolderId
+      ? []
+      : folders.map((folder) => ({
+          id: `folder-${folder.id}`,
+          icon: "📁",
+          name: folder.title,
+          subtitle: "Saksmappe",
+          type: "Mappe",
+          status: folderStatusLabel(folder.status),
+          date: formatDate(folder.created_at),
+          href: "#",
+          folderId: folder.id,
+        }));
+
+    const caseItems: ArchiveItem[] = cases
+      .filter((caseItem) =>
+        selectedFolderId
+          ? caseItem.folder_id === selectedFolderId
+          : !caseItem.folder_id
+      )
+      .map((caseItem) => ({
+        id: `case-${caseItem.id}`,
+        icon: "📄",
+        name: caseItem.title,
+        subtitle: caseItem.media_name ?? "Ukjent medie",
+        type: "Sak",
+        status: statusLabel(caseItem.status),
+        date: caseItem.published_date ?? formatDate(caseItem.created_at),
+        href: `/min-side/saker/${caseItem.id}`,
+      }));
+
+    return [...folderItems, ...caseItems].sort((a, b) => {
+      const valueA = a[sortKey].toLowerCase();
+      const valueB = b[sortKey].toLowerCase();
+
+      if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+      if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [cases, folders, selectedFolderId, sortDirection, sortKey]);
+
+  function handleSort(nextSortKey: SortKey) {
+    if (sortKey === nextSortKey) {
+      setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
+      return;
+    }
+
+    setSortKey(nextSortKey);
+    setSortDirection(nextSortKey === "date" ? "desc" : "asc");
+  }
+
+  function sortLabel(key: SortKey) {
+    if (sortKey !== key) return "";
+    return sortDirection === "asc" ? " ↑" : " ↓";
+  }
+
   const activityItems: ActivityItem[] = [
     ...reports.map((report) => {
       const linkedCase = cases.find((caseItem) => caseItem.id === report.case_id);
 
       return {
         id: `report-${report.id}`,
-        title: `Rapport v${report.version} lagret`,
+        title:
+          report.report_type === "pfu_draft"
+            ? `PFU-utkast v${report.version} lagret`
+            : `Rapport v${report.version} lagret`,
         description: linkedCase
           ? linkedCase.title
           : "Rapportutkast lagret på en sak",
         created_at: report.created_at,
-        href: `/min-side/saker/${report.case_id}/rapport`,
+        href:
+          report.report_type === "pfu_draft"
+            ? `/min-side/saker/${report.case_id}/pfu`
+            : `/min-side/saker/${report.case_id}/rapport`,
       };
     }),
     ...cases.map((caseItem) => ({
@@ -151,12 +280,19 @@ export default function MinSidePage() {
       created_at: caseItem.created_at,
       href: `/min-side/saker/${caseItem.id}`,
     })),
+    ...folders.map((folder) => ({
+      id: `folder-${folder.id}`,
+      title: "Mappe opprettet",
+      description: folder.title,
+      created_at: folder.created_at,
+      href: "/min-side/mapper",
+    })),
   ]
     .sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )
-    .slice(0, 5);
+    .slice(0, 6);
 
   if (isLoading) {
     return (
@@ -185,12 +321,12 @@ export default function MinSidePage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Dine saker
+              Saksarkiv
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Her samles sakene dine. I neste steg kan du opprette en ny sak,
-              lagre artikkeldata og senere generere rapporter.
+              Dette er ditt PresseSjekk-arkiv. Mapper fungerer som Finder:
+              klikk på en mappe eller sak for å åpne den.
             </p>
 
             {user?.email ? (
@@ -202,17 +338,17 @@ export default function MinSidePage() {
 
             <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
               <Link
-                href="/min-side/saker/ny"
+                href="/min-side/mapper/ny"
                 className="w-full rounded-xl bg-slate-950 px-5 py-3 text-center text-sm font-bold text-white hover:bg-slate-800 sm:w-auto"
               >
-                + Opprett ny sak
+                + Ny mappe
               </Link>
 
               <Link
-                href="/min-side/mapper"
+                href="/min-side/saker/ny"
                 className="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:w-auto"
               >
-                Mapper
+                + Ny sak
               </Link>
 
               <Link
@@ -231,43 +367,59 @@ export default function MinSidePage() {
               Neste anbefalte steg
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
-              {cases.length === 0
-                ? "Opprett første ekte sak"
-                : reportCount > 0
-                  ? "Fortsett med rapporten"
-                  : "Legg til opplysninger"}
+              {folderCount === 0 && caseCount > 1
+                ? "Samle saker i mapper"
+                : caseCount === 0
+                  ? "Opprett første sak"
+                  : "Åpne en sak eller mappe"}
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
-              {cases.length === 0
-                ? "Neste steg er å lagre din første PresseSjekk-sak i databasen."
-                : reportCount > 0
-                  ? `Du har ${cases.length} lagret sak og ${reportCount} rapport. Åpne saken for å legge til flere opplysninger, redigere rapportgrunnlaget eller lage ny rapportversjon.`
-                  : "Du har opprettet en sak. Neste steg er å legge til tilsvar, rettsstatus og dokumentasjon før du lager rapportutkast."}
+              {folderCount === 0 && caseCount > 1
+                ? "Du har flere saker. Opprett en mappe for å samle saker som hører sammen."
+                : caseCount === 0
+                  ? "Start med en sak, eller opprett en mappe først hvis du vet at dette skal bli en større sakssamling."
+                  : "Klikk direkte på en mappe eller sak i arkivet for å fortsette arbeidet."}
             </p>
           </aside>
         </div>
 
-        <section className="mt-14 grid gap-6 md:grid-cols-4" id="oversikt">
+        <section
+          className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-5"
+          id="oversikt"
+        >
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
             <p className="font-bold text-slate-500">Credits igjen</p>
             <p className="mt-4 text-5xl font-black text-cyan-700">0</p>
           </div>
 
           <a
-            href="#mine-saker"
+            href="#arkiv"
             className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-slate-500">Aktive saker</p>
+            <p className="font-bold text-slate-500">Mapper</p>
             <p className="mt-4 text-5xl font-black text-slate-950">
-              {cases.length}
+              {folderCount}
             </p>
             <p className="mt-3 text-sm font-semibold text-cyan-700">
-              Se sakslisten
+              Se arkiv
             </p>
           </a>
 
           <a
-            href="#mine-saker"
+            href="#arkiv"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-slate-500">Saker</p>
+            <p className="mt-4 text-5xl font-black text-slate-950">
+              {caseCount}
+            </p>
+            <p className="mt-3 text-sm font-semibold text-cyan-700">
+              Se arkiv
+            </p>
+          </a>
+
+          <a
+            href="#arkiv"
             className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
             <p className="font-bold text-slate-500">Rapporter</p>
@@ -287,103 +439,171 @@ export default function MinSidePage() {
           </div>
         </section>
 
-        <section id="mine-saker" className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <section id="arkiv" className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px]">
+          <div className="rounded-3xl border border-slate-200 bg-white p-0 shadow-sm">
+            <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                  Mine saker
+                  Saksarkiv
                 </p>
-                <h2 className="mt-3 text-4xl font-black text-slate-950">
-                  Lagrede saker
+                <h2 className="mt-2 text-3xl font-black text-slate-950">
+                  {selectedFolder ? selectedFolder.title : "Mapper og saker"}
                 </h2>
+
+                {selectedFolder ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFolderId(null)}
+                    className="mt-3 text-sm font-black text-cyan-700 hover:text-cyan-900"
+                  >
+                    ← Tilbake til mapper og saker
+                  </button>
+                ) : null}
               </div>
 
-              <Link
-                href="/min-side/saker/ny"
-                className="rounded-xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800"
-              >
-                + Opprett ny sak
-              </Link>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/min-side/mapper/ny"
+                  className="rounded-xl bg-slate-950 px-5 py-3 text-center text-sm font-black text-white hover:bg-slate-800"
+                >
+                  + Ny mappe
+                </Link>
+
+                <Link
+                  href="/min-side/saker/ny"
+                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  + Ny sak
+                </Link>
+              </div>
             </div>
 
             {errorMessage ? (
-              <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
+              <div className="m-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
                 {errorMessage}
               </div>
             ) : null}
 
-            {cases.length === 0 ? (
-              <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8">
-                <h3 className="text-2xl font-black text-slate-950">
-                  Ingen lagrede saker ennå
-                </h3>
-                <p className="mt-4 max-w-2xl leading-8 text-slate-700">
-                  Når du oppretter din første sak, vil den vises her. Foreløpig
-                  kan du åpne demosaken for å se hvordan en sak kan se ut.
-                </p>
+            {archiveItems.length === 0 ? (
+              <div className="p-6 sm:p-8">
+                <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8">
+                  <h3 className="text-2xl font-black text-slate-950">
+                    {selectedFolder ? "Mappen er tom" : "Arkivet er tomt"}
+                  </h3>
+                  <p className="mt-4 max-w-2xl leading-8 text-slate-700">
+                    {selectedFolder
+                      ? "Denne mappen har ingen saker ennå. Neste steg blir å kunne opprette saker direkte i valgt mappe."
+                      : "Opprett en mappe eller en sak for å komme i gang."}
+                  </p>
 
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <Link
-                    href="/min-side/saker/ny"
-                    className="rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400"
-                  >
-                    Start ny sak
-                  </Link>
-                  <Link
-                    href="/min-side/saker/demo-1"
-                    className="rounded-xl border border-slate-300 bg-white px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
-                  >
-                    Åpne demosak
-                  </Link>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    {!selectedFolder ? (
+                      <Link
+                        href="/min-side/mapper/ny"
+                        className="rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400"
+                      >
+                        + Ny mappe
+                      </Link>
+                    ) : null}
+
+                    <Link
+                      href="/min-side/saker/ny"
+                      className="rounded-xl border border-slate-300 bg-white px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                    >
+                      + Ny sak
+                    </Link>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="mt-8 grid gap-4">
-                {cases.map((item) => (
-                  <article
-                    key={item.id}
-                    className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
+              <div className="overflow-hidden">
+                <div className="hidden grid-cols-[1fr_130px_140px_130px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
+                  <button
+                    type="button"
+                    onClick={() => handleSort("name")}
+                    className="text-left hover:text-cyan-700"
                   >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p className="text-sm font-bold uppercase tracking-[0.18em] text-cyan-700">
-                          {item.media_name ?? "Ukjent medie"} ·{" "}
-                          {item.published_date ?? "Dato ikke satt"}
-                        </p>
-                        <h3 className="mt-3 text-2xl font-black text-slate-950">
-                          {item.title}
-                        </h3>
-                        {item.article_title ? (
-                          <p className="mt-2 text-slate-600">
-                            {item.article_title}
-                          </p>
-                        ) : null}
-                        <p className="mt-3 text-sm font-semibold text-slate-500">
-                          Status: {statusLabel(item.status)}
-                        </p>
-                      </div>
+                    Navn{sortLabel("name")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSort("type")}
+                    className="text-left hover:text-cyan-700"
+                  >
+                    Type{sortLabel("type")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSort("status")}
+                    className="text-left hover:text-cyan-700"
+                  >
+                    Status{sortLabel("status")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSort("date")}
+                    className="text-left hover:text-cyan-700"
+                  >
+                    Dato{sortLabel("date")}
+                  </button>
+                </div>
 
-                      <div className="flex flex-col gap-2">
-                        <Link
-                          href={`/min-side/saker/${item.id}`}
-                          className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                <div className="divide-y divide-slate-200">
+                  {archiveItems.map((item) => {
+                    const rowContent = (
+                      <>
+                        <div className="flex min-w-0 items-start gap-3">
+                          <span className="text-2xl leading-none">
+                            {item.icon}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="truncate text-base font-black text-slate-950">
+                              {item.name}
+                            </p>
+                            <p className="mt-1 truncate text-sm font-semibold text-slate-500">
+                              {item.subtitle}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-sm font-bold text-slate-600">
+                          {item.type}
+                        </div>
+
+                        <div className="text-sm font-bold text-slate-600">
+                          {item.status}
+                        </div>
+
+                        <div className="text-sm font-semibold text-slate-500">
+                          {item.date}
+                        </div>
+                      </>
+                    );
+
+                    if (item.type === "Mappe") {
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setSelectedFolderId(item.folderId ?? null)}
+                          className="grid w-full gap-3 px-5 py-4 text-left transition hover:bg-cyan-50 md:grid-cols-[1fr_130px_140px_130px] md:items-center"
                         >
-                          Åpne sak
-                        </Link>
+                          {rowContent}
+                        </button>
+                      );
+                    }
 
-                        {reports.some((report) => report.case_id === item.id) ? (
-                          <Link
-                            href={`/min-side/saker/${item.id}/rapport`}
-                            className="rounded-xl bg-cyan-500 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-cyan-400"
-                          >
-                            Åpne rapport
-                          </Link>
-                        ) : null}
-                      </div>
-                    </div>
-                  </article>
-                ))}
+                    return (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        className="grid gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_130px_140px_130px] md:items-center"
+                      >
+                        {rowContent}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -396,7 +616,8 @@ export default function MinSidePage() {
 
               {activityItems.length === 0 ? (
                 <p className="mt-4 leading-8 text-slate-300">
-                  Aktivitet vises her når du har opprettet din første sak.
+                  Aktivitet vises her når du har opprettet din første sak eller
+                  mappe.
                 </p>
               ) : (
                 <div className="mt-5 grid gap-3">
@@ -417,6 +638,19 @@ export default function MinSidePage() {
                   ))}
                 </div>
               )}
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                Arkivvisning
+              </p>
+              <h2 className="mt-3 text-3xl font-black text-slate-950">
+                Lett å skalere
+              </h2>
+              <p className="mt-4 leading-8 text-slate-700">
+                Denne visningen er lettere enn store kort og passer bedre når
+                en advokat, rådgiver eller journalist har mange mapper og saker.
+              </p>
             </div>
           </aside>
         </section>

@@ -14,7 +14,7 @@ export function BrandLogo({ size = "header" }: BrandLogoProps) {
         PresseSjekk
       </p>
       <p
-        className={`mt-1 ${taglineSize} font-bold uppercase tracking-[0.08em] text-cyan-700`}
+        className={`mt-1 ${taglineSize} font-bold uppercase tracking-[0.04em] text-cyan-700`}
       >
         Din kontroll av medieomtale
       </p>
