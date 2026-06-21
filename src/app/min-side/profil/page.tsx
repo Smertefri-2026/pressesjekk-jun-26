@@ -299,7 +299,7 @@ export default function ProfilePage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Din PresseSjekk-profil
+              Din profil
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
@@ -768,7 +768,7 @@ export default function ProfilePage() {
             </div>
           </form>
 
-          <aside className="grid gap-6">
+          <aside className="grid content-start gap-6">
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
                 Konto
