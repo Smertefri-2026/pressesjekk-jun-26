@@ -271,8 +271,9 @@ export default function CaseDetailPage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Dette er første versjon av sakssiden. Her vises grunninformasjon,
-              tilsvar, rettsstatus og dokumentasjon som er lagret på saken.
+              Her får du oversikt over saken, grunninformasjon, saksopplysninger,
+              rapporter, PFU-spor og videre arbeid. Bruk saksgangen til høyre
+              for å fortsette der du slapp.
             </p>
 
             {user?.email ? (
@@ -287,14 +288,28 @@ export default function CaseDetailPage() {
                 href="/min-side"
                 className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:px-5 sm:py-3"
               >
-                Til Min Side
+                Min Side
+              </Link>
+
+              <Link
+                href={`/min-side/saker/${params.id}/opplysninger`}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:px-5 sm:py-3"
+              >
+                Opplysninger
+              </Link>
+
+              <Link
+                href={`/min-side/saker/${params.id}/rapport`}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:px-5 sm:py-3"
+              >
+                Rapport
               </Link>
 
               <Link
                 href={`/min-side/saker/${params.id}/rediger`}
                 className="rounded-xl bg-slate-950 px-4 py-3 text-center text-sm font-bold text-white hover:bg-slate-800 sm:px-5 sm:py-3"
               >
-                Rediger sak
+                Rediger
               </Link>
             </div>
           </section>
@@ -429,7 +444,10 @@ export default function CaseDetailPage() {
                 Saksopplysninger
               </p>
               <h2 className="mt-3 text-4xl font-black text-slate-950">
-                Tilsvar, rettsstatus og dokumentasjon
+                <span className="sm:hidden">Saksopplysninger</span>
+                <span className="hidden sm:inline">
+                  Tilsvar, rettsstatus og dokumentasjon
+                </span>
               </h2>
 
               {caseInput ? (
@@ -543,15 +561,17 @@ export default function CaseDetailPage() {
             </div>
           </div>
 
-          <aside className="grid gap-6">
+          <aside className="grid content-start gap-6">
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
                 Rapport
               </p>
               <h2 className="mt-3 text-3xl font-black">
-                {reports.length > 0
-                  ? `${reports.length} rapport lagret`
-                  : "Ingen rapport lagret"}
+                {reports.length > 1
+                  ? `${reports.length} rapporter lagret`
+                  : reports.length === 1
+                    ? "1 rapport lagret"
+                    : "Ingen rapport lagret"}
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
                 {reports.length > 0
