@@ -169,7 +169,8 @@ export default function NewCasePage() {
               Saksinformasjon
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
-              Grunnopplysninger
+              <span className="sm:hidden">Opplysninger</span>
+              <span className="hidden sm:inline">Grunnopplysninger</span>
             </h2>
 
             <div className="mt-8 grid gap-5">
