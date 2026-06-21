@@ -850,34 +850,37 @@ export default function MinSidePage() {
               </div>
             ) : null}
 
-            {selectedFolder && archiveMode === "active" ? (
-              <div className="border-b border-slate-200 px-5 py-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    sessionStorage.removeItem("pressesjekkSelectedFolderId");
-                    setSelectedFolderId(null);
-                  }}
-                  className="text-sm font-black text-cyan-700 hover:text-cyan-900"
-                >
-                  ← Tilbake til mapper og saker
-                </button>
-              </div>
-            ) : null}
-
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
-              <p className="text-sm font-bold text-slate-500">
-                {viewMode === "list" ? "Listevisning" : "Symbolvisning"}
-              </p>
+              <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-5">
+                {selectedFolder && archiveMode === "active" ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sessionStorage.removeItem("pressesjekkSelectedFolderId");
+                      setSelectedFolderId(null);
+                    }}
+                    className="shrink-0 text-sm font-black text-cyan-700 hover:text-cyan-900"
+                  >
+                    <span className="sm:hidden">← Tilbake</span>
+                    <span className="hidden sm:inline">
+                      ← Tilbake til mapper og saker
+                    </span>
+                  </button>
+                ) : null}
 
-              <div className="flex gap-2">
+                <p className="hidden text-sm font-bold text-slate-500 sm:block">
+                  {viewMode === "list" ? "Listevisning" : "Symbolvisning"}
+                </p>
+              </div>
+
+              <div className="flex shrink-0 gap-2">
                 <button
                   type="button"
                   onClick={() => {
                     localStorage.setItem("pressesjekkArchiveViewMode", "list");
                     setViewMode("list");
                   }}
-                  className={`rounded-xl px-4 py-2 text-sm font-black ${
+                  className={`rounded-xl px-3 py-2 text-sm font-black sm:px-4 ${
                     viewMode === "list"
                       ? "bg-slate-950 text-white"
                       : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
@@ -892,7 +895,7 @@ export default function MinSidePage() {
                     localStorage.setItem("pressesjekkArchiveViewMode", "grid");
                     setViewMode("grid");
                   }}
-                  className={`rounded-xl px-4 py-2 text-sm font-black ${
+                  className={`rounded-xl px-3 py-2 text-sm font-black sm:px-4 ${
                     viewMode === "grid"
                       ? "bg-slate-950 text-white"
                       : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
