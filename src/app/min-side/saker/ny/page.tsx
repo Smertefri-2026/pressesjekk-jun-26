@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
@@ -8,6 +9,9 @@ import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 
 export default function NewCasePage() {
+  const searchParams = useSearchParams();
+  const folderId = searchParams.get("folderId");
+
   const [user, setUser] = useState<User | null>(null);
   const [isCheckingUser, setIsCheckingUser] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -61,6 +65,7 @@ export default function NewCasePage() {
         user_id: user.id,
         title: caseTitle,
         status: "draft",
+        folder_id: folderId || null,
         media_name: mediaName.trim() || null,
         article_title: articleTitle.trim() || null,
         article_url: articleUrl.trim() || null,
@@ -80,6 +85,10 @@ export default function NewCasePage() {
       setErrorMessage("Saken ble lagret, men vi fant ikke saks-ID.");
       setIsSaving(false);
       return;
+    }
+
+    if (folderId) {
+      sessionStorage.setItem("pressesjekkSelectedFolderId", folderId);
     }
 
     window.location.href = "/min-side";
@@ -119,12 +128,13 @@ export default function NewCasePage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Opprett en ny PresseSjekk-sak.
+              {folderId ? "Opprett ny sak i valgt mappe." : "Opprett en ny PresseSjekk-sak."}
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Start med grunninformasjonen om artikkelen. Senere kan du legge
               til tilsvar, rettsstatus, dokumentasjon og rapportversjoner.
+              {folderId ? " Saken lagres i valgt mappe." : ""}
             </p>
 
             {user?.email ? (

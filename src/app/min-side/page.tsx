@@ -107,7 +107,10 @@ export default function MinSidePage() {
   const [pfuDraftCount, setPfuDraftCount] = useState(0);
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem("pressesjekkSelectedFolderId");
+  });
   const [archiveMode, setArchiveMode] = useState<ArchiveMode>("active");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -206,6 +209,12 @@ export default function MinSidePage() {
       ) ?? null
     );
   }, [folders, selectedFolderId]);
+
+  const newCaseHref = selectedFolderId
+    ? `/min-side/saker/ny?folderId=${selectedFolderId}`
+    : "/min-side/saker/ny";
+
+  const newCaseLabel = selectedFolderId ? "+ Ny sak her" : "+ Ny sak";
 
   const archiveItems = useMemo<ArchiveItem[]>(() => {
     const folderItems: ArchiveItem[] = folders
@@ -586,10 +595,14 @@ export default function MinSidePage() {
               </Link>
 
               <Link
-                href="/min-side/saker/ny"
+                href={
+                  selectedFolderId
+                    ? `/min-side/saker/ny?folderId=${selectedFolderId}`
+                    : "/min-side/saker/ny"
+                }
                 className="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:w-auto"
               >
-                + Ny sak
+                {selectedFolderId ? "+ Ny sak her" : "+ Ny sak"}
               </Link>
 
               <Link
@@ -698,7 +711,11 @@ export default function MinSidePage() {
                 {selectedFolder && archiveMode === "active" ? (
                   <button
                     type="button"
-                    onClick={() => setSelectedFolderId(null)}
+                    onClick={() => {
+                      sessionStorage.removeItem("pressesjekkSelectedFolderId");
+                      sessionStorage.removeItem("pressesjekkSelectedFolderId");
+                    setSelectedFolderId(null);
+                    }}
                     className="mt-3 text-sm font-black text-cyan-700 hover:text-cyan-900"
                   >
                     ← Tilbake til mapper og saker
@@ -711,6 +728,7 @@ export default function MinSidePage() {
                   type="button"
                   onClick={() => {
                     setArchiveMode("active");
+                    sessionStorage.removeItem("pressesjekkSelectedFolderId");
                     setSelectedFolderId(null);
                   }}
                   className={`rounded-xl px-5 py-3 text-center text-sm font-black ${
@@ -726,6 +744,7 @@ export default function MinSidePage() {
                   type="button"
                   onClick={() => {
                     setArchiveMode("trash");
+                    sessionStorage.removeItem("pressesjekkSelectedFolderId");
                     setSelectedFolderId(null);
                   }}
                   className={`rounded-xl px-5 py-3 text-center text-sm font-black ${
@@ -751,10 +770,10 @@ export default function MinSidePage() {
                     </Link>
 
                     <Link
-                      href="/min-side/saker/ny"
+                      href={newCaseHref}
                       className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
                     >
-                      + Ny sak
+                      {newCaseLabel}
                     </Link>
                   </>
                 ) : null}
@@ -800,10 +819,14 @@ export default function MinSidePage() {
                     ) : null}
 
                     <Link
-                      href="/min-side/saker/ny"
+                      href={
+                        selectedFolderId
+                          ? `/min-side/saker/ny?folderId=${selectedFolderId}`
+                          : "/min-side/saker/ny"
+                      }
                       className="rounded-xl border border-slate-300 bg-white px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
                     >
-                      + Ny sak
+                      {selectedFolderId ? "+ Ny sak her" : "+ Ny sak"}
                     </Link>
                   </div>
                 </div>
@@ -851,7 +874,12 @@ export default function MinSidePage() {
                       {item.type === "Mappe" ? (
                         <button
                           type="button"
-                          onClick={() => setSelectedFolderId(item.folderId ?? null)}
+                          onClick={() => {
+                            if (item.folderId) {
+                              sessionStorage.setItem("pressesjekkSelectedFolderId", item.folderId);
+                            }
+                            setSelectedFolderId(item.folderId ?? null);
+                          }}
                           className="flex min-w-0 items-start gap-3 text-left"
                         >
                           <span className="text-2xl leading-none">
