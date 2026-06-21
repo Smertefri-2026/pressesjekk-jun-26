@@ -1281,18 +1281,6 @@ export default function MinSidePage() {
               )}
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                Arkivvisning
-              </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                Lett å skalere
-              </h2>
-              <p className="mt-4 leading-8 text-slate-700">
-                Denne visningen er lettere enn store kort og passer bedre når
-                en advokat, rådgiver eller journalist har mange mapper og saker.
-              </p>
-            </div>
           </aside>
         </section>
       </section>
