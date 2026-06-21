@@ -38,6 +38,11 @@ type ReportRow = {
   created_at: string;
 };
 
+type ProfileRow = {
+  full_name: string | null;
+  role_type: string | null;
+};
+
 type ActivityItem = {
   id: string;
   title: string;
@@ -104,6 +109,7 @@ export default function MinSidePage() {
   const [cases, setCases] = useState<CaseRow[]>([]);
   const [folders, setFolders] = useState<CaseFolderRow[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [caseCount, setCaseCount] = useState(0);
   const [folderCount, setFolderCount] = useState(0);
   const [reportCount, setReportCount] = useState(0);
@@ -142,8 +148,13 @@ export default function MinSidePage() {
 
       setUser(user);
 
-      const [casesResult, foldersResult, reportsResult, pfuDraftCountResult] =
-        await Promise.all([
+      const [
+        casesResult,
+        foldersResult,
+        reportsResult,
+        pfuDraftCountResult,
+        profileResult,
+      ] = await Promise.all([
           supabase
             .from("cases")
             .select(
@@ -173,6 +184,12 @@ export default function MinSidePage() {
             .from("case_reports")
             .select("id", { count: "exact", head: true })
             .eq("report_type", "pfu_draft"),
+
+          supabase
+            .from("profiles")
+            .select("full_name,role_type")
+            .eq("id", user.id)
+            .maybeSingle(),
         ]);
 
       if (casesResult.error) {
@@ -200,6 +217,10 @@ export default function MinSidePage() {
       setCases(caseRows);
       setFolders(folderRows);
       setReports(reportRows);
+
+      if (!profileResult.error) {
+        setProfile((profileResult.data ?? null) as ProfileRow | null);
+      }
       setCaseCount(caseRows.filter((caseItem) => !caseItem.deleted_at).length);
       setFolderCount(folderRows.filter((folder) => !folder.deleted_at).length);
       setReportCount(reportsResult.count ?? reportRows.length);
@@ -647,69 +668,38 @@ export default function MinSidePage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Dette er ditt PresseSjekk-arkiv. Mapper fungerer som Finder:
-              klikk på en mappe eller sak for å åpne den.
+              Her administrerer du sakene dine. Du kan opprette
+              mapper, undermapper og saker, flytte innhold mellom mapper, bruke
+              papirkurv og bytte mellom liste- og symbolvisning.
+            </p>
+          </section>
+
+          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              Konto
             </p>
 
+            <h2 className="mt-4 text-3xl font-black text-slate-950">
+              {profile?.full_name?.trim() || "Din profil"}
+            </h2>
+
             {user?.email ? (
-              <p className="mt-5 text-sm font-semibold text-slate-500">
+              <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
                 Innlogget som:{" "}
                 <span className="text-slate-950">{user.email}</span>
               </p>
             ) : null}
 
-            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
-              <Link
-                href={
-                  selectedFolderId
-                    ? `/min-side/mapper/ny?parentFolderId=${selectedFolderId}`
-                    : "/min-side/mapper/ny"
-                }
-                className="w-full rounded-xl bg-slate-950 px-5 py-3 text-center text-sm font-bold text-white hover:bg-slate-800 sm:w-auto"
-              >
-                {selectedFolderId ? "+ Ny mappe her" : "+ Ny mappe"}
-              </Link>
-
-              <Link
-                href={
-                  selectedFolderId
-                    ? `/min-side/saker/ny?folderId=${selectedFolderId}`
-                    : "/min-side/saker/ny"
-                }
-                className="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:w-auto"
-              >
-                {selectedFolderId ? "+ Ny sak her" : "+ Ny sak"}
-              </Link>
-
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <Link
                 href="/min-side/profil"
-                className="w-full rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:w-auto"
+                className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
               >
                 Profil
               </Link>
 
               <SignOutButton />
             </div>
-          </section>
-
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Neste anbefalte steg
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              {folderCount === 0 && caseCount > 1
-                ? "Samle saker i mapper"
-                : caseCount === 0
-                  ? "Opprett første sak"
-                  : "Åpne en sak eller mappe"}
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              {folderCount === 0 && caseCount > 1
-                ? "Du har flere saker. Opprett en mappe for å samle saker som hører sammen."
-                : caseCount === 0
-                  ? "Start med en sak, eller opprett en mappe først hvis du vet at dette skal bli en større sakssamling."
-                  : "Klikk direkte på en mappe eller sak i arkivet for å fortsette arbeidet."}
-            </p>
           </aside>
         </div>
 
