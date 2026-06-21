@@ -1237,7 +1237,7 @@ export default function MinSidePage() {
                               onClick={() => moveToTrash(item)}
                               className="text-xs font-black text-red-700 underline-offset-4 hover:underline"
                             >
-                              Papirkurv
+                              Slett
                             </button>
                           </>
                         )}
