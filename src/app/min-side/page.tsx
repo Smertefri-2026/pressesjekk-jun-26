@@ -57,6 +57,7 @@ type ArchiveItem = {
   date: string;
   href: string;
   folderId?: string;
+  currentFolderId?: string | null;
 };
 
 type SortKey = "name" | "type" | "status" | "date";
@@ -216,6 +217,8 @@ export default function MinSidePage() {
 
   const newCaseLabel = selectedFolderId ? "+ Ny sak her" : "+ Ny sak";
 
+  const activeFolders = folders.filter((folder) => !folder.deleted_at);
+
   const archiveItems = useMemo<ArchiveItem[]>(() => {
     const folderItems: ArchiveItem[] = folders
       .filter((folder) => {
@@ -271,6 +274,7 @@ export default function MinSidePage() {
           archiveMode === "trash" ? "Papirkurv" : statusLabel(caseItem.status),
         date: formatDate(caseItem.deleted_at ?? caseItem.created_at),
         href: `/min-side/saker/${caseItem.id}`,
+        currentFolderId: caseItem.folder_id,
       }));
 
     return [...folderItems, ...caseItems].sort((a, b) => {
@@ -296,6 +300,28 @@ export default function MinSidePage() {
   function sortLabel(key: SortKey) {
     if (sortKey !== key) return "";
     return sortDirection === "asc" ? " ↑" : " ↓";
+  }
+
+  async function moveCaseToFolder(caseId: string, folderId: string | null) {
+    setErrorMessage("");
+
+    const { error } = await supabase
+      .from("cases")
+      .update({
+        folder_id: folderId,
+      })
+      .eq("id", caseId);
+
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+
+    setCases((current) =>
+      current.map((caseItem) =>
+        caseItem.id === caseId ? { ...caseItem, folder_id: folderId } : caseItem
+      )
+    );
   }
 
   async function moveToTrash(item: ArchiveItem) {
@@ -833,7 +859,7 @@ export default function MinSidePage() {
               </div>
             ) : (
               <div className="overflow-hidden">
-                <div className="hidden grid-cols-[1fr_120px_130px_120px_100px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
+                <div className="hidden grid-cols-[1fr_110px_120px_120px_230px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
                   <button
                     type="button"
                     onClick={() => handleSort("name")}
@@ -869,7 +895,7 @@ export default function MinSidePage() {
                   {archiveItems.map((item) => (
                     <div
                       key={item.id}
-                      className="grid gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_120px_130px_120px_100px] md:items-center"
+                      className="grid gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_110px_120px_120px_230px] md:items-center"
                     >
                       {item.type === "Mappe" ? (
                         <button
@@ -925,9 +951,9 @@ export default function MinSidePage() {
                         {item.date}
                       </div>
 
-                      <div className="flex justify-start md:justify-end">
+                      <div className="flex flex-wrap justify-start gap-2 md:justify-end">
                         {archiveMode === "trash" ? (
-                          <div className="flex flex-wrap gap-2 md:justify-end">
+                          <>
                             <button
                               type="button"
                               onClick={() => restoreFromTrash(item)}
@@ -943,15 +969,37 @@ export default function MinSidePage() {
                             >
                               Slett permanent
                             </button>
-                          </div>
+                          </>
                         ) : (
-                          <button
-                            type="button"
-                            onClick={() => moveToTrash(item)}
-                            className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
-                          >
-                            Slett
-                          </button>
+                          <>
+                            {item.type === "Sak" ? (
+                              <select
+                                value={item.currentFolderId ?? ""}
+                                onChange={(event) =>
+                                  moveCaseToFolder(
+                                    item.rawId,
+                                    event.target.value || null
+                                  )
+                                }
+                                className="max-w-[140px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50"
+                              >
+                                <option value="">Uten mappe</option>
+                                {activeFolders.map((folder) => (
+                                  <option key={folder.id} value={folder.id}>
+                                    {folder.title}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : null}
+
+                            <button
+                              type="button"
+                              onClick={() => moveToTrash(item)}
+                              className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                            >
+                              Slett
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
