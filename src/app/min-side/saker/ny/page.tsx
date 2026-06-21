@@ -91,7 +91,7 @@ export default function NewCasePage() {
       sessionStorage.setItem("pressesjekkSelectedFolderId", folderId);
     }
 
-    window.location.href = "/min-side";
+    window.location.href = `/min-side/saker/${data.id}`;
   }
 
   if (isCheckingUser) {
@@ -128,12 +128,13 @@ export default function NewCasePage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              {folderId ? "Opprett ny sak i valgt mappe." : "Opprett en ny PresseSjekk-sak."}
+              Ny sak
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Start med grunninformasjonen om artikkelen. Senere kan du legge
-              til tilsvar, rettsstatus, dokumentasjon og rapportversjoner.
+              Start med grunninformasjonen om artikkelen eller mediesaken.
+              Når saken er opprettet, kan du bygge den videre med opplysninger,
+              rapport, PFU-utkast og annen dokumentasjon.
               {folderId ? " Saken lagres i valgt mappe." : ""}
             </p>
 
@@ -153,8 +154,8 @@ export default function NewCasePage() {
               Start enkelt
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
-              Du trenger ikke fylle inn alt nå. Det viktigste er å opprette
-              saken, slik at den lagres på Min Side.
+              Du trenger ikke fylle inn alt med en gang. Opprett saken først,
+              og fyll heller på med flere opplysninger etter hvert.
             </p>
           </aside>
         </div>
@@ -286,22 +287,23 @@ export default function NewCasePage() {
                 disabled={isSaving}
                 className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isSaving ? "Lagrer..." : "Lagre sak"}
+                {isSaving ? "Oppretter..." : "Opprett sak"}
               </button>
             </div>
           </form>
 
-          <aside className="grid gap-6">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-                Viktig
+          <aside className="grid content-start gap-6">
+            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                Arbeidsflyt
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
-                Ikke legg inn sensitive dokumenter ennå
+                Opprett først, bygg videre etterpå
               </h2>
               <p className="mt-4 leading-8 text-slate-700">
-                Denne siden lagrer bare grunninformasjon. Sikker opplasting av
-                dokumenter kommer senere.
+                Når saken er opprettet, får du en egen saksside hvor du kan
+                legge til flere opplysninger, skrive rapport og jobbe videre
+                med PFU-utkast eller annen dokumentasjon.
               </p>
             </div>
 
@@ -313,8 +315,8 @@ export default function NewCasePage() {
                 Tilsvar og dokumentasjon
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Etter at saken er opprettet, kobler vi på felter for tilsvar,
-                redaktørsvar, rettsstatus og dokumentasjonsliste.
+                Etter opprettelse åpnes saken automatisk, slik at du kan
+                fortsette arbeidet direkte.
               </p>
             </div>
           </aside>
