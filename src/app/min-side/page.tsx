@@ -17,6 +17,7 @@ type CaseRow = {
   article_title: string | null;
   published_date: string | null;
   created_at: string;
+  deleted_at: string | null;
 };
 
 type CaseFolderRow = {
@@ -59,6 +60,7 @@ type ArchiveItem = {
 };
 
 type SortKey = "name" | "type" | "status" | "date";
+type ArchiveMode = "active" | "trash";
 
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
@@ -106,6 +108,7 @@ export default function MinSidePage() {
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+  const [archiveMode, setArchiveMode] = useState<ArchiveMode>("active");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -131,19 +134,17 @@ export default function MinSidePage() {
           supabase
             .from("cases")
             .select(
-              "id,folder_id,title,status,media_name,article_title,published_date,created_at",
+              "id,folder_id,title,status,media_name,article_title,published_date,created_at,deleted_at",
               { count: "exact" }
             )
-            .is("deleted_at", null)
             .order("created_at", { ascending: false })
-            .limit(50),
+            .limit(100),
 
           supabase
             .from("case_folders")
             .select("id,parent_folder_id,title,folder_type,status,created_at,deleted_at", {
               count: "exact",
             })
-            .is("deleted_at", null)
             .order("created_at", { ascending: false })
             .limit(100),
 
@@ -186,8 +187,8 @@ export default function MinSidePage() {
       setCases(caseRows);
       setFolders(folderRows);
       setReports(reportRows);
-      setCaseCount(casesResult.count ?? caseRows.length);
-      setFolderCount(foldersResult.count ?? folderRows.length);
+      setCaseCount(caseRows.filter((caseItem) => !caseItem.deleted_at).length);
+      setFolderCount(folderRows.filter((folder) => !folder.deleted_at).length);
       setReportCount(reportsResult.count ?? reportRows.length);
       setPfuDraftCount(pfuDraftCountResult.count ?? 0);
 
@@ -199,44 +200,67 @@ export default function MinSidePage() {
 
   const selectedFolder = useMemo(() => {
     if (!selectedFolderId) return null;
-    return folders.find((folder) => folder.id === selectedFolderId) ?? null;
+    return (
+      folders.find(
+        (folder) => folder.id === selectedFolderId && !folder.deleted_at
+      ) ?? null
+    );
   }, [folders, selectedFolderId]);
 
   const archiveItems = useMemo<ArchiveItem[]>(() => {
     const folderItems: ArchiveItem[] = folders
-      .filter((folder) =>
-        selectedFolderId
+      .filter((folder) => {
+        if (archiveMode === "trash") return Boolean(folder.deleted_at);
+
+        if (folder.deleted_at) return false;
+
+        return selectedFolderId
           ? folder.parent_folder_id === selectedFolderId
-          : !folder.parent_folder_id
-      )
+          : !folder.parent_folder_id;
+      })
       .map((folder) => ({
         id: `folder-${folder.id}`,
         rawId: folder.id,
         icon: "📁",
         name: folder.title,
-        subtitle: selectedFolderId ? "Undermappe" : "Saksmappe",
+        subtitle:
+          archiveMode === "trash"
+            ? "Slettet mappe"
+            : selectedFolderId
+              ? "Undermappe"
+              : "Saksmappe",
         type: "Mappe",
         status: folderStatusLabel(folder.status),
-        date: formatDate(folder.created_at),
+        date: formatDate(folder.deleted_at ?? folder.created_at),
         href: "#",
         folderId: folder.id,
       }));
 
     const caseItems: ArchiveItem[] = cases
-      .filter((caseItem) =>
-        selectedFolderId
+      .filter((caseItem) => {
+        if (archiveMode === "trash") return Boolean(caseItem.deleted_at);
+
+        if (caseItem.deleted_at) return false;
+
+        return selectedFolderId
           ? caseItem.folder_id === selectedFolderId
-          : !caseItem.folder_id
-      )
+          : !caseItem.folder_id;
+      })
       .map((caseItem) => ({
         id: `case-${caseItem.id}`,
         rawId: caseItem.id,
         icon: "📄",
         name: caseItem.title,
-        subtitle: caseItem.media_name ?? "Ukjent medie",
+        subtitle:
+          archiveMode === "trash"
+            ? caseItem.media_name
+              ? `Slettet sak · ${caseItem.media_name}`
+              : "Slettet sak"
+            : caseItem.media_name ?? "Ukjent medie",
         type: "Sak",
-        status: statusLabel(caseItem.status),
-        date: caseItem.published_date ?? formatDate(caseItem.created_at),
+        status:
+          archiveMode === "trash" ? "Papirkurv" : statusLabel(caseItem.status),
+        date: formatDate(caseItem.deleted_at ?? caseItem.created_at),
         href: `/min-side/saker/${caseItem.id}`,
       }));
 
@@ -248,7 +272,7 @@ export default function MinSidePage() {
       if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
       return 0;
     });
-  }, [cases, folders, selectedFolderId, sortDirection, sortKey]);
+  }, [archiveMode, cases, folders, selectedFolderId, sortDirection, sortKey]);
 
   function handleSort(nextSortKey: SortKey) {
     if (sortKey === nextSortKey) {
@@ -289,8 +313,17 @@ export default function MinSidePage() {
       }
 
       setFolders((current) =>
-        current.filter((folder) => folder.id !== item.rawId)
+        current.map((folder) =>
+          folder.id === item.rawId
+            ? {
+                ...folder,
+                status: "trashed",
+                deleted_at: new Date().toISOString(),
+              }
+            : folder
+        )
       );
+      setFolderCount((current) => Math.max(0, current - 1));
 
       if (selectedFolderId === item.rawId) {
         setSelectedFolderId(null);
@@ -311,7 +344,13 @@ export default function MinSidePage() {
       return;
     }
 
-    setCases((current) => current.filter((caseItem) => caseItem.id !== item.rawId));
+    setCases((current) =>
+      current.map((caseItem) =>
+        caseItem.id === item.rawId
+          ? { ...caseItem, deleted_at: new Date().toISOString() }
+          : caseItem
+      )
+    );
     setCaseCount((current) => Math.max(0, current - 1));
   }
 
@@ -355,6 +394,56 @@ export default function MinSidePage() {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )
     .slice(0, 6);
+
+
+  async function restoreFromTrash(item: ArchiveItem) {
+    setErrorMessage("");
+
+    if (item.type === "Mappe") {
+      const { error } = await supabase
+        .from("case_folders")
+        .update({
+          status: "active",
+          deleted_at: null,
+        })
+        .eq("id", item.rawId);
+
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
+
+      setFolders((current) =>
+        current.map((folder) =>
+          folder.id === item.rawId
+            ? { ...folder, status: "active", deleted_at: null }
+            : folder
+        )
+      );
+
+      setFolderCount((current) => current + 1);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("cases")
+      .update({
+        deleted_at: null,
+      })
+      .eq("id", item.rawId);
+
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+
+    setCases((current) =>
+      current.map((caseItem) =>
+        caseItem.id === item.rawId ? { ...caseItem, deleted_at: null } : caseItem
+      )
+    );
+    setCaseCount((current) => current + 1);
+  }
 
   if (isLoading) {
     return (
@@ -513,10 +602,14 @@ export default function MinSidePage() {
                   Saksarkiv
                 </p>
                 <h2 className="mt-2 text-3xl font-black text-slate-950">
-                  {selectedFolder ? selectedFolder.title : "Mapper og saker"}
+                  {archiveMode === "trash"
+                    ? "Papirkurv"
+                    : selectedFolder
+                      ? selectedFolder.title
+                      : "Mapper og saker"}
                 </h2>
 
-                {selectedFolder ? (
+                {selectedFolder && archiveMode === "active" ? (
                   <button
                     type="button"
                     onClick={() => setSelectedFolderId(null)}
@@ -528,23 +621,57 @@ export default function MinSidePage() {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href={
-                    selectedFolderId
-                      ? `/min-side/mapper/ny?parentFolderId=${selectedFolderId}`
-                      : "/min-side/mapper/ny"
-                  }
-                  className="rounded-xl bg-slate-950 px-5 py-3 text-center text-sm font-black text-white hover:bg-slate-800"
+                <button
+                  type="button"
+                  onClick={() => {
+                    setArchiveMode("active");
+                    setSelectedFolderId(null);
+                  }}
+                  className={`rounded-xl px-5 py-3 text-center text-sm font-black ${
+                    archiveMode === "active"
+                      ? "bg-slate-950 text-white"
+                      : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
+                  }`}
                 >
-                  {selectedFolderId ? "+ Ny mappe her" : "+ Ny mappe"}
-                </Link>
+                  Saksarkiv
+                </button>
 
-                <Link
-                  href="/min-side/saker/ny"
-                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                <button
+                  type="button"
+                  onClick={() => {
+                    setArchiveMode("trash");
+                    setSelectedFolderId(null);
+                  }}
+                  className={`rounded-xl px-5 py-3 text-center text-sm font-black ${
+                    archiveMode === "trash"
+                      ? "bg-slate-950 text-white"
+                      : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
+                  }`}
                 >
-                  + Ny sak
-                </Link>
+                  Papirkurv
+                </button>
+
+                {archiveMode === "active" ? (
+                  <>
+                    <Link
+                      href={
+                        selectedFolderId
+                          ? `/min-side/mapper/ny?parentFolderId=${selectedFolderId}`
+                          : "/min-side/mapper/ny"
+                      }
+                      className="rounded-xl bg-cyan-500 px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-cyan-400"
+                    >
+                      {selectedFolderId ? "+ Ny mappe her" : "+ Ny mappe"}
+                    </Link>
+
+                    <Link
+                      href="/min-side/saker/ny"
+                      className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                    >
+                      + Ny sak
+                    </Link>
+                  </>
+                ) : null}
               </div>
             </div>
 
@@ -558,16 +685,22 @@ export default function MinSidePage() {
               <div className="p-6 sm:p-8">
                 <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8">
                   <h3 className="text-2xl font-black text-slate-950">
-                    {selectedFolder ? "Mappen er tom" : "Arkivet er tomt"}
+                    {archiveMode === "trash"
+                      ? "Papirkurven er tom"
+                      : selectedFolder
+                        ? "Mappen er tom"
+                        : "Arkivet er tomt"}
                   </h3>
                   <p className="mt-4 max-w-2xl leading-8 text-slate-700">
-                    {selectedFolder
-                      ? "Denne mappen har ingen saker ennå. Neste steg blir å kunne opprette saker direkte i valgt mappe."
-                      : "Opprett en mappe eller en sak for å komme i gang."}
+                    {archiveMode === "trash"
+                      ? "Slettede mapper og saker vises her. Når papirkurven er tom, er det ingenting å gjenopprette."
+                      : selectedFolder
+                        ? "Denne mappen har ingen saker ennå. Neste steg blir å kunne opprette saker direkte i valgt mappe."
+                        : "Opprett en mappe eller en sak for å komme i gang."}
                   </p>
 
                   <div className="mt-6 flex flex-wrap gap-3">
-                    {!selectedFolder ? (
+                    {!selectedFolder && archiveMode === "active" ? (
                       <Link
                         href={
                           selectedFolderId
@@ -679,13 +812,23 @@ export default function MinSidePage() {
                       </div>
 
                       <div className="flex justify-start md:justify-end">
-                        <button
-                          type="button"
-                          onClick={() => moveToTrash(item)}
-                          className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
-                        >
-                          Slett
-                        </button>
+                        {archiveMode === "trash" ? (
+                          <button
+                            type="button"
+                            onClick={() => restoreFromTrash(item)}
+                            className="rounded-lg border border-cyan-200 bg-white px-3 py-2 text-xs font-black text-cyan-700 hover:bg-cyan-50"
+                          >
+                            Gjenopprett
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => moveToTrash(item)}
+                            className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
+                          >
+                            Slett
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
