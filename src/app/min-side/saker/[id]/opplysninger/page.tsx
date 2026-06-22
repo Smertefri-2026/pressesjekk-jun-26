@@ -970,32 +970,14 @@ export default function CaseInputsPage() {
               </div>
             </div>
             )}
-          </section>
 
-          <aside className="grid content-start gap-6">
-          <CaseWorkflowCard
-            caseId={params.id}
-            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
-            activeStep="opplysninger"
-            stepsDone={{
-              caseRegistered: true,
-              caseInputs: Boolean(caseInputId),
-              report: reports.some((report) => report.report_type !== "pfu_draft"),
-              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
-              pfuDecision: Boolean(
-                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
-              ),
-              policeReport: false,
-            }}
-          />
-
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+<div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
               Dokumenter
             </p>
 
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
+              <h2 className="mt-3 text-4xl font-black text-slate-950">
                 Last opp dokumentasjon
               </h2>
             </div>
@@ -1007,7 +989,7 @@ export default function CaseInputsPage() {
             </p>
 
             <form onSubmit={handleDocumentUpload} className="mt-8 grid gap-5">
-              <div className="grid gap-5">
+              <div className="grid gap-5 md:grid-cols-2">
                 <div>
                   <label
                     htmlFor="documentTitle"
@@ -1113,7 +1095,7 @@ export default function CaseInputsPage() {
             </form>
 
             <div className="mt-10">
-              <h3 className="text-2xl font-black text-slate-950">
+              <h3 className="text-3xl font-black text-slate-950">
                 Opplastede dokumenter
               </h3>
 
@@ -1176,7 +1158,7 @@ export default function CaseInputsPage() {
 
 
             {trashedDocuments.length > 0 ? (
-              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+              <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
                 <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
                   Dokumentpapirkurv
                 </p>
@@ -1226,6 +1208,24 @@ export default function CaseInputsPage() {
                 </div>
               </div>
             ) : null}
+          </section>
+
+          <aside className="grid content-start gap-6">
+          <CaseWorkflowCard
+            caseId={params.id}
+            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+            activeStep="opplysninger"
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInputId),
+              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: false,
+            }}
+          />
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
