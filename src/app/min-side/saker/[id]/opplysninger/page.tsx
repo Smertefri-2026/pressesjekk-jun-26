@@ -5,14 +5,27 @@ import { useParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
+import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 
 type CaseRow = {
   id: string;
   title: string;
+  status: "draft" | "in_progress" | "report_ready" | "closed";
   media_name: string | null;
   article_title: string | null;
+};
+
+type CaseReportRow = {
+  id: string;
+  report_type: "free_check" | "full_report" | "pfu_draft";
+};
+
+type PfuDecisionRow = {
+  id: string;
+  decision_received: boolean | null;
+  uploaded_file_name: string | null;
 };
 
 type CaseInputRow = {
@@ -40,6 +53,14 @@ const caseRoleOptions = [
   "Leser/publikum",
   "Annet",
 ];
+function statusLabel(status: CaseRow["status"]) {
+  if (status === "draft") return "Utkast";
+  if (status === "in_progress") return "Under arbeid";
+  if (status === "report_ready") return "Rapport klar";
+  if (status === "closed") return "Lukket";
+  return status;
+}
+
 
 export default function CaseInputsPage() {
   const params = useParams<{ id: string }>();
@@ -47,6 +68,8 @@ export default function CaseInputsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInputId, setCaseInputId] = useState<string | null>(null);
+  const [reports, setReports] = useState<CaseReportRow[]>([]);
+  const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -82,7 +105,7 @@ export default function CaseInputsPage() {
 
       const { data: caseData, error: caseError } = await supabase
         .from("cases")
-        .select("id,title,media_name,article_title")
+        .select("id,title,status,media_name,article_title")
         .eq("id", params.id)
         .single();
 
@@ -123,6 +146,21 @@ export default function CaseInputsPage() {
         setDocumentationSummary(input.documentation_summary ?? "");
         setDesiredOutcome(input.desired_outcome ?? "");
       }
+
+      const { data: reportsData } = await supabase
+        .from("case_reports")
+        .select("id,report_type")
+        .eq("case_id", params.id);
+
+      setReports((reportsData ?? []) as CaseReportRow[]);
+
+      const { data: pfuDecisionData } = await supabase
+        .from("pfu_decisions")
+        .select("id,decision_received,uploaded_file_name")
+        .eq("case_id", params.id)
+        .maybeSingle();
+
+      setPfuDecision((pfuDecisionData as PfuDecisionRow | null) ?? null);
 
       setIsLoading(false);
     }
@@ -275,19 +313,21 @@ export default function CaseInputsPage() {
             ) : null}
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Tips
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Start med det viktigste
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Du trenger ikke skrive alt perfekt. Start med fakta, hva som
-              skjedde, om du har sendt tilsvar, og hvilken dokumentasjon som
-              finnes.
-            </p>
-          </aside>
+          <CaseWorkflowCard
+            caseId={params.id}
+            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+            activeStep="opplysninger"
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInputId),
+              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: false,
+            }}
+          />
         </div>
 
         <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
