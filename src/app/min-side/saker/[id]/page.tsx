@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
+import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 
@@ -314,77 +315,21 @@ export default function CaseDetailPage() {
             </div>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Saksgang
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              {statusLabel(caseItem.status)}
-            </h2>
-
-            <div className="mt-6 grid gap-3">
-              {[
-                {
-                  label: "Sak registrert",
-                  done: true,
-                  href: `/min-side/saker/${params.id}/rediger`,
-                },
-                {
-                  label: "Saksopplysninger",
-                  done: Boolean(caseInput),
-                  href: `/min-side/saker/${params.id}/opplysninger`,
-                },
-                {
-                  label: "Rapport",
-                  done: reports.some((report) => report.report_type !== "pfu_draft"),
-                  href: `/min-side/saker/${params.id}/rapport`,
-                },
-                {
-                  label: "PFU-klage",
-                  done: reports.some((report) => report.report_type === "pfu_draft"),
-                  href: `/min-side/saker/${params.id}/pfu`,
-                },
-                {
-                  label: "PFU-avgjørelse",
-                  done: Boolean(pfuDecision?.decision_received || pfuDecision?.uploaded_file_name),
-                  href: `/min-side/saker/${params.id}/pfu-avgjorelse`,
-                },
-                {
-                  label: "Politianmeldelse",
-                  done: false,
-                  href: `/min-side/saker/${params.id}/politianmeldelse`,
-                },
-              ].map((step, index) => (
-                <Link
-                  key={step.label}
-                  href={step.href}
-                  className={`rounded-2xl border p-3 transition ${
-                    step.done
-                      ? "border-cyan-300 bg-white text-slate-950 hover:bg-cyan-50"
-                      : "border-cyan-100 bg-white/50 text-slate-400 hover:bg-white/70"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
-                        step.done
-                          ? "bg-cyan-500 text-slate-950"
-                          : "bg-slate-200 text-slate-500"
-                      }`}
-                    >
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p className="font-black">{step.label}</p>
-                      <p className="mt-0.5 text-xs leading-5">
-                        {step.done ? "Utført / påbegynt" : "Ikke påbegynt"}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </aside>
+          <CaseWorkflowCard
+            caseId={params.id}
+            statusLabel={statusLabel(caseItem.status)}
+            activeStep="case"
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInput),
+              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: false,
+            }}
+          />
         </div>
 
         <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
