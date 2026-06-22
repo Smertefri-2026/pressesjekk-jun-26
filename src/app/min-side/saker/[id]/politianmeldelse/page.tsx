@@ -5,15 +5,22 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
+import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 
 type CaseRow = {
   id: string;
   title: string;
+  status: "draft" | "in_progress" | "report_ready" | "closed";
   media_name: string | null;
   article_title: string | null;
   short_description: string | null;
+};
+
+type CaseReportRow = {
+  id: string;
+  report_type: "free_check" | "full_report" | "pfu_draft";
 };
 
 type CaseInputRow = {
@@ -61,6 +68,14 @@ function pfuDecisionResultLabel(status: string | null) {
   return status;
 }
 
+function statusLabel(status: CaseRow["status"]) {
+  if (status === "draft") return "Utkast";
+  if (status === "in_progress") return "Under arbeid";
+  if (status === "report_ready") return "Rapport klar";
+  if (status === "closed") return "Lukket";
+  return status;
+}
+
 export default function PoliceReportPage() {
   const params = useParams<{ id: string }>();
 
@@ -68,6 +83,7 @@ export default function PoliceReportPage() {
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
+  const [reports, setReports] = useState<CaseReportRow[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -91,7 +107,7 @@ export default function PoliceReportPage() {
 
       const { data: caseData, error: caseError } = await supabase
         .from("cases")
-        .select("id,title,media_name,article_title,short_description")
+        .select("id,title,status,media_name,article_title,short_description")
         .eq("id", params.id)
         .single();
 
@@ -112,6 +128,13 @@ export default function PoliceReportPage() {
         .maybeSingle();
 
       setCaseInput((inputData as CaseInputRow | null) ?? null);
+
+      const { data: reportsData } = await supabase
+        .from("case_reports")
+        .select("id,report_type")
+        .eq("case_id", params.id);
+
+      setReports((reportsData ?? []) as CaseReportRow[]);
 
       const { data: pfuData } = await supabase
         .from("pfu_decisions")
@@ -228,18 +251,21 @@ export default function PoliceReportPage() {
             </div>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Sak
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              {caseItem.title}
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              {caseItem.media_name ?? "Ukjent medie"}
-              {caseItem.article_title ? ` · ${caseItem.article_title}` : ""}
-            </p>
-          </aside>
+          <CaseWorkflowCard
+            caseId={params.id}
+            statusLabel={statusLabel(caseItem.status)}
+            activeStep="politianmeldelse"
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInput),
+              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: false,
+            }}
+          />
         </div>
 
         <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
