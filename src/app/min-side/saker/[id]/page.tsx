@@ -272,75 +272,34 @@ export default function CaseDetailPage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Her får du oversikt over saken, grunninformasjon, saksopplysninger,
-              rapporter, PFU-spor og videre arbeid. Bruk saksgangen til høyre
-              for å fortsette der du slapp.
+              Dette er startsiden for saken. Her får du oversikt over artikkel,
+              mediehus, status, rapporter og videre arbeid. Bruk Saksgang til
+              høyre for å gå mellom stegene i saken.
             </p>
 
-            {user?.email ? (
-              <p className="mt-5 text-sm font-semibold text-slate-500">
-                Innlogget som:{" "}
-                <span className="text-slate-950">{user.email}</span>
-              </p>
-            ) : null}
-
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
-              <Link
-                href="/min-side"
-                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:px-5 sm:py-3"
-              >
-                Min Side
-              </Link>
-
-              <Link
-                href={`/min-side/saker/${params.id}/opplysninger`}
-                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:px-5 sm:py-3"
-              >
-                Opplysninger
-              </Link>
-
-              <Link
-                href={`/min-side/saker/${params.id}/rapport`}
-                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 sm:px-5 sm:py-3"
-              >
-                Rapport
-              </Link>
-
-              <Link
-                href={`/min-side/saker/${params.id}/rediger`}
-                className="rounded-xl bg-slate-950 px-4 py-3 text-center text-sm font-bold text-white hover:bg-slate-800 sm:px-5 sm:py-3"
-              >
-                Rediger
-              </Link>
-            </div>
-          </section>
-
-          <CaseWorkflowCard
-            caseId={params.id}
-            statusLabel={statusLabel(caseItem.status)}
-            activeStep="case"
-            stepsDone={{
-              caseRegistered: true,
-              caseInputs: Boolean(caseInput),
-              report: reports.some((report) => report.report_type !== "pfu_draft"),
-              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
-              pfuDecision: Boolean(
-                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
-              ),
-              policeReport: false,
-            }}
-          />
-        </div>
-
-        <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
-          <div className="grid gap-8">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
                 Grunninformasjon
               </p>
-              <h2 className="mt-3 text-4xl font-black text-slate-950">
-                Artikkel og sak
-              </h2>
+
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <h2 className="mt-3 text-4xl font-black text-slate-950">
+                  Artikkel og sak
+                </h2>
+
+                <Link
+                  href={`/min-side/saker/${params.id}/rediger`}
+                  className="mt-3 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800"
+                >
+                  Rediger grunninformasjon
+                </Link>
+              </div>
+
+              <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+                Sjekk at mediehus, publiseringsdato, artikkeloverskrift, lenke
+                og kort beskrivelse stemmer. Dette er grunnlaget som brukes
+                videre i saksopplysninger, rapport og PFU-spor.
+              </p>
 
               <div className="mt-8 grid gap-4">
                 <InfoBlock label="Mediehus">
@@ -384,129 +343,25 @@ export default function CaseDetailPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                Saksopplysninger
-              </p>
-              <h2 className="mt-3 text-4xl font-black text-slate-950">
-                <span className="sm:hidden">Saksopplysninger</span>
-                <span className="hidden sm:inline">
-                  Tilsvar, rettsstatus og dokumentasjon
-                </span>
-              </h2>
-
-              {caseInput ? (
-                <div className="mt-8 grid gap-6">
-                  <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 sm:p-6">
-                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                      Nøkkelopplysninger
-                    </p>
-
-                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                      <div className="rounded-2xl bg-white/80 p-4">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
-                          Rolle i saken
-                        </p>
-                        <p className="mt-2 text-xl font-black text-slate-950">
-                          {caseInput.your_role || "Ikke satt"}
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl bg-white/80 p-4">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
-                          Tilsvar sendt
-                        </p>
-                        <p className="mt-2 text-xl font-black text-slate-950">
-                          {caseInput.reply_sent ? "Ja" : "Nei / ikke registrert"}
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl bg-white/80 p-4">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
-                          Rettsstatus
-                        </p>
-                        <p className="mt-2 text-xl font-black text-slate-950">
-                          {legalStatusLabel(caseInput.legal_status)}
-                        </p>
-                      </div>
-
-                      <div className="rounded-2xl bg-white/80 p-4">
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
-                          Ønsket resultat
-                        </p>
-                        <p className="mt-2 text-lg font-black leading-7 text-slate-950">
-                          {caseInput.desired_outcome || "Ikke satt"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4">
-                    <InfoBlock label="Rolle i saken">
-                      {caseInput.your_role || "Ikke lagt inn ennå."}
-                    </InfoBlock>
-
-                    <InfoBlock label="Hva skjedde?">
-                      {caseInput.what_happened || "Ikke lagt inn ennå."}
-                    </InfoBlock>
-
-                    <InfoBlock label="Artikkeltekst eller utdrag">
-                      {caseInput.article_text || "Ikke lagt inn ennå."}
-                    </InfoBlock>
-
-                    <InfoBlock label="Tilsvar sendt">
-                      {caseInput.reply_sent ? "Ja" : "Nei / ikke registrert"}
-                    </InfoBlock>
-
-                    <InfoBlock label="Tilsvar eller henvendelse">
-                      {caseInput.reply_text || "Ikke lagt inn ennå."}
-                    </InfoBlock>
-
-                    <InfoBlock label="Svar fra redaksjonen">
-                      {caseInput.editor_response || "Ikke lagt inn ennå."}
-                    </InfoBlock>
-
-                    <InfoBlock label="Rettsstatus">
-                      <p className="text-xl font-black text-slate-950">
-                        {legalStatusLabel(caseInput.legal_status)}
-                      </p>
-                    </InfoBlock>
-
-                    <InfoBlock label="Detaljer om rettsstatus">
-                      {caseInput.legal_status_details || "Ikke lagt inn ennå."}
-                    </InfoBlock>
-
-                    <InfoBlock label="Dokumentasjonsoppsummering">
-                      {caseInput.documentation_summary ||
-                        "Ikke lagt inn ennå."}
-                    </InfoBlock>
-
-                    <InfoBlock label="Ønsket resultat">
-                      {caseInput.desired_outcome || "Ikke lagt inn ennå."}
-                    </InfoBlock>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-8 rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8">
-                  <h3 className="text-2xl font-black text-slate-950">
-                    Ingen saksopplysninger lagt inn ennå
-                  </h3>
-                  <p className="mt-4 max-w-2xl leading-8 text-slate-700">
-                    Legg til tilsvar, redaktørsvar, rettsstatus og
-                    dokumentasjon for å gjøre saken klar for rapport.
-                  </p>
-                  <Link
-                    href={`/min-side/saker/${params.id}/opplysninger`}
-                    className="mt-6 inline-flex rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400"
-                  >
-                    Saksopplysninger
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
+          </section>
 
           <aside className="grid content-start gap-6">
+          <CaseWorkflowCard
+            caseId={params.id}
+            statusLabel={statusLabel(caseItem.status)}
+            activeStep="case"
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInput),
+              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: false,
+            }}
+          />
+
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
                 Rapport
@@ -573,7 +428,8 @@ export default function CaseDetailPage() {
               </Link>
             </div>
           </aside>
-        </section>
+        </div>
+
       </section>
 
       <LightPublicFooter />
