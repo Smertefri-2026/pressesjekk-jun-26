@@ -290,6 +290,135 @@ export default function CaseReportPage() {
       ? activeReport.recommendations
       : draft.recommendations;
 
+  function formatActiveReportForExport() {
+    const title = activeReportTitle;
+    const date = activeReport?.created_at
+      ? formatDate(activeReport.created_at)
+      : formatDate(new Date().toISOString());
+
+    const findingsText = activeFindings
+      .map((item, index) => `${index + 1}. ${item}`)
+      .join("\n");
+
+    const recommendationsText = activeRecommendations
+      .map((item, index) => `${index + 1}. ${item}`)
+      .join("\n");
+
+    return `PresseSjekk rapport
+
+Sak:
+${caseItem?.title ?? "Ukjent sak"}
+
+Rapport:
+${title}
+
+Dato:
+${date}
+
+Sammendrag:
+${activeSummary}
+
+Foreløpige funn:
+${findingsText}
+
+Anbefalte neste steg:
+${recommendationsText}
+
+Forbehold:
+Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgivning, PFU-avgjørelse eller endelig vurdering. Innholdet bør kontrolleres før det brukes videre.
+`;
+  }
+
+  async function handleDownloadReportPdf() {
+    if (!activeReport) {
+      setErrorMessage("Du må velge en lagret rapportversjon før du kan laste ned PDF.");
+      return;
+    }
+
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+
+    const accessToken = sessionData.session?.access_token;
+
+    if (sessionError || !accessToken) {
+      setErrorMessage("Du må være innlogget for å laste ned PDF.");
+      return;
+    }
+
+    setErrorMessage("");
+
+    console.log("Laster ned PDF for rapport:", activeReport.id);
+
+    const response = await fetch(
+      `/api/cases/${params.id}/reports/${activeReport.id}/pdf`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    console.log("PDF response status:", response.status);
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      const message = payload?.error ?? `Kunne ikke lage PDF. Status: ${response.status}`;
+      console.error("PDF-feil:", message);
+      setErrorMessage(message);
+      alert(message);
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    const safeTitle = (caseItem?.title ?? "pressesjekk-rapport")
+      .toLowerCase()
+      .replace(/[^a-z0-9æøå]+/gi, "-")
+      .replace(/^-+|-+$/g, "");
+
+    link.href = url;
+    link.download = `${safeTitle}-${activeReportTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9æøå]+/gi, "-")
+      .replace(/^-+|-+$/g, "")}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
+  function handleDownloadReportText() {
+    const reportText = formatActiveReportForExport();
+    const safeTitle = (caseItem?.title ?? "pressesjekk-rapport")
+      .toLowerCase()
+      .replace(/[^a-z0-9æøå]+/gi, "-")
+      .replace(/^-+|-+$/g, "");
+
+    const blob = new Blob([reportText], {
+      type: "text/plain;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `${safeTitle}-${activeReportTitle
+      .toLowerCase()
+      .replace(/[^a-z0-9æøå]+/gi, "-")
+      .replace(/^-+|-+$/g, "")}.txt`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
   async function handleSaveReport() {
     if (!caseItem) return;
 
@@ -497,6 +626,23 @@ export default function CaseReportPage() {
                   className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSaving ? "Lagrer..." : "Lagre regelbasert utkast"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadReportPdf}
+                  disabled={!activeReport}
+                  className="rounded-xl border border-cyan-300 bg-cyan-50 px-5 py-3 text-sm font-black text-cyan-900 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Last ned PDF
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadReportText}
+                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Last ned tekst
                 </button>
               </div>
             </div>
