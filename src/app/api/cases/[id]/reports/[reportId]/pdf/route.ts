@@ -310,7 +310,7 @@ async function createReportPdf(reportText: string) {
       color: dark,
     });
 
-    y -= 34;
+    y -= 24;
   }
 
   drawHeader(page);
@@ -358,7 +358,7 @@ async function createReportPdf(reportText: string) {
       continue;
     }
 
-    const isNumbered = /^\d+\./.test(trimmed);
+    const isNumbered = /^\d+\.\s+/.test(trimmed);
     const isBullet = trimmed.startsWith("- ");
 
     if (isNumbered || isBullet) {

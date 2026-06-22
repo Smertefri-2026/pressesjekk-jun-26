@@ -607,12 +607,12 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                 </p>
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-3">
+              <div className="mt-6 grid w-full grid-cols-2 gap-3 sm:mt-3 sm:flex sm:w-auto sm:flex-wrap">
                 <button
                   type="button"
                   onClick={handleGenerateAiReport}
                   disabled={isGeneratingAiReport}
-                  className="rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="col-span-2 w-full rounded-2xl bg-cyan-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
                 >
                   {isGeneratingAiReport
                     ? "Genererer..."
@@ -623,7 +623,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                   type="button"
                   onClick={handleSaveReport}
                   disabled={isSaving}
-                  className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="col-span-2 w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-base font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
                 >
                   {isSaving ? "Lagrer..." : "Lagre regelbasert utkast"}
                 </button>
@@ -632,7 +632,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                   type="button"
                   onClick={handleDownloadReportPdf}
                   disabled={!activeReport}
-                  className="rounded-xl border border-cyan-300 bg-cyan-50 px-5 py-3 text-sm font-black text-cyan-900 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-2 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
                 >
                   Last ned PDF
                 </button>
@@ -640,7 +640,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                 <button
                   type="button"
                   onClick={handleDownloadReportText}
-                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-950 hover:bg-slate-100"
+                  className="col-span-1 w-full rounded-2xl border border-slate-300 bg-white px-2 py-4 text-center text-base font-black text-slate-950 hover:bg-slate-100 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
                 >
                   Last ned tekst
                 </button>
