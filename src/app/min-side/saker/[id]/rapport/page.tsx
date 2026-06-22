@@ -345,13 +345,14 @@ export default function CaseReportPage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Første rapportutkast.
+              Rapportutkast
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Dette er en enkel, regelbasert rapport basert på opplysningene som
-              allerede er lagret på saken. Senere kan denne erstattes eller
-              forbedres med AI-analyse.
+              Rapportutkastet bygger på grunninformasjon og saksopplysninger
+              som allerede er lagret på saken. Utkastet kan brukes som
+              arbeidsgrunnlag før videre vurdering, PFU-spor eller full
+              utredning.
             </p>
 
             {user?.email ? (
@@ -450,24 +451,29 @@ export default function CaseReportPage() {
             ) : null}
           </div>
 
-          <aside className="grid gap-6">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
+          <aside className="grid content-start gap-6">
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
                 Rapportversjoner
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
-                {reports.length} lagret
+                {reports.length > 1
+                  ? `${reports.length} lagret`
+                  : reports.length === 1
+                    ? "1 lagret"
+                    : "Ingen lagret"}
               </h2>
               <div className="mt-5 grid gap-3">
                 {reports.length === 0 ? (
                   <p className="leading-8 text-slate-700">
-                    Ingen rapporter er lagret ennå.
+                    Ingen rapporter er lagret ennå. Lagre rapportutkastet når du
+                    ønsker å bevare denne versjonen.
                   </p>
                 ) : (
                   reports.map((report) => (
                     <div
                       key={`${report.id}-${report.version}`}
-                      className="rounded-2xl border border-amber-200 bg-white/70 p-4"
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
                     >
                       <p className="font-black text-slate-950">
                         Rapport v{report.version}
@@ -483,14 +489,15 @@ export default function CaseReportPage() {
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Neste versjon
+                Videre arbeid
               </p>
               <h2 className="mt-3 text-3xl font-black">
-                AI-analyse senere
+                Fra rapport til handling
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Når rapportflyten fungerer, kan vi koble på AI for dypere
-                vurdering av presseetikk, tilsvar og dokumentasjon.
+                Etter at rapportutkastet er lagret, kan saken brukes videre som
+                grunnlag for PFU-klage, dokumentasjon, redigering eller full
+                utredning.
               </p>
             </div>
           </aside>
