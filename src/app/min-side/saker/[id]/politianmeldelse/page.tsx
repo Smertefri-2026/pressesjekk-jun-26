@@ -190,17 +190,18 @@ export default function PoliceReportPage() {
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
-              Neste steg
+              Politianmeldelse
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Strukturert politianmeldelse.
+              Politianmeldelse
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Etter PFU kan noen saker være aktuelle å vurdere videre. Denne
-              modulen skal senere hjelpe brukeren med å strukturere en mulig
-              politianmeldelse basert på saken, dokumentasjonen og PFU-utfallet.
+              Her får du en samlet oversikt over dokumentasjon, rettsstatus,
+              PFU-spor og mulige videre steg. Siden kan brukes som grunnlag for
+              intern vurdering, dialog med rådgiver eller bestilling av en
+              komplett utredning.
             </p>
 
             {user?.email ? (
@@ -243,31 +244,31 @@ export default function PoliceReportPage() {
 
         <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
           <div className="grid gap-8">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-                Kommer senere
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                Komplett utredning
               </p>
               <h2 className="mt-3 text-4xl font-black text-slate-950">
-                Denne modulen blir en betalt tilleggspakke.
+                Ønsker du en grundigere vurdering?
               </h2>
               <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-700">
-                Før betaling kobles på, lager vi siden som en tydelig del av
-                produkttrappen. Senere kan brukeren kjøpe tilgang til å lage et
-                strukturert utkast til politianmeldelse.
+                For større eller mer komplekse saker kan lage en
+                komplett utredning med gjennomgang av dokumentasjon,
+                hendelsesforløp, PFU-spor og mulige videre steg. Priser fra
+                kr 100 000 eks. mva. Ta kontakt for en uforpliktende vurdering.
               </p>
 
-              <button
-                type="button"
-                disabled
-                className="mt-8 cursor-not-allowed rounded-2xl bg-slate-950 px-6 py-4 font-black text-white opacity-60"
+              <Link
+                href="/kontakt"
+                className="mt-8 inline-flex rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
               >
-                Kjøp politianmeldelse – kommer snart
-              </button>
+                Kontakt oss om utredning
+              </Link>
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                Hva pakken bør inneholde
+                Hva en utredning kan omfatte
               </p>
               <h2 className="mt-3 text-4xl font-black text-slate-950">
                 Strukturert grunnlag for anmeldelse
@@ -281,8 +282,8 @@ export default function PoliceReportPage() {
                   "Hvilken dokumentasjon som finnes",
                   "Eventuell PFU-klage og PFU-avgjørelse",
                   "Rettsstatus og tidligere henvendelser",
-                  "Forslag til anmeldelsestekst",
-                  "Tydelig forbehold om at saken kan bli henlagt",
+                  "Vurdering av om saken bør følges opp videre",
+                  "Tydelig skille mellom dokumentasjon, vurdering og mulige tiltak",
                 ].map((item) => (
                   <div
                     key={item}
@@ -354,7 +355,7 @@ export default function PoliceReportPage() {
             </div>
           </div>
 
-          <aside className="grid gap-6">
+          <aside className="grid content-start gap-6">
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
                 Viktig forbehold
@@ -363,23 +364,25 @@ export default function PoliceReportPage() {
                 En anmeldelse kan bli henlagt
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                En politianmeldelse gir ingen garanti for etterforskning eller
-                resultat. Mange saker kan bli henlagt. Arbeidet kan likevel ha
-                verdi som dokumentasjon, historikk og statistikkgrunnlag.
+                Dersom saken vurderes videre som politianmeldelse eller annen
+                oppfølging, bør grunnlaget være ryddig, dokumentert og nøkternt.
+                En anmeldelse gir ingen garanti for etterforskning eller
+                resultat.
               </p>
             </div>
 
             <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                PFU og neste steg
+                PFU og videre vurdering
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
                 PFU er pressens egen ordning
               </h2>
               <p className="mt-4 leading-8 text-slate-700">
-                PFU vurderer saken presseetisk. Det er ikke det samme som en
-                juridisk avgjørelse fra politi eller domstol. Derfor kan noen
-                brukere ønske å vurdere saken videre etter PFU.
+                PFU vurderer saken presseetisk. En PFU-avgjørelse kan likevel
+                være nyttig dokumentasjon dersom saken skal vurderes videre,
+                enten presseetisk, juridisk eller som del av en større
+                utredning.
               </p>
             </div>
           </aside>
