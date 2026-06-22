@@ -86,6 +86,13 @@ function folderStatusLabel(status: CaseFolderRow["status"]) {
   return status;
 }
 
+function folderTypeForRole(roleType: string | null) {
+  if (roleType === "lawyer" || roleType === "advisor") return "client_case";
+  if (roleType === "journalist") return "publication_case";
+  if (roleType === "organization") return "organization_case";
+  return "media_case";
+}
+
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("nb-NO", {
     day: "2-digit",
@@ -527,7 +534,8 @@ export default function MinSidePage() {
       .insert({
         user_id: user.id,
         title: folderTitle.trim(),
-        folder_type: selectedFolder ? "subfolder" : "case_folder",
+        folder_type:
+          selectedFolder?.folder_type ?? folderTypeForRole(profile?.role_type ?? null),
         parent_folder_id: selectedFolderId || null,
         status: "active",
       })
