@@ -340,13 +340,14 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Første PFU-klageutkast.
+              PFU-klageutkast
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Dette er en strukturert kladd basert på saken, tilsvar,
-              rettsstatus og dokumentasjon. Utkastet bør kontrolleres før
-              eventuell bruk.
+              Dette er et strukturert utkast basert på saken, profilen din,
+              tilsvar, rettsstatus og dokumentasjon. Utkastet kan brukes som
+              arbeidsgrunnlag før eventuell innsending eller videre
+              kvalitetssikring.
             </p>
 
             {user?.email ? (
@@ -429,24 +430,29 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
             ) : null}
           </div>
 
-          <aside className="grid gap-6">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
+          <aside className="grid content-start gap-6">
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
                 Lagrede utkast
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
-                {pfuDrafts.length} lagret
+                {pfuDrafts.length > 1
+                  ? `${pfuDrafts.length} lagret`
+                  : pfuDrafts.length === 1
+                    ? "1 lagret"
+                    : "Ingen lagret"}
               </h2>
               <div className="mt-5 grid gap-3">
                 {pfuDrafts.length === 0 ? (
                   <p className="leading-8 text-slate-700">
-                    Ingen PFU-utkast er lagret ennå.
+                    Ingen PFU-utkast er lagret ennå. Lagre utkastet når du
+                    ønsker å bevare denne versjonen.
                   </p>
                 ) : (
                   pfuDrafts.map((draft) => (
                     <div
                       key={`${draft.id}-${draft.version}`}
-                      className="rounded-2xl border border-amber-200 bg-white/70 p-4"
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
                     >
                       <p className="font-black text-slate-950">
                         PFU-utkast v{draft.version}
@@ -462,12 +468,15 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Neste versjon
+                Videre arbeid
               </p>
-              <h2 className="mt-3 text-3xl font-black">Bedre PFU-struktur</h2>
+              <h2 className="mt-3 text-3xl font-black">
+                Fra utkast til klage
+              </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Senere kan vi dele kladden inn i egne felt, legge til
-                Vær Varsom-punkter og lage eksport til PDF.
+                Bruk utkastet som et arbeidsgrunnlag. Før innsending bør teksten
+                kontrolleres, tilpasses saken og vurderes opp mot relevante
+                punkter i Vær Varsom-plakaten.
               </p>
             </div>
           </aside>
