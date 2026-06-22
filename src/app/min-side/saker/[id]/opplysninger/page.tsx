@@ -63,6 +63,10 @@ type CaseInputRow = {
   desired_outcome: string | null;
 };
 
+type DocumentMode = "active" | "trash";
+type DocumentViewMode = "list" | "grid";
+type DocumentSortKey = "name" | "type" | "size" | "date";
+
 const caseRoleOptions = [
   "Omtalt person",
   "Pårørende",
@@ -96,6 +100,16 @@ function formatFileSize(size: number | null) {
   if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+function formatDocumentDate(date: string | null) {
+  if (!date) return "Ikke satt";
+
+  return new Intl.DateTimeFormat("nb-NO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(date));
+}
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
   if (status === "in_progress") return "Under arbeid";
@@ -127,6 +141,13 @@ export default function CaseInputsPage() {
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
   const [documents, setDocuments] = useState<CaseDocumentRow[]>([]);
   const [trashedDocuments, setTrashedDocuments] = useState<CaseDocumentRow[]>([]);
+  const [documentMode, setDocumentMode] = useState<DocumentMode>("active");
+  const [documentViewMode, setDocumentViewMode] =
+    useState<DocumentViewMode>("list");
+  const [documentSortKey, setDocumentSortKey] =
+    useState<DocumentSortKey>("date");
+  const [documentSortDirection, setDocumentSortDirection] =
+    useState<"asc" | "desc">("desc");
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -446,9 +467,17 @@ export default function CaseInputsPage() {
       return;
     }
 
+    const trashedDocument: CaseDocumentRow = {
+      ...document,
+      deleted_at: deletedAt,
+    };
+
     setDocuments((current) =>
       current.filter((item) => item.id !== document.id)
     );
+
+    setTrashedDocuments((current) => [trashedDocument, ...current]);
+    setDocumentMode("trash");
     setDocumentMessage("Dokumentet er flyttet til papirkurv.");
   }
 
@@ -510,6 +539,49 @@ export default function CaseInputsPage() {
     );
     setDocuments((current) => [restoredDocument, ...current]);
     setDocumentMessage("Dokumentet er gjenopprettet.");
+  }
+
+  const documentItems = [
+    ...(documentMode === "trash" ? trashedDocuments : documents),
+  ].sort((a, b) => {
+    const valueA =
+      documentSortKey === "name"
+        ? a.title.toLowerCase()
+        : documentSortKey === "type"
+          ? documentTypeLabel(a.document_type).toLowerCase()
+          : documentSortKey === "size"
+            ? String(a.file_size ?? 0).padStart(20, "0")
+            : a.deleted_at ?? a.created_at;
+
+    const valueB =
+      documentSortKey === "name"
+        ? b.title.toLowerCase()
+        : documentSortKey === "type"
+          ? documentTypeLabel(b.document_type).toLowerCase()
+          : documentSortKey === "size"
+            ? String(b.file_size ?? 0).padStart(20, "0")
+            : b.deleted_at ?? b.created_at;
+
+    if (valueA < valueB) return documentSortDirection === "asc" ? -1 : 1;
+    if (valueA > valueB) return documentSortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  function handleDocumentSort(nextSortKey: DocumentSortKey) {
+    if (documentSortKey === nextSortKey) {
+      setDocumentSortDirection((current) =>
+        current === "asc" ? "desc" : "asc"
+      );
+      return;
+    }
+
+    setDocumentSortKey(nextSortKey);
+    setDocumentSortDirection(nextSortKey === "date" ? "desc" : "asc");
+  }
+
+  function documentSortLabel(key: DocumentSortKey) {
+    if (documentSortKey !== key) return "";
+    return documentSortDirection === "asc" ? " ↑" : " ↓";
   }
 
   if (isLoading) {
@@ -971,243 +1043,394 @@ export default function CaseInputsPage() {
             </div>
             )}
 
-<div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Dokumenter
-            </p>
-
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <h2 className="mt-3 text-4xl font-black text-slate-950">
-                Last opp dokumentasjon
-              </h2>
-            </div>
-
-            <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-              Last opp dokumenter som hører til saken, for eksempel artikkel,
-              e-post fra journalist, tilsvar, svar fra redaksjonen,
-              PFU-dokumenter eller andre vedlegg.
-            </p>
-
-            <form onSubmit={handleDocumentUpload} className="mt-8 grid gap-5">
-              <div className="grid gap-5 md:grid-cols-2">
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-0 shadow-sm">
+              <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-8">
                 <div>
-                  <label
-                    htmlFor="documentTitle"
-                    className="text-sm font-bold text-slate-800"
-                  >
-                    Tittel
-                  </label>
-                  <input
-                    id="documentTitle"
-                    type="text"
-                    value={documentTitle}
-                    onChange={(event) => setDocumentTitle(event.target.value)}
-                    placeholder="F.eks. E-post fra journalist"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
-                  />
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                    Dokumenter
+                  </p>
+                  <h2 className="mt-3 text-4xl font-black text-slate-950">
+                    {documentMode === "trash"
+                      ? "Dokumentpapirkurv"
+                      : "Dokumenter"}
+                  </h2>
+                  <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+                    {documentMode === "trash"
+                      ? "Slettede dokumenter ligger fortsatt lagret på saken og kan gjenopprettes eller slettes permanent."
+                      : "Last opp og organiser dokumentasjon som hører til saken, for eksempel artikkel, e-post, tilsvar, svar fra redaksjonen, PFU-dokumenter eller andre vedlegg."}
+                  </p>
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="documentType"
-                    className="text-sm font-bold text-slate-800"
+                <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => setDocumentMode("active")}
+                    className={`rounded-xl px-5 py-3 text-center text-sm font-black ${
+                      documentMode === "active"
+                        ? "bg-slate-950 text-white"
+                        : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
+                    }`}
                   >
-                    Dokumenttype
-                  </label>
-                  <select
-                    id="documentType"
-                    value={documentType}
-                    onChange={(event) =>
-                      setDocumentType(
-                        event.target.value as CaseDocumentRow["document_type"]
-                      )
-                    }
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                    Dokumenter
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDocumentMode("trash")}
+                    className={`rounded-xl px-5 py-3 text-center text-sm font-black ${
+                      documentMode === "trash"
+                        ? "bg-slate-950 text-white"
+                        : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
+                    }`}
                   >
-                    {documentTypeOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    Papirkurv
+                  </button>
                 </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="documentDescription"
-                  className="text-sm font-bold text-slate-800"
-                >
-                  Kort beskrivelse
-                </label>
-                <textarea
-                  id="documentDescription"
-                  rows={3}
-                  value={documentDescription}
-                  onChange={(event) =>
-                    setDocumentDescription(event.target.value)
-                  }
-                  placeholder="Forklar kort hva dokumentet viser..."
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
-                />
-              </div>
+              {documentMode === "active" ? (
+                <div className="border-b border-slate-200 p-5 sm:p-8">
+                  <form onSubmit={handleDocumentUpload} className="grid gap-5">
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <div>
+                        <label
+                          htmlFor="documentTitle"
+                          className="text-sm font-bold text-slate-800"
+                        >
+                          Tittel
+                        </label>
+                        <input
+                          id="documentTitle"
+                          type="text"
+                          value={documentTitle}
+                          onChange={(event) =>
+                            setDocumentTitle(event.target.value)
+                          }
+                          placeholder="F.eks. E-post fra journalist"
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                        />
+                      </div>
 
-              <div>
-                <label
-                  htmlFor="documentFile"
-                  className="text-sm font-bold text-slate-800"
-                >
-                  Fil
-                </label>
-                <input
-                  id="documentFile"
-                  type="file"
-                  onChange={(event) =>
-                    setSelectedDocumentFile(event.target.files?.[0] ?? null)
-                  }
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none file:mr-4 file:rounded-xl file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-black file:text-white focus:border-cyan-500 focus:bg-white"
-                />
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Start med PDF, bilder, tekstfiler eller e-postvedlegg. Store
-                  saker kan senere organiseres som dokumentpakker.
-                </p>
-              </div>
-
-              {documentError ? (
-                <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
-                  {documentError}
-                </div>
-              ) : null}
-
-              {documentMessage ? (
-                <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
-                  {documentMessage}
-                </div>
-              ) : null}
-
-              <button
-                type="submit"
-                disabled={isUploadingDocument}
-                className="w-fit rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isUploadingDocument ? "Laster opp..." : "Last opp dokument"}
-              </button>
-            </form>
-
-            <div className="mt-10">
-              <h3 className="text-3xl font-black text-slate-950">
-                Opplastede dokumenter
-              </h3>
-
-              {documents.length > 0 ? (
-                <div className="mt-5 grid gap-4">
-                  {documents.map((document) => (
-                    <div
-                      key={document.id}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-4">
-                        <div>
-                          <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
-                            {documentTypeLabel(document.document_type)}
-                          </p>
-                          <h4 className="mt-2 text-xl font-black text-slate-950">
-                            {document.title}
-                          </h4>
-                          <p className="mt-2 text-sm font-semibold text-slate-500">
-                            {document.file_name} ·{" "}
-                            {formatFileSize(document.file_size)}
-                          </p>
-                          {document.description ? (
-                            <p className="mt-3 whitespace-pre-line leading-7 text-slate-700">
-                              {document.description}
-                            </p>
-                          ) : null}
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() => openDocument(document)}
-                            className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 hover:bg-slate-100"
-                          >
-                            Åpne
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => deleteDocument(document)}
-                            className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-black text-red-700 hover:bg-red-50"
-                          >
-                            Flytt til papirkurv
-                          </button>
-                        </div>
+                      <div>
+                        <label
+                          htmlFor="documentType"
+                          className="text-sm font-bold text-slate-800"
+                        >
+                          Dokumenttype
+                        </label>
+                        <select
+                          id="documentType"
+                          value={documentType}
+                          onChange={(event) =>
+                            setDocumentType(
+                              event.target
+                                .value as CaseDocumentRow["document_type"]
+                            )
+                          }
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                        >
+                          {documentTypeOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
-                  ))}
+
+                    <div>
+                      <label
+                        htmlFor="documentDescription"
+                        className="text-sm font-bold text-slate-800"
+                      >
+                        Kort beskrivelse
+                      </label>
+                      <textarea
+                        id="documentDescription"
+                        rows={3}
+                        value={documentDescription}
+                        onChange={(event) =>
+                          setDocumentDescription(event.target.value)
+                        }
+                        placeholder="Forklar kort hva dokumentet viser..."
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="documentFile"
+                        className="text-sm font-bold text-slate-800"
+                      >
+                        Fil
+                      </label>
+                      <input
+                        id="documentFile"
+                        type="file"
+                        onChange={(event) =>
+                          setSelectedDocumentFile(event.target.files?.[0] ?? null)
+                        }
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none file:mr-4 file:rounded-xl file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-black file:text-white focus:border-cyan-500 focus:bg-white"
+                      />
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                        Start med PDF, bilder, tekstfiler eller e-postvedlegg.
+                        Store saker kan senere organiseres som dokumentpakker.
+                      </p>
+                    </div>
+
+                    {documentError ? (
+                      <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
+                        {documentError}
+                      </div>
+                    ) : null}
+
+                    {documentMessage ? (
+                      <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
+                        {documentMessage}
+                      </div>
+                    ) : null}
+
+                    <button
+                      type="submit"
+                      disabled={isUploadingDocument}
+                      className="w-fit rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isUploadingDocument
+                        ? "Laster opp..."
+                        : "Last opp dokument"}
+                    </button>
+                  </form>
+                </div>
+              ) : null}
+
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+                <p className="hidden text-sm font-bold text-slate-500 sm:block">
+                  {documentViewMode === "list" ? "Listevisning" : "Symbolvisning"}
+                </p>
+
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDocumentViewMode("list")}
+                    className={`rounded-xl px-3 py-2 text-sm font-black sm:px-4 ${
+                      documentViewMode === "list"
+                        ? "bg-slate-950 text-white"
+                        : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
+                    }`}
+                  >
+                    Liste
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDocumentViewMode("grid")}
+                    className={`rounded-xl px-3 py-2 text-sm font-black sm:px-4 ${
+                      documentViewMode === "grid"
+                        ? "bg-slate-950 text-white"
+                        : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
+                    }`}
+                  >
+                    Symboler
+                  </button>
+                </div>
+              </div>
+
+              {documentItems.length === 0 ? (
+                <div className="p-6 sm:p-8">
+                  <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-8">
+                    <h3 className="text-2xl font-black text-slate-950">
+                      {documentMode === "trash"
+                        ? "Dokumentpapirkurven er tom"
+                        : "Ingen dokumenter lastet opp"}
+                    </h3>
+                    <p className="mt-4 max-w-2xl leading-8 text-slate-700">
+                      {documentMode === "trash"
+                        ? "Dokumenter som flyttes til papirkurv vises her."
+                        : "Last opp dokumenter som underbygger saken."}
+                    </p>
+                  </div>
+                </div>
+              ) : documentViewMode === "grid" ? (
+                <div className="p-5">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {documentItems.map((document) => (
+                      <article
+                        key={document.id}
+                        className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-cyan-50 hover:shadow-md"
+                      >
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                          {documentTypeLabel(document.document_type)}
+                        </p>
+                        <h3 className="mt-2 text-xl font-black text-slate-950">
+                          {document.title}
+                        </h3>
+                        <p className="mt-2 text-sm font-semibold text-slate-500">
+                          {document.file_name} ·{" "}
+                          {formatFileSize(document.file_size)}
+                        </p>
+                        {document.description ? (
+                          <p className="mt-3 line-clamp-3 leading-7 text-slate-700">
+                            {document.description}
+                          </p>
+                        ) : null}
+
+                        <div className="mt-5 flex flex-wrap gap-2">
+                          {documentMode === "trash" ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => restoreDocument(document)}
+                                className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-slate-800"
+                              >
+                                Gjenopprett
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  permanentlyDeleteDocument(document)
+                                }
+                                className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-black text-red-700 hover:bg-red-50"
+                              >
+                                Slett permanent
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => openDocument(document)}
+                                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 hover:bg-slate-100"
+                              >
+                                Åpne
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteDocument(document)}
+                                className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-black text-red-700 hover:bg-red-50"
+                              >
+                                Papirkurv
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
                 </div>
               ) : (
-                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
-                  <p className="font-bold text-slate-700">
-                    Ingen dokumenter er lastet opp ennå.
-                  </p>
+                <div className="overflow-hidden">
+                  <div className="grid grid-cols-[minmax(0,1fr)_112px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:hidden">
+                    <div>Dokument</div>
+                    <div className="text-right">Handling</div>
+                  </div>
+
+                  <div className="hidden grid-cols-[1fr_130px_110px_110px_180px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
+                    <button
+                      type="button"
+                      onClick={() => handleDocumentSort("name")}
+                      className="text-left hover:text-cyan-700"
+                    >
+                      Navn{documentSortLabel("name")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDocumentSort("type")}
+                      className="text-left hover:text-cyan-700"
+                    >
+                      Type{documentSortLabel("type")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDocumentSort("size")}
+                      className="text-left hover:text-cyan-700"
+                    >
+                      Størrelse{documentSortLabel("size")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDocumentSort("date")}
+                      className="text-left hover:text-cyan-700"
+                    >
+                      Dato{documentSortLabel("date")}
+                    </button>
+                    <div className="text-right">Handling</div>
+                  </div>
+
+                  <div className="divide-y divide-slate-200">
+                    {documentItems.map((document) => (
+                      <div
+                        key={document.id}
+                        className="grid grid-cols-[minmax(0,1fr)_112px] gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_130px_110px_110px_180px] md:items-center"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-base font-black text-slate-950">
+                            {document.title}
+                          </p>
+                          <p className="mt-1 truncate text-sm font-semibold text-slate-500">
+                            {document.file_name}
+                          </p>
+                        </div>
+
+                        <div className="hidden text-sm font-bold text-slate-600 md:block">
+                          {documentTypeLabel(document.document_type)}
+                        </div>
+
+                        <div className="hidden text-sm font-semibold text-slate-500 md:block">
+                          {formatFileSize(document.file_size)}
+                        </div>
+
+                        <div className="hidden text-sm font-semibold text-slate-500 md:block">
+                          {formatDocumentDate(
+                            document.deleted_at ?? document.created_at
+                          )}
+                        </div>
+
+                        <div className="flex flex-col items-end gap-2 md:flex-row md:flex-wrap md:justify-end">
+                          {documentMode === "trash" ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => restoreDocument(document)}
+                                className="rounded-lg border border-cyan-200 bg-white px-3 py-2 text-xs font-black text-cyan-700 hover:bg-cyan-50"
+                              >
+                                Gjenopprett
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  permanentlyDeleteDocument(document)
+                                }
+                                className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs font-black text-red-800 hover:bg-red-100"
+                              >
+                                Slett permanent
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => openDocument(document)}
+                                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-950 hover:bg-slate-100"
+                              >
+                                Åpne
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteDocument(document)}
+                                className="text-xs font-black text-red-700 underline-offset-4 hover:underline"
+                              >
+                                Slett
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
-          </div>
 
-
-            {trashedDocuments.length > 0 ? (
-              <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                  Dokumentpapirkurv
-                </p>
-                <h2 className="mt-3 text-3xl font-black text-slate-950">
-                  Slettede dokumenter
-                </h2>
-                <p className="mt-4 leading-8 text-slate-700">
-                  Dokumenter som er flyttet til papirkurv ligger fortsatt lagret
-                  på saken og kan gjenopprettes.
-                </p>
-
-                <div className="mt-5 grid gap-4">
-                  {trashedDocuments.map((document) => (
-                    <div
-                      key={document.id}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
-                    >
-                      <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
-                        {documentTypeLabel(document.document_type)}
-                      </p>
-                      <h4 className="mt-2 text-lg font-black text-slate-950">
-                        {document.title}
-                      </h4>
-                      <p className="mt-2 text-sm font-semibold text-slate-500">
-                        {document.file_name} · {formatFileSize(document.file_size)}
-                      </p>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => restoreDocument(document)}
-                          className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-slate-800"
-                        >
-                          Gjenopprett
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => permanentlyDeleteDocument(document)}
-                          className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-black text-red-700 hover:bg-red-50"
-                        >
-                          Slett permanent
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </section>
 
           <aside className="grid content-start gap-6">
