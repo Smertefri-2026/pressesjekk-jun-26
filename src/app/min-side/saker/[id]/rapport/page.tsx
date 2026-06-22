@@ -275,7 +275,7 @@ export default function CaseReportPage() {
       ? `KI-rapport v${activeReport.version}`
       : activeReport.report_type === "pfu_draft"
         ? `PFU-utkast v${activeReport.version}`
-        : `Rapport v${activeReport.version}`
+        : `Regelbasert rapport v${activeReport.version}`
     : "Rapportutkast";
 
   const activeSummary = activeReport?.summary || draft.summary;
@@ -321,7 +321,7 @@ export default function CaseReportPage() {
       .update({ status: "report_ready" })
       .eq("id", caseItem.id);
 
-    setSuccessMessage(`Rapportutkast v${nextVersion} er lagret.`);
+    setSuccessMessage(`Regelbasert rapportutkast v${nextVersion} er lagret.`);
     const newReportId = crypto.randomUUID();
 
     setReports((current) => [
@@ -496,7 +496,7 @@ export default function CaseReportPage() {
                   disabled={isSaving}
                   className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isSaving ? "Lagrer..." : "Lagre rapportutkast"}
+                  {isSaving ? "Lagrer..." : "Lagre regelbasert utkast"}
                 </button>
               </div>
             </div>
@@ -597,7 +597,7 @@ export default function CaseReportPage() {
               <div className="mt-5 grid gap-3">
                 {reports.length === 0 ? (
                   <p className="leading-8 text-slate-700">
-                    Ingen rapporter er lagret ennå. Lagre rapportutkastet når du
+                    Ingen rapporter er lagret ennå. Lagre regelbasert utkastet når du
                     ønsker å bevare denne versjonen.
                   </p>
                 ) : (
@@ -618,7 +618,7 @@ export default function CaseReportPage() {
                         <p className="font-black text-slate-950">
                           {report.report_type === "full_report"
                             ? `KI-rapport v${report.version}`
-                            : `Rapport v${report.version}`}
+                            : `Regelbasert rapport v${report.version}`}
                         </p>
                         <p className="mt-1 text-sm font-semibold text-slate-600">
                           {formatDate(report.created_at)}
