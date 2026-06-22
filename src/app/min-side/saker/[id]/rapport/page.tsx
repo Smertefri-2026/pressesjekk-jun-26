@@ -357,10 +357,10 @@ export default function CaseReportPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
-          href={`/min-side/saker/${params.id}`}
+          href="/min-side"
           className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
         >
-          ← Tilbake til saken
+          ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
@@ -380,57 +380,33 @@ export default function CaseReportPage() {
               utredning.
             </p>
 
-            {user?.email ? (
-              <p className="mt-5 text-sm font-semibold text-slate-500">
-                Innlogget som:{" "}
-                <span className="text-slate-950">{user.email}</span>
-              </p>
-            ) : null}
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href={`/min-side/saker/${params.id}`}
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                Til saken
-              </Link>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              Rapport
+            </p>
+
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 className="mt-3 text-4xl font-black text-slate-950">
+                  Rapportutkast
+                </h2>
+                <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+                  Kontroller utkastet før du lagrer en ny rapportversjon. Utkastet
+                  bygger på grunninformasjon og saksopplysninger som er lagt inn.
+                </p>
+              </div>
 
               <button
                 type="button"
                 onClick={handleSaveReport}
                 disabled={isSaving}
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-3 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSaving ? "Lagrer..." : "Lagre rapportutkast"}
               </button>
             </div>
-          </section>
-
-          <CaseWorkflowCard
-            caseId={params.id}
-            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
-            activeStep="rapport"
-            stepsDone={{
-              caseRegistered: true,
-              caseInputs: Boolean(caseInput),
-              report: reports.some((report) => report.report_type !== "pfu_draft"),
-              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
-              pfuDecision: Boolean(
-                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
-              ),
-              policeReport: false,
-            }}
-          />
-        </div>
-
-        <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Utkast
-            </p>
-            <h2 className="mt-3 text-4xl font-black text-slate-950">
-              Rapport
-            </h2>
 
             <div className="mt-8 grid gap-5">
               <ReportBlock title="Sammendrag">
@@ -477,10 +453,44 @@ export default function CaseReportPage() {
                 {successMessage}
               </div>
             ) : null}
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href={`/min-side/saker/${params.id}/pfu`}
+                className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+              >
+                Gå til PFU-klage
+              </Link>
+
+              <Link
+                href={`/min-side/saker/${params.id}`}
+                className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
+              >
+                Til saken
+              </Link>
+            </div>
           </div>
 
+          </section>
+
           <aside className="grid content-start gap-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+          <CaseWorkflowCard
+            caseId={params.id}
+            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+            activeStep="rapport"
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInput),
+              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: false,
+            }}
+          />
+
+<div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
                 Rapportversjoner
               </p>
@@ -529,7 +539,8 @@ export default function CaseReportPage() {
               </p>
             </div>
           </aside>
-        </section>
+        </div>
+
       </section>
 
       <LightPublicFooter />
