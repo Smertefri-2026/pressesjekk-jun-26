@@ -45,6 +45,7 @@ type CaseDocumentRow = {
   file_size: number | null;
   mime_type: string | null;
   created_at: string;
+  deleted_at: string | null;
 };
 
 type CaseInputRow = {
@@ -125,6 +126,7 @@ export default function CaseInputsPage() {
   const [reports, setReports] = useState<CaseReportRow[]>([]);
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
   const [documents, setDocuments] = useState<CaseDocumentRow[]>([]);
+  const [trashedDocuments, setTrashedDocuments] = useState<CaseDocumentRow[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -236,12 +238,24 @@ export default function CaseInputsPage() {
       const { data: documentsData } = await supabase
         .from("case_documents")
         .select(
-          "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at"
+          "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at,deleted_at"
         )
         .eq("case_id", params.id)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false });
 
       setDocuments((documentsData ?? []) as CaseDocumentRow[]);
+
+      const { data: trashedDocumentsData } = await supabase
+        .from("case_documents")
+        .select(
+          "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at,deleted_at"
+        )
+        .eq("case_id", params.id)
+        .not("deleted_at", "is", null)
+        .order("deleted_at", { ascending: false });
+
+      setTrashedDocuments((trashedDocumentsData ?? []) as CaseDocumentRow[]);
 
       setIsLoading(false);
     }
@@ -367,7 +381,7 @@ export default function CaseInputsPage() {
         mime_type: selectedDocumentFile.type || null,
       })
       .select(
-        "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at"
+        "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at,deleted_at"
       )
       .single();
 
@@ -411,7 +425,36 @@ export default function CaseInputsPage() {
 
   async function deleteDocument(document: CaseDocumentRow) {
     const confirmed = window.confirm(
-      `Vil du slette dokumentet «${document.title}»?`
+      `Vil du flytte dokumentet «${document.title}» til papirkurv?`
+    );
+
+    if (!confirmed) return;
+
+    setErrorMessage("");
+    setDocumentError("");
+    setDocumentMessage("");
+
+    const deletedAt = new Date().toISOString();
+
+    const { error } = await supabase
+      .from("case_documents")
+      .update({ deleted_at: deletedAt })
+      .eq("id", document.id);
+
+    if (error) {
+      setDocumentError(`Kunne ikke flytte dokumentet til papirkurv: ${error.message}`);
+      return;
+    }
+
+    setDocuments((current) =>
+      current.filter((item) => item.id !== document.id)
+    );
+    setDocumentMessage("Dokumentet er flyttet til papirkurv.");
+  }
+
+  async function permanentlyDeleteDocument(document: CaseDocumentRow) {
+    const confirmed = window.confirm(
+      `Vil du slette dokumentet «${document.title}» permanent? Dette kan ikke angres.`
     );
 
     if (!confirmed) return;
@@ -425,7 +468,7 @@ export default function CaseInputsPage() {
       .remove([document.file_path]);
 
     if (storageError) {
-      setDocumentError(`Kunne ikke slette filen fra lagring: ${storageError.message}`);
+      setDocumentError(`Kunne ikke slette filen permanent: ${storageError.message}`);
       return;
     }
 
@@ -435,14 +478,38 @@ export default function CaseInputsPage() {
       .eq("id", document.id);
 
     if (deleteError) {
-      setDocumentError(`Kunne ikke slette dokumentet fra saken: ${deleteError.message}`);
+      setDocumentError(`Filen ble slettet, men dokumentraden kunne ikke slettes: ${deleteError.message}`);
       return;
     }
 
-    setDocuments((current) =>
+    setTrashedDocuments((current) =>
       current.filter((item) => item.id !== document.id)
     );
-    setDocumentMessage("Dokumentet er slettet.");
+    setDocumentMessage("Dokumentet er slettet permanent.");
+  }
+
+  async function restoreDocument(document: CaseDocumentRow) {
+    setErrorMessage("");
+    setDocumentError("");
+    setDocumentMessage("");
+
+    const { error } = await supabase
+      .from("case_documents")
+      .update({ deleted_at: null })
+      .eq("id", document.id);
+
+    if (error) {
+      setDocumentError(`Kunne ikke gjenopprette dokumentet: ${error.message}`);
+      return;
+    }
+
+    const restoredDocument = { ...document, deleted_at: null };
+
+    setTrashedDocuments((current) =>
+      current.filter((item) => item.id !== document.id)
+    );
+    setDocuments((current) => [restoredDocument, ...current]);
+    setDocumentMessage("Dokumentet er gjenopprettet.");
   }
 
   if (isLoading) {
@@ -1090,7 +1157,7 @@ export default function CaseInputsPage() {
                             onClick={() => deleteDocument(document)}
                             className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-black text-red-700 hover:bg-red-50"
                           >
-                            Slett
+                            Flytt til papirkurv
                           </button>
                         </div>
                       </div>
@@ -1107,6 +1174,58 @@ export default function CaseInputsPage() {
             </div>
           </div>
 
+
+            {trashedDocuments.length > 0 ? (
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                  Dokumentpapirkurv
+                </p>
+                <h2 className="mt-3 text-3xl font-black text-slate-950">
+                  Slettede dokumenter
+                </h2>
+                <p className="mt-4 leading-8 text-slate-700">
+                  Dokumenter som er flyttet til papirkurv ligger fortsatt lagret
+                  på saken og kan gjenopprettes.
+                </p>
+
+                <div className="mt-5 grid gap-4">
+                  {trashedDocuments.map((document) => (
+                    <div
+                      key={document.id}
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                    >
+                      <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                        {documentTypeLabel(document.document_type)}
+                      </p>
+                      <h4 className="mt-2 text-lg font-black text-slate-950">
+                        {document.title}
+                      </h4>
+                      <p className="mt-2 text-sm font-semibold text-slate-500">
+                        {document.file_name} · {formatFileSize(document.file_size)}
+                      </p>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => restoreDocument(document)}
+                          className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-slate-800"
+                        >
+                          Gjenopprett
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => permanentlyDeleteDocument(document)}
+                          className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-black text-red-700 hover:bg-red-50"
+                        >
+                          Slett permanent
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
