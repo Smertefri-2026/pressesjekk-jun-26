@@ -61,6 +61,18 @@ function statusLabel(status: CaseRow["status"]) {
   return status;
 }
 
+function legalStatusLabel(status: string) {
+  if (!status) return "Ikke satt";
+  if (status === "not_relevant") return "Ikke relevant";
+  if (status === "unknown") return "Uavklart";
+  if (status === "reported") return "Anmeldt";
+  if (status === "dismissed") return "Henlagt";
+  if (status === "court_case") return "Rettssak";
+  if (status === "judgment") return "Dom/avgjørelse";
+  if (status === "appeal") return "Klage/anke";
+  return status;
+}
+
 
 export default function CaseInputsPage() {
   const params = useParams<{ id: string }>();
@@ -73,6 +85,8 @@ export default function CaseInputsPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isEditingInputs, setIsEditingInputs] = useState(true);
+  const [saveMessage, setSaveMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const [articleText, setArticleText] = useState("");
@@ -145,6 +159,9 @@ export default function CaseInputsPage() {
         setLegalStatusDetails(input.legal_status_details ?? "");
         setDocumentationSummary(input.documentation_summary ?? "");
         setDesiredOutcome(input.desired_outcome ?? "");
+        setIsEditingInputs(false);
+      } else {
+        setIsEditingInputs(true);
       }
 
       const { data: reportsData } = await supabase
@@ -179,6 +196,7 @@ export default function CaseInputsPage() {
     }
 
     setIsSaving(true);
+    setSaveMessage("");
     setErrorMessage("");
 
     const payload = {
@@ -222,7 +240,9 @@ export default function CaseInputsPage() {
       setCaseInputId(data.id);
     }
 
-    window.location.href = `/min-side/saker/${params.id}`;
+    setSaveMessage("Saksopplysningene er lagret.");
+    setIsEditingInputs(false);
+    setIsSaving(false);
   }
 
   if (isLoading) {
@@ -275,10 +295,10 @@ export default function CaseInputsPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
-          href={`/min-side/saker/${params.id}`}
+          href="/min-side"
           className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
         >
-          ← Tilbake til saken
+          ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
@@ -297,44 +317,11 @@ export default function CaseInputsPage() {
               PFU-klageutkast.
             </p>
 
-            {caseItem ? (
-              <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-700">
-                  Sak
-                </p>
-                <h2 className="mt-3 text-2xl font-black text-slate-950">
-                  {caseItem.title}
-                </h2>
-                <p className="mt-2 text-slate-600">
-                  {caseItem.media_name ?? "Ukjent medie"}
-                  {caseItem.article_title ? ` · ${caseItem.article_title}` : ""}
-                </p>
-              </div>
-            ) : null}
-          </section>
-
-          <CaseWorkflowCard
-            caseId={params.id}
-            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
-            activeStep="opplysninger"
-            stepsDone={{
-              caseRegistered: true,
-              caseInputs: Boolean(caseInputId),
-              report: reports.some((report) => report.report_type !== "pfu_draft"),
-              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
-              pfuDecision: Boolean(
-                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
-              ),
-              policeReport: false,
-            }}
-          />
-        </div>
-
-        <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
-          <form
-            onSubmit={handleSubmit}
-            className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
-          >
+            {isEditingInputs ? (
+            <form
+              onSubmit={handleSubmit}
+              className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
+            >
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
               Opplysninger
             </p>
@@ -539,6 +526,12 @@ export default function CaseInputsPage() {
                 />
               </div>
 
+              {saveMessage ? (
+                <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
+                  {saveMessage}
+                </div>
+              ) : null}
+
               {errorMessage ? (
                 <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
                   {errorMessage}
@@ -558,13 +551,177 @@ export default function CaseInputsPage() {
                   href={`/min-side/saker/${params.id}`}
                   className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
                 >
-                  Avbryt
+                  Til saken
                 </Link>
               </div>
             </div>
           </form>
+            ) : (
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                Opplysninger
+              </p>
+
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <h2 className="mt-3 text-4xl font-black text-slate-950">
+                  Fakta, tilsvar og dokumentasjon
+                </h2>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSaveMessage("");
+                    setIsEditingInputs(true);
+                  }}
+                  className="mt-3 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800"
+                >
+                  Rediger saksopplysninger
+                </button>
+              </div>
+
+              <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+                Dette er opplysningene som brukes videre som grunnlag for
+                rapport, PFU-klage og dokumentasjon.
+              </p>
+
+              {saveMessage ? (
+                <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
+                  {saveMessage}
+                </div>
+              ) : null}
+
+              <div className="mt-8 grid gap-4">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Artikkeltekst eller utdrag
+                  </p>
+                  <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
+                    {articleText || "Ikke lagt inn ennå."}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Hva skjedde?
+                  </p>
+                  <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
+                    {whatHappened || "Ikke lagt inn ennå."}
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                      Din rolle
+                    </p>
+                    <p className="mt-3 text-lg font-black text-slate-950">
+                      {yourRole || "Ikke satt"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                      Tilsvar sendt
+                    </p>
+                    <p className="mt-3 text-lg font-black text-slate-950">
+                      {replySent ? "Ja" : "Nei / ikke registrert"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Tilsvar eller henvendelse
+                  </p>
+                  <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
+                    {replyText || "Ikke lagt inn ennå."}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Svar fra redaksjonen
+                  </p>
+                  <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
+                    {editorResponse || "Ikke lagt inn ennå."}
+                  </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                      Rettsstatus
+                    </p>
+                    <p className="mt-3 text-lg font-black text-slate-950">
+                      {legalStatusLabel(legalStatus)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                      Ønsket resultat
+                    </p>
+                    <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
+                      {desiredOutcome || "Ikke lagt inn ennå."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Detaljer om rettsstatus
+                  </p>
+                  <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
+                    {legalStatusDetails || "Ikke lagt inn ennå."}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Dokumentasjonsoppsummering
+                  </p>
+                  <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
+                    {documentationSummary || "Ikke lagt inn ennå."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href={`/min-side/saker/${params.id}/rapport`}
+                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+                >
+                  Gå til rapport
+                </Link>
+
+                <Link
+                  href={`/min-side/saker/${params.id}`}
+                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Til saken
+                </Link>
+              </div>
+            </div>
+            )}
+          </section>
 
           <aside className="grid content-start gap-6">
+          <CaseWorkflowCard
+            caseId={params.id}
+            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+            activeStep="opplysninger"
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInputId),
+              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: false,
+            }}
+          />
+
             <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
                 Dokumentasjon
@@ -592,7 +749,8 @@ export default function CaseInputsPage() {
               </p>
             </div>
           </aside>
-        </section>
+        </div>
+
       </section>
 
       <LightPublicFooter />
