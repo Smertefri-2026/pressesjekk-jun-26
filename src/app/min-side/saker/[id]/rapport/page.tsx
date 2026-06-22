@@ -106,10 +106,12 @@ export default function CaseReportPage() {
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingAiReport, setIsGeneratingAiReport] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -176,7 +178,9 @@ export default function CaseReportPage() {
         return;
       }
 
-      setReports((reportData ?? []) as CaseReportRow[]);
+      const loadedReports = (reportData ?? []) as CaseReportRow[];
+      setReports(loadedReports);
+      setSelectedReportId(loadedReports[0]?.id ?? null);
 
       const { data: pfuDecisionData } = await supabase
         .from("pfu_decisions")
@@ -261,6 +265,31 @@ export default function CaseReportPage() {
     };
   }, [caseItem, caseInput]);
 
+  const activeReport =
+    reports.find((report) => report.id === selectedReportId) ??
+    reports[0] ??
+    null;
+
+  const activeReportTitle = activeReport
+    ? activeReport.report_type === "full_report"
+      ? `KI-rapport v${activeReport.version}`
+      : activeReport.report_type === "pfu_draft"
+        ? `PFU-utkast v${activeReport.version}`
+        : `Rapport v${activeReport.version}`
+    : "Rapportutkast";
+
+  const activeSummary = activeReport?.summary || draft.summary;
+
+  const activeFindings =
+    activeReport?.findings && activeReport.findings.length > 0
+      ? activeReport.findings
+      : draft.findings;
+
+  const activeRecommendations =
+    activeReport?.recommendations && activeReport.recommendations.length > 0
+      ? activeReport.recommendations
+      : draft.recommendations;
+
   async function handleSaveReport() {
     if (!caseItem) return;
 
@@ -293,9 +322,11 @@ export default function CaseReportPage() {
       .eq("id", caseItem.id);
 
     setSuccessMessage(`Rapportutkast v${nextVersion} er lagret.`);
+    const newReportId = crypto.randomUUID();
+
     setReports((current) => [
       {
-        id: crypto.randomUUID(),
+        id: newReportId,
         version: nextVersion,
         report_type: "free_check",
         summary: draft.summary,
@@ -308,8 +339,57 @@ export default function CaseReportPage() {
       ...current,
     ]);
 
+    setSelectedReportId(newReportId);
     setCaseItem({ ...caseItem, status: "report_ready" });
     setIsSaving(false);
+  }
+
+  async function handleGenerateAiReport() {
+    if (!caseItem) return;
+
+    setIsGeneratingAiReport(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+
+    const accessToken = sessionData.session?.access_token;
+
+    if (sessionError || !accessToken) {
+      setErrorMessage("Du må være innlogget for å generere KI-rapport.");
+      setIsGeneratingAiReport(false);
+      return;
+    }
+
+    const response = await fetch(`/api/cases/${params.id}/generate-report`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      setErrorMessage(result.error || "Kunne ikke generere KI-rapport.");
+      setIsGeneratingAiReport(false);
+      return;
+    }
+
+    if (!result.report) {
+      setErrorMessage("KI-rapporten ble generert, men svaret manglet rapportdata.");
+      setIsGeneratingAiReport(false);
+      return;
+    }
+
+    const generatedReport = result.report as CaseReportRow;
+
+    setReports((current) => [generatedReport, ...current]);
+    setSelectedReportId(generatedReport.id);
+    setCaseItem({ ...caseItem, status: "report_ready" });
+    setSuccessMessage(`KI-rapport v${generatedReport.version} er generert og lagret.`);
+    setIsGeneratingAiReport(false);
   }
 
   if (isLoading) {
@@ -398,24 +478,37 @@ export default function CaseReportPage() {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={handleSaveReport}
-                disabled={isSaving}
-                className="mt-3 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSaving ? "Lagrer..." : "Lagre rapportutkast"}
-              </button>
+              <div className="mt-3 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleGenerateAiReport}
+                  disabled={isGeneratingAiReport}
+                  className="rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isGeneratingAiReport
+                    ? "Genererer..."
+                    : "Generer rapport med KI"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSaveReport}
+                  disabled={isSaving}
+                  className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isSaving ? "Lagrer..." : "Lagre rapportutkast"}
+                </button>
+              </div>
             </div>
 
             <div className="mt-8 grid gap-5">
               <ReportBlock title="Sammendrag">
-                {draft.summary}
+                {activeSummary}
               </ReportBlock>
 
               <ReportBlock title="Foreløpige funn">
                 <ul className="grid gap-3">
-                  {draft.findings.map((item) => (
+                  {activeFindings.map((item) => (
                     <li key={item} className="flex gap-3">
                       <span className="text-cyan-700">✓</span>
                       <span>{item}</span>
@@ -426,7 +519,7 @@ export default function CaseReportPage() {
 
               <ReportBlock title="Anbefalte neste steg">
                 <ul className="grid gap-3">
-                  {draft.recommendations.map((item) => (
+                  {activeRecommendations.map((item) => (
                     <li key={item} className="flex gap-3">
                       <span className="text-amber-600">→</span>
                       <span>{item}</span>
@@ -508,19 +601,36 @@ export default function CaseReportPage() {
                     ønsker å bevare denne versjonen.
                   </p>
                 ) : (
-                  reports.map((report) => (
-                    <div
-                      key={`${report.id}-${report.version}`}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                    >
-                      <p className="font-black text-slate-950">
-                        Rapport v{report.version}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-600">
-                        {formatDate(report.created_at)}
-                      </p>
-                    </div>
-                  ))
+                  reports.map((report) => {
+                    const isSelected = activeReport?.id === report.id;
+
+                    return (
+                      <button
+                        key={`${report.id}-${report.version}`}
+                        type="button"
+                        onClick={() => setSelectedReportId(report.id)}
+                        className={`rounded-2xl border p-4 text-left transition ${
+                          isSelected
+                            ? "border-cyan-400 bg-cyan-50 shadow-sm"
+                            : "border-slate-200 bg-slate-50 hover:bg-cyan-50"
+                        }`}
+                      >
+                        <p className="font-black text-slate-950">
+                          {report.report_type === "full_report"
+                            ? `KI-rapport v${report.version}`
+                            : `Rapport v${report.version}`}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-600">
+                          {formatDate(report.created_at)}
+                        </p>
+                        {isSelected ? (
+                          <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                            Vises nå
+                          </p>
+                        ) : null}
+                      </button>
+                    );
+                  })
                 )}
               </div>
             </div>
