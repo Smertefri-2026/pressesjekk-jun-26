@@ -318,12 +318,13 @@ export default function PfuDecisionPage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Last opp og registrer PFU-avgjørelsen.
+              PFU-avgjørelse
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Når PFU har behandlet saken, kan avgjørelsen lagres her sammen
-              med resultat, sammendrag og mulig neste steg.
+              Registrer om PFU-klage er sendt, saksnummer, resultat,
+              avgjørelse, dokumentasjon og eventuelle videre steg. Dette gjør
+              saken enklere å følge opp senere.
             </p>
           </section>
 
@@ -350,7 +351,10 @@ export default function PfuDecisionPage() {
               PFU-status
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
-              Klage, avgjørelse og dokumentasjon
+              <span className="sm:hidden">PFU-status</span>
+              <span className="hidden sm:inline">
+                Klage, avgjørelse og dokumentasjon
+              </span>
             </h2>
 
             <div className="mt-8 grid gap-6">
@@ -597,7 +601,7 @@ export default function PfuDecisionPage() {
             </div>
           </form>
 
-          <aside className="grid gap-6">
+          <aside className="grid content-start gap-6">
             <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
                 Lagret status
@@ -626,17 +630,17 @@ export default function PfuDecisionPage() {
               ) : null}
             </div>
 
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-                Neste steg
+            <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                Videre arbeid
               </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                PFU er ikke en domstol
+              <h2 className="mt-3 text-3xl font-black">
+                Etter PFU
               </h2>
-              <p className="mt-4 leading-8 text-slate-700">
-                PFU er pressens egen klageordning. En avgjørelse kan være
-                viktig dokumentasjon, men er ikke det samme som en juridisk
-                avgjørelse. Etter PFU kan saken eventuelt vurderes videre.
+              <p className="mt-4 leading-8 text-slate-300">
+                En PFU-avgjørelse kan være viktig dokumentasjon i saken. Etter
+                avgjørelsen kan du vurdere retting, oppfølging, ny
+                dokumentasjon eller andre mulige steg.
               </p>
             </div>
           </aside>
