@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
+import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 
@@ -45,6 +46,12 @@ type CaseReportRow = {
   created_at: string;
 };
 
+type PfuDecisionRow = {
+  id: string;
+  decision_received: boolean | null;
+  uploaded_file_name: string | null;
+};
+
 function legalStatusLabel(status: string | null) {
   if (!status) return "Ikke satt";
   if (status === "not_relevant") return "Ikke relevant";
@@ -54,6 +61,14 @@ function legalStatusLabel(status: string | null) {
   if (status === "court_case") return "Rettssak";
   if (status === "judgment") return "Dom/avgjørelse";
   if (status === "appeal") return "Klage/anke";
+  return status;
+}
+
+function statusLabel(status: CaseRow["status"]) {
+  if (status === "draft") return "Utkast";
+  if (status === "in_progress") return "Under arbeid";
+  if (status === "report_ready") return "Rapport klar";
+  if (status === "closed") return "Lukket";
   return status;
 }
 
@@ -91,6 +106,7 @@ export default function CaseReportPage() {
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
+  const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -161,6 +177,15 @@ export default function CaseReportPage() {
       }
 
       setReports((reportData ?? []) as CaseReportRow[]);
+
+      const { data: pfuDecisionData } = await supabase
+        .from("pfu_decisions")
+        .select("id,decision_received,uploaded_file_name")
+        .eq("case_id", params.id)
+        .maybeSingle();
+
+      setPfuDecision((pfuDecisionData as PfuDecisionRow | null) ?? null);
+
       setIsLoading(false);
     }
 
@@ -381,18 +406,21 @@ export default function CaseReportPage() {
             </div>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Sak
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              {caseItem?.title}
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              {caseItem?.media_name ?? "Ukjent medie"} ·{" "}
-              {formatDate(caseItem?.published_date ?? null)}
-            </p>
-          </aside>
+          <CaseWorkflowCard
+            caseId={params.id}
+            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+            activeStep="rapport"
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInput),
+              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: false,
+            }}
+          />
         </div>
 
         <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
