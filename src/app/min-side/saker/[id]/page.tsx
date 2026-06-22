@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
@@ -126,7 +126,17 @@ export default function CaseDetailPage() {
   const [reports, setReports] = useState<CaseReportRow[]>([]);
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditingBasicInfo, setIsEditingBasicInfo] = useState(false);
+  const [isSavingBasicInfo, setIsSavingBasicInfo] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [editTitle, setEditTitle] = useState("");
+  const [editStatus, setEditStatus] = useState<CaseRow["status"]>("draft");
+  const [editMediaName, setEditMediaName] = useState("");
+  const [editArticleTitle, setEditArticleTitle] = useState("");
+  const [editArticleUrl, setEditArticleUrl] = useState("");
+  const [editPublishedDate, setEditPublishedDate] = useState("");
+  const [editShortDescription, setEditShortDescription] = useState("");
 
   useEffect(() => {
     async function loadCase() {
@@ -159,7 +169,16 @@ export default function CaseDetailPage() {
         return;
       }
 
-      setCaseItem(data as CaseRow);
+      const loadedCase = data as CaseRow;
+
+      setCaseItem(loadedCase);
+      setEditTitle(loadedCase.title ?? "");
+      setEditStatus(loadedCase.status ?? "draft");
+      setEditMediaName(loadedCase.media_name ?? "");
+      setEditArticleTitle(loadedCase.article_title ?? "");
+      setEditArticleUrl(loadedCase.article_url ?? "");
+      setEditPublishedDate(loadedCase.published_date ?? "");
+      setEditShortDescription(loadedCase.short_description ?? "");
 
       const { data: inputData, error: inputError } = await supabase
         .from("case_inputs")
@@ -204,6 +223,52 @@ export default function CaseDetailPage() {
       loadCase();
     }
   }, [params.id]);
+
+  async function handleBasicInfoSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!user || !caseItem) {
+      setErrorMessage("Du må være innlogget for å redigere saken.");
+      return;
+    }
+
+    setIsSavingBasicInfo(true);
+    setErrorMessage("");
+
+    const cleanTitle =
+      editTitle.trim() ||
+      editArticleTitle.trim() ||
+      `PresseSjekk-sak${editMediaName.trim() ? ` – ${editMediaName.trim()}` : ""}`;
+
+    const updates = {
+      title: cleanTitle,
+      status: editStatus,
+      media_name: editMediaName.trim() || null,
+      article_title: editArticleTitle.trim() || null,
+      article_url: editArticleUrl.trim() || null,
+      published_date: editPublishedDate || null,
+      short_description: editShortDescription.trim() || null,
+    };
+
+    const { error } = await supabase
+      .from("cases")
+      .update(updates)
+      .eq("id", params.id);
+
+    if (error) {
+      setErrorMessage(error.message);
+      setIsSavingBasicInfo(false);
+      return;
+    }
+
+    setCaseItem({
+      ...caseItem,
+      ...updates,
+    });
+
+    setIsSavingBasicInfo(false);
+    setIsEditingBasicInfo(false);
+  }
 
   if (isLoading) {
     return (
@@ -287,12 +352,15 @@ export default function CaseDetailPage() {
                   Artikkel og sak
                 </h2>
 
-                <Link
-                  href={`/min-side/saker/${params.id}/rediger`}
-                  className="mt-3 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800"
-                >
-                  Rediger grunninformasjon
-                </Link>
+                {!isEditingBasicInfo ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingBasicInfo(true)}
+                    className="mt-3 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800"
+                  >
+                    Rediger grunninformasjon
+                  </button>
+                ) : null}
               </div>
 
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
@@ -301,46 +369,207 @@ export default function CaseDetailPage() {
                 videre i saksopplysninger, rapport og PFU-spor.
               </p>
 
-              <div className="mt-8 grid gap-4">
-                <InfoBlock label="Mediehus">
-                  <p className="text-xl font-black text-slate-950">
-                    {caseItem.media_name || "Ikke satt"}
-                  </p>
-                </InfoBlock>
-
-                <InfoBlock label="Publiseringsdato">
-                  <p className="text-xl font-black text-slate-950">
-                    {formatDate(caseItem.published_date)}
-                  </p>
-                </InfoBlock>
-
-                <InfoBlock label="Artikkeloverskrift">
-                  <p className="text-xl font-black text-slate-950">
-                    {caseItem.article_title || "Ikke satt"}
-                  </p>
-                </InfoBlock>
-
-                <InfoBlock label="Lenke">
-                  {caseItem.article_url ? (
-                    <a
-                      href={caseItem.article_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="block break-words text-lg font-bold text-cyan-700 hover:text-cyan-900"
+              {isEditingBasicInfo ? (
+                <form onSubmit={handleBasicInfoSubmit} className="mt-8 grid gap-5">
+                  <div>
+                    <label
+                      htmlFor="editTitle"
+                      className="text-sm font-bold text-slate-800"
                     >
-                      {caseItem.article_url}
-                    </a>
-                  ) : (
-                    <p className="text-xl font-black text-slate-950">
-                      Ikke satt
-                    </p>
-                  )}
-                </InfoBlock>
+                      Tittel på saken
+                    </label>
+                    <input
+                      id="editTitle"
+                      type="text"
+                      value={editTitle}
+                      onChange={(event) => setEditTitle(event.target.value)}
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                    />
+                  </div>
 
-                <InfoBlock label="Kort beskrivelse">
-                  {caseItem.short_description || "Ikke lagt inn ennå."}
-                </InfoBlock>
-              </div>
+                  <div>
+                    <label
+                      htmlFor="editStatus"
+                      className="text-sm font-bold text-slate-800"
+                    >
+                      Status
+                    </label>
+                    <select
+                      id="editStatus"
+                      value={editStatus}
+                      onChange={(event) =>
+                        setEditStatus(event.target.value as CaseRow["status"])
+                      }
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                    >
+                      <option value="draft">Utkast</option>
+                      <option value="in_progress">Under arbeid</option>
+                      <option value="report_ready">Rapport klar</option>
+                      <option value="closed">Lukket</option>
+                    </select>
+                  </div>
+
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor="editMediaName"
+                        className="text-sm font-bold text-slate-800"
+                      >
+                        Mediehus
+                      </label>
+                      <input
+                        id="editMediaName"
+                        type="text"
+                        value={editMediaName}
+                        onChange={(event) => setEditMediaName(event.target.value)}
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="editPublishedDate"
+                        className="text-sm font-bold text-slate-800"
+                      >
+                        Publiseringsdato
+                      </label>
+                      <input
+                        id="editPublishedDate"
+                        type="date"
+                        value={editPublishedDate}
+                        onChange={(event) =>
+                          setEditPublishedDate(event.target.value)
+                        }
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="editArticleTitle"
+                      className="text-sm font-bold text-slate-800"
+                    >
+                      Artikkeloverskrift
+                    </label>
+                    <input
+                      id="editArticleTitle"
+                      type="text"
+                      value={editArticleTitle}
+                      onChange={(event) => setEditArticleTitle(event.target.value)}
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="editArticleUrl"
+                      className="text-sm font-bold text-slate-800"
+                    >
+                      Lenke til artikkel
+                    </label>
+                    <input
+                      id="editArticleUrl"
+                      type="url"
+                      value={editArticleUrl}
+                      onChange={(event) => setEditArticleUrl(event.target.value)}
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="editShortDescription"
+                      className="text-sm font-bold text-slate-800"
+                    >
+                      Kort beskrivelse
+                    </label>
+                    <textarea
+                      id="editShortDescription"
+                      rows={5}
+                      value={editShortDescription}
+                      onChange={(event) =>
+                        setEditShortDescription(event.target.value)
+                      }
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="submit"
+                      disabled={isSavingBasicInfo}
+                      className="rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isSavingBasicInfo ? "Lagrer..." : "Lagre grunninformasjon"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditTitle(caseItem.title ?? "");
+                        setEditStatus(caseItem.status ?? "draft");
+                        setEditMediaName(caseItem.media_name ?? "");
+                        setEditArticleTitle(caseItem.article_title ?? "");
+                        setEditArticleUrl(caseItem.article_url ?? "");
+                        setEditPublishedDate(caseItem.published_date ?? "");
+                        setEditShortDescription(caseItem.short_description ?? "");
+                        setIsEditingBasicInfo(false);
+                      }}
+                      className="rounded-xl border border-slate-300 bg-white px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                    >
+                      Avbryt
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="mt-8 grid gap-4">
+                  <InfoBlock label="Status">
+                    <p className="text-xl font-black text-slate-950">
+                      {statusLabel(caseItem.status)}
+                    </p>
+                  </InfoBlock>
+
+                  <InfoBlock label="Mediehus">
+                    <p className="text-xl font-black text-slate-950">
+                      {caseItem.media_name || "Ikke satt"}
+                    </p>
+                  </InfoBlock>
+
+                  <InfoBlock label="Publiseringsdato">
+                    <p className="text-xl font-black text-slate-950">
+                      {formatDate(caseItem.published_date)}
+                    </p>
+                  </InfoBlock>
+
+                  <InfoBlock label="Artikkeloverskrift">
+                    <p className="text-xl font-black text-slate-950">
+                      {caseItem.article_title || "Ikke satt"}
+                    </p>
+                  </InfoBlock>
+
+                  <InfoBlock label="Lenke">
+                    {caseItem.article_url ? (
+                      <a
+                        href={caseItem.article_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block break-words text-lg font-bold text-cyan-700 hover:text-cyan-900"
+                      >
+                        {caseItem.article_url}
+                      </a>
+                    ) : (
+                      <p className="text-xl font-black text-slate-950">
+                        Ikke satt
+                      </p>
+                    )}
+                  </InfoBlock>
+
+                  <InfoBlock label="Kort beskrivelse">
+                    {caseItem.short_description || "Ikke lagt inn ennå."}
+                  </InfoBlock>
+                </div>
+              )}
             </div>
 
           </section>
