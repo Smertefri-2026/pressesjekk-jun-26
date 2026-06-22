@@ -28,6 +28,25 @@ type PfuDecisionRow = {
   uploaded_file_name: string | null;
 };
 
+type CaseDocumentRow = {
+  id: string;
+  title: string;
+  document_type:
+    | "article"
+    | "journalist_email"
+    | "reply_sent"
+    | "editor_response"
+    | "pfu_document"
+    | "legal_document"
+    | "other";
+  description: string | null;
+  file_name: string;
+  file_path: string;
+  file_size: number | null;
+  mime_type: string | null;
+  created_at: string;
+};
+
 type CaseInputRow = {
   id: string;
   case_id: string;
@@ -53,6 +72,29 @@ const caseRoleOptions = [
   "Leser/publikum",
   "Annet",
 ];
+
+const documentTypeOptions = [
+  { value: "article", label: "Artikkel" },
+  { value: "journalist_email", label: "E-post fra journalist" },
+  { value: "reply_sent", label: "Tilsvar sendt" },
+  { value: "editor_response", label: "Svar fra redaksjonen" },
+  { value: "pfu_document", label: "PFU-dokument" },
+  { value: "legal_document", label: "Rettslig dokument" },
+  { value: "other", label: "Annet vedlegg" },
+] as const;
+
+function documentTypeLabel(type: CaseDocumentRow["document_type"]) {
+  return (
+    documentTypeOptions.find((option) => option.value === type)?.label ??
+    "Annet vedlegg"
+  );
+}
+
+function formatFileSize(size: number | null) {
+  if (!size) return "Ukjent størrelse";
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
   if (status === "in_progress") return "Under arbeid";
@@ -82,12 +124,24 @@ export default function CaseInputsPage() {
   const [caseInputId, setCaseInputId] = useState<string | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
+  const [documents, setDocuments] = useState<CaseDocumentRow[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingInputs, setIsEditingInputs] = useState(true);
+  const [isUploadingDocument, setIsUploadingDocument] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [documentMessage, setDocumentMessage] = useState("");
+  const [documentError, setDocumentError] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [documentTitle, setDocumentTitle] = useState("");
+  const [documentType, setDocumentType] =
+    useState<CaseDocumentRow["document_type"]>("other");
+  const [documentDescription, setDocumentDescription] = useState("");
+  const [selectedDocumentFile, setSelectedDocumentFile] = useState<File | null>(
+    null
+  );
 
   const [articleText, setArticleText] = useState("");
   const [whatHappened, setWhatHappened] = useState("");
@@ -179,6 +233,16 @@ export default function CaseInputsPage() {
 
       setPfuDecision((pfuDecisionData as PfuDecisionRow | null) ?? null);
 
+      const { data: documentsData } = await supabase
+        .from("case_documents")
+        .select(
+          "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at"
+        )
+        .eq("case_id", params.id)
+        .order("created_at", { ascending: false });
+
+      setDocuments((documentsData ?? []) as CaseDocumentRow[]);
+
       setIsLoading(false);
     }
 
@@ -243,6 +307,142 @@ export default function CaseInputsPage() {
     setSaveMessage("Saksopplysningene er lagret.");
     setIsEditingInputs(false);
     setIsSaving(false);
+  }
+
+  async function handleDocumentUpload(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!user) {
+      setDocumentError("Du må være innlogget for å laste opp dokumenter.");
+      return;
+    }
+
+    if (!selectedDocumentFile) {
+      setDocumentError("Velg en fil før du laster opp.");
+      return;
+    }
+
+    if (selectedDocumentFile.size > 10 * 1024 * 1024) {
+      setDocumentError("Filen er for stor. Maks filstørrelse i denne versjonen er 10 MB.");
+      return;
+    }
+
+    setIsUploadingDocument(true);
+    setDocumentMessage("");
+    setDocumentError("");
+    setErrorMessage("");
+
+    const cleanFileName = selectedDocumentFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const filePath = `${user.id}/${params.id}/${Date.now()}-${cleanFileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("case-documents")
+      .upload(filePath, selectedDocumentFile, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+
+    if (uploadError) {
+      setDocumentError(`Opplasting feilet: ${uploadError.message}`);
+      setIsUploadingDocument(false);
+      return;
+    }
+
+    const title =
+      documentTitle.trim() ||
+      selectedDocumentFile.name.replace(/\.[^/.]+$/, "") ||
+      "Dokument";
+
+    const { data, error: insertError } = await supabase
+      .from("case_documents")
+      .insert({
+        case_id: params.id,
+        user_id: user.id,
+        title,
+        document_type: documentType,
+        description: documentDescription.trim() || null,
+        file_name: selectedDocumentFile.name,
+        file_path: filePath,
+        file_size: selectedDocumentFile.size,
+        mime_type: selectedDocumentFile.type || null,
+      })
+      .select(
+        "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at"
+      )
+      .single();
+
+    if (insertError) {
+      await supabase.storage.from("case-documents").remove([filePath]);
+      setDocumentError(`Dokumentet ble lastet opp, men kunne ikke lagres i saken: ${insertError.message}`);
+      setIsUploadingDocument(false);
+      return;
+    }
+
+    setDocuments((current) => [data as CaseDocumentRow, ...current]);
+    setDocumentTitle("");
+    setDocumentType("other");
+    setDocumentDescription("");
+    setSelectedDocumentFile(null);
+    setDocumentError("");
+    setDocumentMessage("Dokumentet er lastet opp.");
+    setIsUploadingDocument(false);
+
+    const fileInput = document.getElementById(
+      "documentFile"
+    ) as HTMLInputElement | null;
+    if (fileInput) fileInput.value = "";
+  }
+
+  async function openDocument(document: CaseDocumentRow) {
+    setDocumentError("");
+    setErrorMessage("");
+
+    const { data, error } = await supabase.storage
+      .from("case-documents")
+      .createSignedUrl(document.file_path, 60);
+
+    if (error) {
+      setDocumentError(`Kunne ikke åpne dokumentet: ${error.message}`);
+      return;
+    }
+
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
+
+  async function deleteDocument(document: CaseDocumentRow) {
+    const confirmed = window.confirm(
+      `Vil du slette dokumentet «${document.title}»?`
+    );
+
+    if (!confirmed) return;
+
+    setErrorMessage("");
+    setDocumentError("");
+    setDocumentMessage("");
+
+    const { error: storageError } = await supabase.storage
+      .from("case-documents")
+      .remove([document.file_path]);
+
+    if (storageError) {
+      setDocumentError(`Kunne ikke slette filen fra lagring: ${storageError.message}`);
+      return;
+    }
+
+    const { error: deleteError } = await supabase
+      .from("case_documents")
+      .delete()
+      .eq("id", document.id);
+
+    if (deleteError) {
+      setDocumentError(`Kunne ikke slette dokumentet fra saken: ${deleteError.message}`);
+      return;
+    }
+
+    setDocuments((current) =>
+      current.filter((item) => item.id !== document.id)
+    );
+    setDocumentMessage("Dokumentet er slettet.");
   }
 
   if (isLoading) {
@@ -722,19 +922,191 @@ export default function CaseInputsPage() {
             }}
           />
 
-            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                Dokumentasjon
-              </p>
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              Dokumenter
+            </p>
+
+            <div className="flex flex-wrap items-start justify-between gap-4">
               <h2 className="mt-3 text-3xl font-black text-slate-950">
-                Oppsummer det du har
+                Last opp dokumentasjon
               </h2>
-              <p className="mt-4 leading-8 text-slate-700">
-                Bruk dokumentasjonsfeltet til å liste opp e-poster, SMS,
-                skjermbilder, vedlegg, lenker eller andre bevis. Selve
-                filopplasting kan legges til senere.
-              </p>
             </div>
+
+            <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+              Last opp dokumenter som hører til saken, for eksempel artikkel,
+              e-post fra journalist, tilsvar, svar fra redaksjonen,
+              PFU-dokumenter eller andre vedlegg.
+            </p>
+
+            <form onSubmit={handleDocumentUpload} className="mt-8 grid gap-5">
+              <div className="grid gap-5">
+                <div>
+                  <label
+                    htmlFor="documentTitle"
+                    className="text-sm font-bold text-slate-800"
+                  >
+                    Tittel
+                  </label>
+                  <input
+                    id="documentTitle"
+                    type="text"
+                    value={documentTitle}
+                    onChange={(event) => setDocumentTitle(event.target.value)}
+                    placeholder="F.eks. E-post fra journalist"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="documentType"
+                    className="text-sm font-bold text-slate-800"
+                  >
+                    Dokumenttype
+                  </label>
+                  <select
+                    id="documentType"
+                    value={documentType}
+                    onChange={(event) =>
+                      setDocumentType(
+                        event.target.value as CaseDocumentRow["document_type"]
+                      )
+                    }
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  >
+                    {documentTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="documentDescription"
+                  className="text-sm font-bold text-slate-800"
+                >
+                  Kort beskrivelse
+                </label>
+                <textarea
+                  id="documentDescription"
+                  rows={3}
+                  value={documentDescription}
+                  onChange={(event) =>
+                    setDocumentDescription(event.target.value)
+                  }
+                  placeholder="Forklar kort hva dokumentet viser..."
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="documentFile"
+                  className="text-sm font-bold text-slate-800"
+                >
+                  Fil
+                </label>
+                <input
+                  id="documentFile"
+                  type="file"
+                  onChange={(event) =>
+                    setSelectedDocumentFile(event.target.files?.[0] ?? null)
+                  }
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none file:mr-4 file:rounded-xl file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-black file:text-white focus:border-cyan-500 focus:bg-white"
+                />
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  Start med PDF, bilder, tekstfiler eller e-postvedlegg. Store
+                  saker kan senere organiseres som dokumentpakker.
+                </p>
+              </div>
+
+              {documentError ? (
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
+                  {documentError}
+                </div>
+              ) : null}
+
+              {documentMessage ? (
+                <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
+                  {documentMessage}
+                </div>
+              ) : null}
+
+              <button
+                type="submit"
+                disabled={isUploadingDocument}
+                className="w-fit rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isUploadingDocument ? "Laster opp..." : "Last opp dokument"}
+              </button>
+            </form>
+
+            <div className="mt-10">
+              <h3 className="text-2xl font-black text-slate-950">
+                Opplastede dokumenter
+              </h3>
+
+              {documents.length > 0 ? (
+                <div className="mt-5 grid gap-4">
+                  {documents.map((document) => (
+                    <div
+                      key={document.id}
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                            {documentTypeLabel(document.document_type)}
+                          </p>
+                          <h4 className="mt-2 text-xl font-black text-slate-950">
+                            {document.title}
+                          </h4>
+                          <p className="mt-2 text-sm font-semibold text-slate-500">
+                            {document.file_name} ·{" "}
+                            {formatFileSize(document.file_size)}
+                          </p>
+                          {document.description ? (
+                            <p className="mt-3 whitespace-pre-line leading-7 text-slate-700">
+                              {document.description}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openDocument(document)}
+                            className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 hover:bg-slate-100"
+                          >
+                            Åpne
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => deleteDocument(document)}
+                            className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-black text-red-700 hover:bg-red-50"
+                          >
+                            Slett
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
+                  <p className="font-bold text-slate-700">
+                    Ingen dokumenter er lastet opp ennå.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
