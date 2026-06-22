@@ -250,12 +250,13 @@ export default function CaseInputsPage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Legg til tilsvar, rettsstatus og dokumentasjon.
+              Saksopplysninger
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Disse opplysningene brukes senere som grunnlag for rapport,
-              dokumentasjonsliste og eventuelt PFU-klageutkast.
+              Samle det viktigste om saken på ett sted. Opplysningene brukes
+              som grunnlag for rapport, dokumentasjonsliste og eventuelt
+              PFU-klageutkast.
             </p>
 
             {caseItem ? (
@@ -279,11 +280,12 @@ export default function CaseInputsPage() {
               Tips
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Skriv kort og konkret
+              Start med det viktigste
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
-              Du trenger ikke skrive en ferdig klage her. Målet er å samle
-              fakta, tilsvar, rettsstatus og dokumentasjon på ett sted.
+              Du trenger ikke skrive alt perfekt. Start med fakta, hva som
+              skjedde, om du har sendt tilsvar, og hvilken dokumentasjon som
+              finnes.
             </p>
           </aside>
         </div>
@@ -522,17 +524,18 @@ export default function CaseInputsPage() {
             </div>
           </form>
 
-          <aside className="grid gap-6">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-                Viktig
+          <aside className="grid content-start gap-6">
+            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                Dokumentasjon
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
-                Ikke last opp dokumenter ennå
+                Oppsummer det du har
               </h2>
               <p className="mt-4 leading-8 text-slate-700">
-                Denne første versjonen lagrer tekst og oppsummeringer. Sikker
-                dokumentopplasting kommer senere.
+                Bruk dokumentasjonsfeltet til å liste opp e-poster, SMS,
+                skjermbilder, vedlegg, lenker eller andre bevis. Selve
+                filopplasting kan legges til senere.
               </p>
             </div>
 
@@ -544,8 +547,8 @@ export default function CaseInputsPage() {
                 Første rapportutkast
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Når opplysninger er lagret, kan vi lage en enkel rapportvisning
-                basert på artikkeldata og saksopplysninger.
+                Når opplysninger er lagret, kan du gå tilbake til saken og
+                jobbe videre med rapportutkast, PFU-spor eller redigering.
               </p>
             </div>
           </aside>
