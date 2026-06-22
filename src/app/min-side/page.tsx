@@ -129,6 +129,7 @@ export default function MinSidePage() {
     return savedViewMode === "grid" ? "grid" : "list";
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -492,7 +493,7 @@ export default function MinSidePage() {
       title: "Mappe opprettet",
       description: folder.title,
       created_at: folder.created_at,
-      href: "/min-side/mapper",
+      href: "#",
     })),
   ]
     .sort(
@@ -501,6 +502,50 @@ export default function MinSidePage() {
     )
     .slice(0, 5);
 
+
+  async function createFolder() {
+    if (!user) {
+      setErrorMessage("Du må være innlogget for å opprette mapper.");
+      return;
+    }
+
+    const folderTitle = window.prompt(
+      selectedFolder
+        ? `Navn på ny undermappe i «${selectedFolder.title}»:`
+        : "Navn på ny mappe:"
+    );
+
+    if (!folderTitle?.trim()) {
+      return;
+    }
+
+    setIsCreatingFolder(true);
+    setErrorMessage("");
+
+    const { data, error } = await supabase
+      .from("case_folders")
+      .insert({
+        user_id: user.id,
+        title: folderTitle.trim(),
+        folder_type: selectedFolder ? "subfolder" : "case_folder",
+        parent_folder_id: selectedFolderId || null,
+        status: "active",
+      })
+      .select("id,parent_folder_id,title,folder_type,status,created_at,deleted_at")
+      .single();
+
+    if (error) {
+      setErrorMessage(error.message);
+      setIsCreatingFolder(false);
+      return;
+    }
+
+    const newFolder = data as CaseFolderRow;
+
+    setFolders((current) => [newFolder, ...current]);
+    setFolderCount((current) => current + 1);
+    setIsCreatingFolder(false);
+  }
 
   async function restoreFromTrash(item: ArchiveItem) {
     setErrorMessage("");
@@ -812,16 +857,18 @@ export default function MinSidePage() {
 
                 {archiveMode === "active" ? (
                   <>
-                    <Link
-                      href={
-                        selectedFolderId
-                          ? `/min-side/mapper/ny?parentFolderId=${selectedFolderId}`
-                          : "/min-side/mapper/ny"
-                      }
-                      className="rounded-xl bg-cyan-500 px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-cyan-400"
+                    <button
+                      type="button"
+                      onClick={createFolder}
+                      disabled={isCreatingFolder}
+                      className="rounded-xl bg-cyan-500 px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {selectedFolderId ? "+ Ny mappe her" : "+ Ny mappe"}
-                    </Link>
+                      {isCreatingFolder
+                        ? "Oppretter..."
+                        : selectedFolderId
+                          ? "+ Ny mappe her"
+                          : "+ Ny mappe"}
+                    </button>
 
                     <Link
                       href={newCaseHref}
@@ -910,22 +957,24 @@ export default function MinSidePage() {
                     {archiveMode === "trash"
                       ? "Slettede mapper og saker vises her. Når papirkurven er tom, er det ingenting å gjenopprette."
                       : selectedFolder
-                        ? "Denne mappen har ingen saker ennå. Neste steg blir å kunne opprette saker direkte i valgt mappe."
+                        ? "Denne mappen har ingen saker ennå. Opprett en sak eller en undermappe direkte her."
                         : "Opprett en mappe eller en sak for å komme i gang."}
                   </p>
 
                   <div className="mt-6 flex flex-wrap gap-3">
                     {!selectedFolder && archiveMode === "active" ? (
-                      <Link
-                        href={
-                          selectedFolderId
-                            ? `/min-side/mapper/ny?parentFolderId=${selectedFolderId}`
-                            : "/min-side/mapper/ny"
-                        }
-                        className="rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400"
+                      <button
+                        type="button"
+                        onClick={createFolder}
+                        disabled={isCreatingFolder}
+                        className="rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {selectedFolderId ? "+ Ny mappe her" : "+ Ny mappe"}
-                      </Link>
+                        {isCreatingFolder
+                          ? "Oppretter..."
+                          : selectedFolderId
+                            ? "+ Ny mappe her"
+                            : "+ Ny mappe"}
+                      </button>
                     ) : null}
 
                     <Link
