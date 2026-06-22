@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
+import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 
@@ -21,10 +22,36 @@ type CaseRow = {
   short_description: string | null;
 };
 
+type CaseInputRow = {
+  id: string;
+};
+
+type CaseReportRow = {
+  id: string;
+  report_type: "free_check" | "full_report" | "pfu_draft";
+};
+
+type PfuDecisionRow = {
+  id: string;
+  decision_received: boolean | null;
+  uploaded_file_name: string | null;
+};
+
+function statusLabel(status: CaseStatus) {
+  if (status === "draft") return "Utkast";
+  if (status === "in_progress") return "Under arbeid";
+  if (status === "report_ready") return "Rapport klar";
+  if (status === "closed") return "Lukket";
+  return status;
+}
+
 export default function EditCasePage() {
   const params = useParams<{ id: string }>();
 
   const [user, setUser] = useState<User | null>(null);
+  const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
+  const [reports, setReports] = useState<CaseReportRow[]>([]);
+  const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -77,6 +104,29 @@ export default function EditCasePage() {
       setArticleUrl(caseData.article_url ?? "");
       setPublishedDate(caseData.published_date ?? "");
       setShortDescription(caseData.short_description ?? "");
+
+      const { data: inputData } = await supabase
+        .from("case_inputs")
+        .select("id")
+        .eq("case_id", params.id)
+        .maybeSingle();
+
+      setCaseInput((inputData as CaseInputRow | null) ?? null);
+
+      const { data: reportsData } = await supabase
+        .from("case_reports")
+        .select("id,report_type")
+        .eq("case_id", params.id);
+
+      setReports((reportsData ?? []) as CaseReportRow[]);
+
+      const { data: pfuDecisionData } = await supabase
+        .from("pfu_decisions")
+        .select("id,decision_received,uploaded_file_name")
+        .eq("case_id", params.id)
+        .maybeSingle();
+
+      setPfuDecision((pfuDecisionData as PfuDecisionRow | null) ?? null);
 
       setIsLoading(false);
     }
@@ -187,12 +237,13 @@ export default function EditCasePage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Oppdater PresseSjekk-saken.
+              Rediger sak
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Endre grunninformasjonen. Senere legger vi til egne felt for
-              tilsvar, rettsstatus, dokumentasjon og rapportversjoner.
+              Oppdater grunninformasjon, status, mediehus, artikkellenke og
+              kort beskrivelse. Saksopplysninger, rapport, PFU-spor og videre
+              vurdering håndteres i saksgangen.
             </p>
 
             {user?.email ? (
@@ -203,18 +254,21 @@ export default function EditCasePage() {
             ) : null}
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Tips
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Hold saken oppdatert
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Hvis artikkelen endres, redaksjonen svarer, eller rettsstatus
-              utvikler seg, bør saken oppdateres før ny rapport lages.
-            </p>
-          </aside>
+          <CaseWorkflowCard
+            caseId={params.id}
+            statusLabel={statusLabel(status)}
+            activeStep="case"
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInput),
+              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: false,
+            }}
+          />
         </div>
 
         <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
@@ -375,30 +429,31 @@ export default function EditCasePage() {
             </div>
           </form>
 
-          <aside className="grid gap-6">
-            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-                Viktig
+          <aside className="grid content-start gap-6">
+            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                Oppdatert grunnlag
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
-                Saken kan endre seg
+                Endringer kan påvirke rapporten
               </h2>
               <p className="mt-4 leading-8 text-slate-700">
-                Hvis du legger inn nye opplysninger senere, bør rapporten også
-                kunne genereres på nytt i en ny versjon.
+                Hvis du endrer artikkeldata, status eller beskrivelse, kan det
+                være lurt å gå gjennom rapport og PFU-utkast på nytt.
               </p>
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Neste versjon
+                Videre arbeid
               </p>
               <h2 className="mt-3 text-3xl font-black">
-                Tilsvar og rettsstatus
+                Bruk saksgangen
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Etter redigering av grunninfo legger vi til egne felt for
-                tilsvar, redaktørsvar og rettsstatus.
+                Etter at grunninformasjonen er lagret, kan du gå videre til
+                saksopplysninger, rapport, PFU-klage eller annen oppfølging i
+                saksgangen.
               </p>
             </div>
           </aside>
