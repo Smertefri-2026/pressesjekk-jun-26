@@ -189,9 +189,11 @@ PFU-RESULTAT SKAL TOLKES SLIK:
 JURIDISK SPRÅK:
 - Under punkt 10 kan du nevne mulige rettslige spor hvis relevant, men bare som forhold politiet/advokat eventuelt må vurdere.
 - Hvis saken gjelder en privatperson, kan temaer som privatliv, identifisering, belastende omtale, forhåndsdømming og samtidig imøtegåelse være relevante dersom fakta tilsier det.
-- Hvis saken gjelder en virksomhet, offentlig aktør, organisasjon eller selskap, skal du normalt ikke bruke privatlivets fred, uskyldspresumsjon eller personvern som hovedspor, med mindre konkrete privatpersoner er identifisert eller omtalt.
-- I saker om virksomhet, offentlig aktør, organisasjon eller selskap skal vurderingen normalt heller vektlegge dokumentasjon, faktisk dekning, presisjon, omdømme, tilsvar, presseetikk og eventuelt sivilt/erstatningsrettslig spor.
-- Straffeloven § 266 og § 267 skal ikke brukes automatisk. De skal bare nevnes hvis saksopplysningene konkret tilsier at bestemmelsene kan være relevante.
+- Hvis saken gjelder en virksomhet, offentlig aktør, organisasjon eller selskap, skal du normalt ikke bruke privatlivets fred, uskyldspresumsjon, personvern, straffeloven § 266 eller straffeloven § 267 som hovedspor.
+- I slike virksomhets- og organisasjonssaker skal punkt 10 normalt vektlegge: faktisk dekning, dokumentasjon, presisjon, kildegrunnlag, omdømmebelastning, tilsvar/imøtegåelse, presseetikk og eventuelt sivilt/erstatningsrettslig spor.
+- I virksomhets- og organisasjonssaker skal politisporet omtales svært forsiktig. Skriv heller at saken primært synes å reise presseetiske og eventuelt sivile spørsmål, med mindre konkrete opplysninger tilsier annet.
+- Privatlivets fred, uskyldspresumsjon, personvern, straffeloven § 266 og straffeloven § 267 skal bare nevnes dersom konkrete identifiserbare privatpersoner er omtalt, eller saksopplysningene klart tilsier at bestemmelsene kan være relevante.
+- Ikke be politiet vurdere privatlivets fred eller hensynsløs opptreden i saker som bare gjelder en virksomhet/offentlig aktør og generell samfunnsdebatt, med mindre det finnes konkrete personrettede forhold.
 - Under punkt 11 skal du kort forklare at økonomisk tap, omdømmeskade eller oppreisning normalt bør vurderes som et eget sivilt spor / utredningspakke.
 - Ikke lag bastante lovkonklusjoner.
 
