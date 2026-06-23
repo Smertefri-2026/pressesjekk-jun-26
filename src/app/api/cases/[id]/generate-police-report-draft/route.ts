@@ -194,6 +194,8 @@ JURIDISK SPRÅK:
 - I virksomhets- og organisasjonssaker skal politisporet omtales svært forsiktig. Skriv heller at saken primært synes å reise presseetiske og eventuelt sivile spørsmål, med mindre konkrete opplysninger tilsier annet.
 - Privatlivets fred, uskyldspresumsjon, personvern, straffeloven § 266 og straffeloven § 267 skal bare nevnes dersom konkrete identifiserbare privatpersoner er omtalt, eller saksopplysningene klart tilsier at bestemmelsene kan være relevante.
 - Ikke be politiet vurdere privatlivets fred eller hensynsløs opptreden i saker som bare gjelder en virksomhet/offentlig aktør og generell samfunnsdebatt, med mindre det finnes konkrete personrettede forhold.
+- I saker som gjelder virksomhet, offentlig aktør, organisasjon eller selskap, skal punkt 12 normalt formulere at saken primært fremstår som presseetisk og eventuelt sivilrettslig, og at politisporet bare bør vurderes dersom konkrete straffbare forhold er dokumentert.
+- Ikke bruk uttrykk som "straffeloven § 266", "straffelovgivning", "hensynsløs atferd" eller "privatlivets fred" i virksomhetssaker med mindre faktagrunnlaget klart gjelder identifiserbare privatpersoner eller konkrete personrettede handlinger.
 - Under punkt 11 skal du kort forklare at økonomisk tap, omdømmeskade eller oppreisning normalt bør vurderes som et eget sivilt spor / utredningspakke.
 - Ikke lag bastante lovkonklusjoner.
 
