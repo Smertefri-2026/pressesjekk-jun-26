@@ -423,10 +423,10 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
-          href={`/min-side/saker/${params.id}`}
+          href="/min-side"
           className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
         >
-          ← Tilbake til saken
+          ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
@@ -440,109 +440,123 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Dette er et strukturert utkast basert på saken, profilen din,
-              tilsvar, rettsstatus og dokumentasjon. Utkastet kan brukes som
-              arbeidsgrunnlag før eventuell innsending eller videre
-              kvalitetssikring.
+              PFU-klageutkastet bygger på saken, saksopplysninger,
+              dokumentasjon og relevante punkter i Vær Varsom-plakaten.
+              Utkastet er et arbeidsgrunnlag før eventuell innsending eller
+              videre kvalitetssikring.
             </p>
 
-            {user?.email ? (
-              <p className="mt-5 text-sm font-semibold text-slate-500">
-                Innlogget som:{" "}
-                <span className="text-slate-950">{user.email}</span>
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                Kladd
               </p>
-            ) : null}
 
-            <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
-              <button
-                type="button"
-                onClick={handleGenerateAiPfuDraft}
-                disabled={isGeneratingAiDraft}
-                className="col-span-2 w-full rounded-2xl bg-cyan-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
-              >
-                {isGeneratingAiDraft
-                  ? "Genererer..."
-                  : "Generer PFU-klage med KI"}
-              </button>
+              <h2 className="mt-3 text-4xl font-black text-slate-950">
+                {activePfuDraft
+                  ? `PFU-klageutkast v${activePfuDraft.version}`
+                  : "PFU-klageutkast"}
+              </h2>
 
-              <button
-                type="button"
-                onClick={handleSavePfuDraft}
-                disabled={isSaving}
-                className="col-span-2 w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-base font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
-              >
-                {isSaving ? "Lagrer..." : "Lagre regelbasert utkast"}
-              </button>
+              <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+                {activePfuDraft
+                  ? "Dette er valgt lagret PFU-klageutkast. Du kan kopiere teksten, lage nytt KI-utkast eller lagre et regelbasert utkast."
+                  : "Dette er et foreløpig regelbasert utkast. Bruk KI-knappen for å lage et mer gjennomarbeidet PFU-klageutkast basert på saken og relevante presseetiske punkter."}
+              </p>
 
-              <button
-                type="button"
-                onClick={handleCopyDraft}
-                className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-3 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
-              >
-                Kopier
-              </button>
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleGenerateAiPfuDraft}
+                  disabled={isGeneratingAiDraft}
+                  className="col-span-2 w-full rounded-2xl bg-cyan-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
+                >
+                  {isGeneratingAiDraft
+                    ? "Genererer..."
+                    : "Generer PFU-klage med KI"}
+                </button>
 
-              <Link
-                href={`/min-side/saker/${params.id}`}
-                className="col-span-1 w-full rounded-2xl border border-slate-300 bg-white px-3 py-4 text-center text-base font-black text-slate-950 hover:bg-slate-100 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
-              >
-                Til saken
-              </Link>
+                <button
+                  type="button"
+                  onClick={handleSavePfuDraft}
+                  disabled={isSaving}
+                  className="col-span-2 w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-base font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
+                >
+                  {isSaving ? "Lagrer..." : "Lagre regelbasert utkast"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleCopyDraft}
+                  className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-3 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
+                >
+                  Kopier
+                </button>
+
+                <Link
+                  href={`/min-side/saker/${params.id}`}
+                  className="col-span-1 w-full rounded-2xl border border-slate-300 bg-white px-3 py-4 text-center text-base font-black text-slate-950 hover:bg-slate-100 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
+                >
+                  Til saken
+                </Link>
+              </div>
+
+              <pre className="mt-8 max-h-[900px] overflow-auto whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800 sm:p-7">
+                {activePfuDraftText}
+              </pre>
+
+              {errorMessage ? (
+                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
+                  {errorMessage}
+                </div>
+              ) : null}
+
+              {copyMessage ? (
+                <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold text-cyan-800">
+                  {copyMessage}
+                </div>
+              ) : null}
+
+              {successMessage ? (
+                <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
+                  {successMessage}
+                </div>
+              ) : null}
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href={`/min-side/saker/${params.id}/pfu-avgjorelse`}
+                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+                >
+                  Gå til PFU-avgjørelse
+                </Link>
+
+                <Link
+                  href={`/min-side/saker/${params.id}`}
+                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Til saken
+                </Link>
+              </div>
             </div>
           </section>
 
-          <CaseWorkflowCard
-            caseId={params.id}
-            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
-            activeStep="pfu"
-            stepsDone={{
-              caseRegistered: true,
-              caseInputs: Boolean(caseInput),
-              report: reports.some((report) => report.report_type !== "pfu_draft"),
-              pfuDraft: pfuDrafts.length > 0,
-              pfuDecision: Boolean(
-                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
-              ),
-              policeReport: false,
-            }}
-          />
-        </div>
-
-        <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Kladd
-            </p>
-            <h2 className="mt-3 text-4xl font-black text-slate-950">
-              {activePfuDraft
-                ? `PFU-klageutkast v${activePfuDraft.version}`
-                : "PFU-klageutkast"}
-            </h2>
-
-            <pre className="mt-8 whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800 sm:p-7">
-              {activePfuDraftText}
-            </pre>
-
-            {errorMessage ? (
-              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
-                {errorMessage}
-              </div>
-            ) : null}
-
-            {copyMessage ? (
-              <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold text-cyan-800">
-                {copyMessage}
-              </div>
-            ) : null}
-
-            {successMessage ? (
-              <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
-                {successMessage}
-              </div>
-            ) : null}
-          </div>
-
           <aside className="grid content-start gap-6">
+            <CaseWorkflowCard
+              caseId={params.id}
+              statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+              activeStep="pfu"
+              stepsDone={{
+                caseRegistered: true,
+                caseInputs: Boolean(caseInput),
+                report: reports.some((report) => report.report_type !== "pfu_draft"),
+                pfuDraft: pfuDrafts.length > 0,
+                pfuDecision: Boolean(
+                  pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+                ),
+                policeReport: false,
+              }}
+            />
+
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
                 Lagrede utkast
@@ -607,7 +621,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               </p>
             </div>
           </aside>
-        </section>
+        </div>
       </section>
 
       <LightPublicFooter />
