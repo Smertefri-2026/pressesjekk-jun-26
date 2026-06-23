@@ -42,10 +42,14 @@ function formatDate(value: string | null | undefined) {
   }
 }
 
-function reportTypeLabel(type: string | null | undefined, version: number | null | undefined) {
-  if (type === "full_report") return `KI-rapport v${version ?? ""}`.trim();
-  if (type === "pfu_draft") return `PFU-utkast v${version ?? ""}`.trim();
-  return `Regelbasert rapport v${version ?? ""}`.trim();
+function reportTypeLabel(
+  type: string | null | undefined,
+  version: number | null | undefined
+) {
+  if (type === "full_report") return `KI-rapport v${version ?? "1"}`;
+  if (type === "pfu_draft") return `PFU-klageutkast v${version ?? "1"}`;
+  if (type === "police_draft") return `Vurderingsnotat v${version ?? "1"}`;
+  return `Regelbasert rapport v${version ?? "1"}`;
 }
 
 function wrapLine(text: string, maxCharacters: number) {
