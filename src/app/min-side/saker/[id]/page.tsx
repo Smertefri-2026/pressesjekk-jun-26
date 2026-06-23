@@ -39,7 +39,7 @@ type CaseInputRow = {
 type CaseReportRow = {
   id: string;
   version: number;
-  report_type: "free_check" | "full_report" | "pfu_draft";
+  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft";
   status: "draft" | "ready" | "archived";
   created_at: string;
 };
@@ -572,6 +572,22 @@ export default function CaseDetailPage() {
               )}
             </div>
 
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href={`/min-side/saker/${params.id}/opplysninger`}
+                className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+              >
+                Gå til saksopplysninger
+              </Link>
+
+              <Link
+                href="/min-side"
+                className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
+              >
+                Til Min Side
+              </Link>
+            </div>
+
           </section>
 
           <aside className="grid content-start gap-6">
@@ -582,12 +598,16 @@ export default function CaseDetailPage() {
             stepsDone={{
               caseRegistered: true,
               caseInputs: Boolean(caseInput),
-              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              report: reports.some(
+                (report) =>
+                  report.report_type === "free_check" ||
+                  report.report_type === "full_report"
+              ),
               pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
               pfuDecision: Boolean(
                 pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
               ),
-              policeReport: false,
+              policeReport: reports.some((report) => report.report_type === "police_draft"),
             }}
           />
 
