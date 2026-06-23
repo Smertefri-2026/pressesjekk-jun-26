@@ -69,6 +69,60 @@ function wrapLine(text: string, maxCharacters: number) {
   return lines.length > 0 ? lines : [""];
 }
 
+function buildPoliceDraftText({
+  caseItem,
+  report,
+  documents,
+}: {
+  caseItem: any;
+  report: any;
+  documents: any[];
+}) {
+  const documentLines =
+    documents.length > 0
+      ? documents
+          .map((item) => {
+            const name = safeText(item.file_name || item.title || "Dokument");
+            const category = safeText(item.category || "dokument");
+            return `- ${name} (${category})`;
+          })
+          .join("\n")
+      : "- Ingen dokumenter registrert.";
+
+  return [
+    "PresseSjekk vurderingsnotat",
+    "",
+    "Sak",
+    safeText(caseItem.title || "Ukjent sak"),
+    "",
+    "Kilde / artikkel",
+    safeText(
+      caseItem.article_url ??
+        caseItem.url ??
+        caseItem.source_url ??
+        caseItem.link ??
+        caseItem.media_name ??
+        caseItem.publisher ??
+        "Ikke registrert"
+    ),
+    "",
+    "Rapport",
+    reportTypeLabel(report.report_type, report.version),
+    "",
+    "Rapportdato",
+    formatDate(report.created_at),
+    "",
+    "Vurderingsnotat / mulig politianmeldelse",
+    safeText(report.police_draft || "Ingen vurderingstekst registrert."),
+    "",
+    "Dokumentgrunnlag",
+    documentLines,
+    "",
+    "Forbehold",
+    "Dette er et foreløpig og veiledende vurderingsnotat. Det er ikke juridisk rådgivning, politianmeldelse, advokatvurdering eller konklusjon om straffbart forhold. Teksten bør kontrolleres og kvalitetssikres før eventuell bruk eller innsending.",
+  ].join("\n");
+}
+
 function buildPfuDraftText({
   caseItem,
   report,
@@ -526,25 +580,33 @@ export async function GET(request: NextRequest, context: RouteContext) {
     .order("created_at", { ascending: true });
 
   const reportText =
-    report.report_type === "pfu_draft"
-      ? buildPfuDraftText({
+    report.report_type === "police_draft"
+      ? buildPoliceDraftText({
           caseItem,
           report,
           documents: documents ?? [],
         })
-      : buildReportText({
-          caseItem,
-          report,
-          inputs: inputs ?? [],
-          documents: documents ?? [],
-        });
+      : report.report_type === "pfu_draft"
+        ? buildPfuDraftText({
+            caseItem,
+            report,
+            documents: documents ?? [],
+          })
+        : buildReportText({
+            caseItem,
+            report,
+            inputs: inputs ?? [],
+            documents: documents ?? [],
+          });
 
   const pdfBytes = await createReportPdf(reportText);
 
   const fileName =
-    report.report_type === "pfu_draft"
-      ? `pressesjekk-pfu-klageutkast-v${report.version ?? "1"}.pdf`
-      : `pressesjekk-rapport-v${report.version ?? "1"}.pdf`;
+    report.report_type === "police_draft"
+      ? `pressesjekk-vurderingsnotat-v${report.version ?? "1"}.pdf`
+      : report.report_type === "pfu_draft"
+        ? `pressesjekk-pfu-klageutkast-v${report.version ?? "1"}.pdf`
+        : `pressesjekk-rapport-v${report.version ?? "1"}.pdf`;
 
     return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,
