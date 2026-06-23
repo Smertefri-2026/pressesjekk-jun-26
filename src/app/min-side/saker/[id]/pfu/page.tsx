@@ -293,6 +293,84 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
   const activePfuDraftText = activePfuDraft?.pfu_draft || draftText;
 
+  function handleDownloadPfuDraftText() {
+    const safeTitle = (caseItem?.title ?? "pressesjekk-pfu-klage")
+      .toLowerCase()
+      .replace(/[^a-z0-9æøå]+/gi, "-")
+      .replace(/^-+|-+$/g, "");
+
+    const blob = new Blob([activePfuDraftText], {
+      type: "text/plain;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `${safeTitle}-${activePfuDraft
+      ? `pfu-klageutkast-v${activePfuDraft.version}`
+      : "pfu-klageutkast"}.txt`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
+  async function handleDownloadPfuDraftPdf() {
+    if (!activePfuDraft) {
+      setErrorMessage("Du må velge et lagret PFU-utkast før du kan laste ned PDF.");
+      return;
+    }
+
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+
+    const accessToken = sessionData.session?.access_token;
+
+    if (sessionError || !accessToken) {
+      setErrorMessage("Du må være innlogget for å laste ned PFU-PDF.");
+      return;
+    }
+
+    setErrorMessage("");
+
+    const response = await fetch(
+      `/api/cases/${params.id}/reports/${activePfuDraft.id}/pdf`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      setErrorMessage(payload?.error ?? `Kunne ikke lage PFU-PDF. Status: ${response.status}`);
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    const safeTitle = (caseItem?.title ?? "pressesjekk-pfu-klage")
+      .toLowerCase()
+      .replace(/[^a-z0-9æøå]+/gi, "-")
+      .replace(/^-+|-+$/g, "");
+
+    link.href = url;
+    link.download = `${safeTitle}-pfu-klageutkast-v${activePfuDraft.version}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
   async function handleCopyDraft() {
     setCopyMessage("");
     setErrorMessage("");
@@ -486,18 +564,22 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
                 <button
                   type="button"
-                  onClick={handleCopyDraft}
-                  className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-3 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
+                  onClick={handleDownloadPfuDraftPdf}
+                  disabled={!activePfuDraft}
+                  className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-3 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
                 >
-                  Kopier
+                  Last ned PDF
                 </button>
 
-                <Link
-                  href={`/min-side/saker/${params.id}`}
+                <button
+                  type="button"
+                  onClick={handleDownloadPfuDraftText}
                   className="col-span-1 w-full rounded-2xl border border-slate-300 bg-white px-3 py-4 text-center text-base font-black text-slate-950 hover:bg-slate-100 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
                 >
-                  Til saken
-                </Link>
+                  Last ned tekst
+                </button>
+
+
               </div>
 
               <pre className="mt-8 max-h-[900px] overflow-auto whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800 sm:p-7">

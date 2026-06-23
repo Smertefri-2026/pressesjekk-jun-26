@@ -69,6 +69,60 @@ function wrapLine(text: string, maxCharacters: number) {
   return lines.length > 0 ? lines : [""];
 }
 
+function buildPfuDraftText({
+  caseItem,
+  report,
+  documents,
+}: {
+  caseItem: any;
+  report: any;
+  documents: any[];
+}) {
+  const documentLines =
+    documents.length > 0
+      ? documents
+          .map((item) => {
+            const name = safeText(item.file_name || item.title || "Dokument");
+            const category = safeText(item.category || "dokument");
+            return `- ${name} (${category})`;
+          })
+          .join("\n")
+      : "- Ingen dokumenter registrert.";
+
+  return [
+    "PresseSjekk PFU-klageutkast",
+    "",
+    "Sak",
+    safeText(caseItem.title || "Ukjent sak"),
+    "",
+    "Kilde / artikkel",
+    safeText(
+      caseItem.article_url ??
+        caseItem.url ??
+        caseItem.source_url ??
+        caseItem.link ??
+        caseItem.media_name ??
+        caseItem.publisher ??
+        "Ikke registrert"
+    ),
+    "",
+    "Rapport",
+    reportTypeLabel(report.report_type, report.version),
+    "",
+    "Rapportdato",
+    formatDate(report.created_at),
+    "",
+    "PFU-klageutkast",
+    safeText(report.pfu_draft || "Ingen PFU-tekst registrert."),
+    "",
+    "Dokumentgrunnlag",
+    documentLines,
+    "",
+    "Forbehold",
+    "Dette er et foreløpig og veiledende PFU-klageutkast. Det er ikke juridisk rådgivning, PFU-avgjørelse eller endelig presseetisk vurdering. Teksten bør kontrolleres og tilpasses før eventuell innsending.",
+  ].join("\n");
+}
+
 function buildReportText({
   caseItem,
   report,
@@ -471,16 +525,26 @@ export async function GET(request: NextRequest, context: RouteContext) {
     .is("deleted_at", null)
     .order("created_at", { ascending: true });
 
-  const reportText = buildReportText({
-    caseItem,
-    report,
-    inputs: inputs ?? [],
-    documents: documents ?? [],
-  });
+  const reportText =
+    report.report_type === "pfu_draft"
+      ? buildPfuDraftText({
+          caseItem,
+          report,
+          documents: documents ?? [],
+        })
+      : buildReportText({
+          caseItem,
+          report,
+          inputs: inputs ?? [],
+          documents: documents ?? [],
+        });
 
   const pdfBytes = await createReportPdf(reportText);
 
-  const fileName = `pressesjekk-rapport-v${report.version ?? "1"}.pdf`;
+  const fileName =
+    report.report_type === "pfu_draft"
+      ? `pressesjekk-pfu-klageutkast-v${report.version ?? "1"}.pdf`
+      : `pressesjekk-rapport-v${report.version ?? "1"}.pdf`;
 
     return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,
