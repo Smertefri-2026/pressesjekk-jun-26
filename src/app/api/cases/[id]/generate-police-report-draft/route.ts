@@ -228,8 +228,35 @@ ${jsonText(pfuDecision)}
       );
     }
 
+    const existingVersions = (reports ?? [])
+      .map((report) => Number(report.version))
+      .filter((version) => Number.isFinite(version));
+
+    const nextVersion =
+      existingVersions.length > 0 ? Math.max(...existingVersions) + 1 : 1;
+
+    const { data: insertedReport, error: insertError } = await supabase
+      .from("case_reports")
+      .insert({
+        case_id: id,
+        version: nextVersion,
+        report_type: "police_draft",
+        police_draft: policeDraft,
+        status: "ready",
+      })
+      .select("id,version,report_type,police_draft,status,created_at")
+      .single();
+
+    if (insertError) {
+      return NextResponse.json(
+        { error: insertError.message },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       policeDraft,
+      report: insertedReport,
     });
   } catch (error) {
     if (error instanceof Error) {

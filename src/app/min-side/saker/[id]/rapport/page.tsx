@@ -82,23 +82,6 @@ function formatDate(date: string | null) {
   }).format(new Date(date));
 }
 
-function ReportBlock({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-      <h3 className="text-xl font-black text-slate-950">{title}</h3>
-      <div className="mt-3 whitespace-pre-line leading-8 text-slate-700">
-        {children}
-      </div>
-    </section>
-  );
-}
-
 export default function CaseReportPage() {
   const params = useParams<{ id: string }>();
 
@@ -106,7 +89,9 @@ export default function CaseReportPage() {
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
+  const [allReports, setAllReports] = useState<CaseReportRow[]>([]);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+  const [visibleReportCount, setVisibleReportCount] = useState(5);
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -179,8 +164,16 @@ export default function CaseReportPage() {
       }
 
       const loadedReports = (reportData ?? []) as CaseReportRow[];
-      setReports(loadedReports);
-      setSelectedReportId(loadedReports[0]?.id ?? null);
+      const loadedReportVersions = loadedReports.filter(
+        (report) =>
+          report.report_type === "free_check" ||
+          report.report_type === "full_report"
+      );
+
+      setAllReports(loadedReports);
+      setReports(loadedReportVersions);
+      setSelectedReportId(loadedReportVersions[0]?.id ?? null);
+      setVisibleReportCount(5);
 
       const { data: pfuDecisionData } = await supabase
         .from("pfu_decisions")
@@ -277,6 +270,9 @@ export default function CaseReportPage() {
         ? `PFU-utkast v${activeReport.version}`
         : `Regelbasert rapport v${activeReport.version}`
     : "Rapportutkast";
+
+  const visibleReports = reports.slice(0, visibleReportCount);
+  const hasMoreReports = reports.length > visibleReportCount;
 
   const activeSummary = activeReport?.summary || draft.summary;
 
@@ -453,20 +449,20 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
     setSuccessMessage(`Regelbasert rapportutkast v${nextVersion} er lagret.`);
     const newReportId = crypto.randomUUID();
 
-    setReports((current) => [
-      {
-        id: newReportId,
-        version: nextVersion,
-        report_type: "free_check",
-        summary: draft.summary,
-        findings: draft.findings,
-        recommendations: draft.recommendations,
-        pfu_draft: null,
-        status: "ready",
-        created_at: new Date().toISOString(),
-      },
-      ...current,
-    ]);
+    const newReport: CaseReportRow = {
+      id: newReportId,
+      version: nextVersion,
+      report_type: "free_check",
+      summary: draft.summary,
+      findings: draft.findings,
+      recommendations: draft.recommendations,
+      pfu_draft: null,
+      status: "ready",
+      created_at: new Date().toISOString(),
+    };
+
+    setReports((current) => [newReport, ...current]);
+    setAllReports((current) => [newReport, ...current]);
 
     setSelectedReportId(newReportId);
     setCaseItem({ ...caseItem, status: "report_ready" });
@@ -515,6 +511,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
     const generatedReport = result.report as CaseReportRow;
 
     setReports((current) => [generatedReport, ...current]);
+    setAllReports((current) => [generatedReport, ...current]);
     setSelectedReportId(generatedReport.id);
     setCaseItem({ ...caseItem, status: "report_ready" });
     setSuccessMessage(`KI-rapport v${generatedReport.version} er generert og lagret.`);
@@ -621,15 +618,6 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
 
                 <button
                   type="button"
-                  onClick={handleSaveReport}
-                  disabled={isSaving}
-                  className="col-span-2 w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-base font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
-                >
-                  {isSaving ? "Lagrer..." : "Lagre regelbasert utkast"}
-                </button>
-
-                <button
-                  type="button"
                   onClick={handleDownloadReportPdf}
                   disabled={!activeReport}
                   className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-2 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
@@ -647,39 +635,9 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
               </div>
             </div>
 
-            <div className="mt-8 grid gap-5">
-              <ReportBlock title="Sammendrag">
-                {activeSummary}
-              </ReportBlock>
-
-              <ReportBlock title="Foreløpige funn">
-                <ul className="grid gap-3">
-                  {activeFindings.map((item) => (
-                    <li key={item} className="flex gap-3">
-                      <span className="text-cyan-700">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </ReportBlock>
-
-              <ReportBlock title="Anbefalte neste steg">
-                <ul className="grid gap-3">
-                  {activeRecommendations.map((item) => (
-                    <li key={item} className="flex gap-3">
-                      <span className="text-amber-600">→</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </ReportBlock>
-
-              <ReportBlock title="Forbehold">
-                Dette er et foreløpig og veiledende rapportutkast. Det er ikke
-                juridisk rådgivning, PFU-avgjørelse eller endelig vurdering.
-                Innholdet bør kontrolleres før det brukes videre.
-              </ReportBlock>
-            </div>
+            <pre className="mt-8 max-h-[900px] overflow-auto whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800 sm:p-7">
+              {formatActiveReportForExport()}
+            </pre>
 
             {errorMessage ? (
               <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
@@ -720,12 +678,12 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
             stepsDone={{
               caseRegistered: true,
               caseInputs: Boolean(caseInput),
-              report: reports.some((report) => report.report_type !== "pfu_draft"),
-              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              report: reports.length > 0,
+              pfuDraft: allReports.some((report) => report.report_type === "pfu_draft"),
               pfuDecision: Boolean(
                 pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
               ),
-              policeReport: reports.some((report) => report.report_type === "police_draft"),
+              policeReport: allReports.some((report) => report.report_type === "police_draft"),
             }}
           />
 
@@ -747,7 +705,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                     ønsker å bevare denne versjonen.
                   </p>
                 ) : (
-                  reports.map((report) => {
+                  visibleReports.map((report) => {
                     const isSelected = activeReport?.id === report.id;
 
                     return (
@@ -778,6 +736,16 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                     );
                   })
                 )}
+
+                {hasMoreReports ? (
+                  <button
+                    type="button"
+                    onClick={() => setVisibleReportCount((current) => current + 5)}
+                    className="rounded-2xl border border-slate-300 bg-white px-5 py-4 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                  >
+                    Vis 5 til
+                  </button>
+                ) : null}
               </div>
             </div>
 

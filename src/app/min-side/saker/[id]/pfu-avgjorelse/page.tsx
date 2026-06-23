@@ -611,6 +611,13 @@ export default function PfuDecisionPage() {
                 </button>
 
                 <Link
+                  href={`/min-side/saker/${params.id}/politianmeldelse`}
+                  className="col-span-2 w-full rounded-2xl bg-slate-950 px-6 py-4 text-center font-black text-white hover:bg-slate-800 sm:col-span-1 sm:w-auto"
+                >
+                  Gå til politianmeldelse
+                </Link>
+
+                <Link
                   href={`/min-side/saker/${params.id}`}
                   className="col-span-2 w-full rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center font-black text-slate-950 hover:bg-slate-100 sm:col-span-1 sm:w-auto"
                 >

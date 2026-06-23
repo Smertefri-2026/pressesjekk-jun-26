@@ -537,8 +537,8 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
                 {activePfuDraft
-                  ? "Dette er valgt lagret PFU-klageutkast. Du kan kopiere teksten, lage nytt KI-utkast eller lagre et regelbasert utkast."
-                  : "Dette er et foreløpig regelbasert utkast. Bruk KI-knappen for å lage et mer gjennomarbeidet PFU-klageutkast basert på saken og relevante presseetiske punkter."}
+                  ? "Dette er valgt lagret PFU-klageutkast. Du kan laste ned PDF, laste ned tekst eller lage et nytt KI-utkast."
+                  : "Bruk KI-knappen for å lage et gjennomarbeidet PFU-klageutkast basert på saken og relevante presseetiske punkter."}
               </p>
 
               <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
@@ -551,15 +551,6 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                   {isGeneratingAiDraft
                     ? "Genererer..."
                     : "Generer PFU-klage med KI"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleSavePfuDraft}
-                  disabled={isSaving}
-                  className="col-span-2 w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-base font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
-                >
-                  {isSaving ? "Lagrer..." : "Lagre regelbasert utkast"}
                 </button>
 
                 <button
