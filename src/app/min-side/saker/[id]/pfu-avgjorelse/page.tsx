@@ -341,10 +341,10 @@ export default function PfuDecisionPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
-          href={`/min-side/saker/${params.id}`}
+          href="/min-side"
           className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
         >
-          ← Tilbake til saken
+          ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
@@ -358,32 +358,14 @@ export default function PfuDecisionPage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Registrer om PFU-klage er sendt, saksnummer, resultat,
+              Registrer om PFU-klagen er sendt, saksnummer, resultat,
               avgjørelse, dokumentasjon og eventuelle videre steg. Dette gjør
               saken enklere å følge opp senere.
             </p>
-          </section>
-
-          <CaseWorkflowCard
-            caseId={params.id}
-            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
-            activeStep="pfu-avgjorelse"
-            stepsDone={{
-              caseRegistered: true,
-              caseInputs: Boolean(caseInput),
-              report: reports.some((report) => report.report_type !== "pfu_draft"),
-              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
-              pfuDecision: Boolean(decisionReceived || uploadedFileName),
-              policeReport: false,
-            }}
-          />
-        </div>
-
-        <section className="mt-12 grid gap-8 lg:grid-cols-[1fr_390px]">
-          <form
-            onSubmit={handleSave}
-            className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
-          >
+            <form
+              onSubmit={handleSave}
+              className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
+            >
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
               PFU-status
             </p>
@@ -615,11 +597,11 @@ export default function PfuDecisionPage() {
                 </div>
               ) : null}
 
-              <div className="flex flex-wrap gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
                 <button
                   type="submit"
                   disabled={isSaving || isUploading}
-                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="col-span-2 w-full rounded-2xl bg-slate-950 px-6 py-4 text-center font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto"
                 >
                   {isUploading
                     ? "Laster opp..."
@@ -630,15 +612,30 @@ export default function PfuDecisionPage() {
 
                 <Link
                   href={`/min-side/saker/${params.id}`}
-                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
+                  className="col-span-2 w-full rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center font-black text-slate-950 hover:bg-slate-100 sm:col-span-1 sm:w-auto"
                 >
-                  Avbryt
+                  Til saken
                 </Link>
               </div>
             </div>
-          </form>
+            </form>
+          </section>
 
           <aside className="grid content-start gap-6">
+            <CaseWorkflowCard
+              caseId={params.id}
+              statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+              activeStep="pfu-avgjorelse"
+              stepsDone={{
+                caseRegistered: true,
+                caseInputs: Boolean(caseInput),
+                report: reports.some((report) => report.report_type !== "pfu_draft"),
+                pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+                pfuDecision: Boolean(decisionReceived || uploadedFileName),
+                policeReport: false,
+              }}
+            />
+
             <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
                 Lagret status
@@ -681,7 +678,7 @@ export default function PfuDecisionPage() {
               </p>
             </div>
           </aside>
-        </section>
+        </div>
       </section>
 
       <LightPublicFooter />
