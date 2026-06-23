@@ -37,7 +37,7 @@ type CaseInputRow = {
 type CaseReportRow = {
   id: string;
   version: number;
-  report_type: "free_check" | "full_report" | "pfu_draft";
+  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft";
   summary: string | null;
   findings: string[] | null;
   recommendations: string[] | null;
@@ -725,7 +725,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
               pfuDecision: Boolean(
                 pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
               ),
-              policeReport: false,
+              policeReport: reports.some((report) => report.report_type === "police_draft"),
             }}
           />
 
