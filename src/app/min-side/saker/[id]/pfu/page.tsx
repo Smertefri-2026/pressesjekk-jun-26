@@ -104,11 +104,13 @@ export default function PfuDraftPage() {
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [pfuDrafts, setPfuDrafts] = useState<CaseReportRow[]>([]);
+  const [selectedPfuDraftId, setSelectedPfuDraftId] = useState<string | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGeneratingAiDraft, setIsGeneratingAiDraft] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -183,7 +185,9 @@ export default function PfuDraftPage() {
         return;
       }
 
-      setPfuDrafts((reportData ?? []) as CaseReportRow[]);
+      const loadedPfuDrafts = (reportData ?? []) as CaseReportRow[];
+      setPfuDrafts(loadedPfuDrafts);
+      setSelectedPfuDraftId(loadedPfuDrafts[0]?.id ?? null);
 
       const { data: allReportsData } = await supabase
         .from("case_reports")
@@ -282,18 +286,74 @@ Basert på de registrerte opplysningene kan følgende temaer være relevante å 
 Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetisk vurdering. Utkastet bør kvalitetssikres før bruk.`;
   }, [caseItem, caseInput, profile, user]);
 
+  const activePfuDraft =
+    pfuDrafts.find((draft) => draft.id === selectedPfuDraftId) ??
+    pfuDrafts[0] ??
+    null;
+
+  const activePfuDraftText = activePfuDraft?.pfu_draft || draftText;
+
   async function handleCopyDraft() {
     setCopyMessage("");
     setErrorMessage("");
 
     try {
-      await navigator.clipboard.writeText(draftText);
+      await navigator.clipboard.writeText(activePfuDraftText);
       setCopyMessage("PFU-utkastet er kopiert.");
     } catch {
       setErrorMessage(
         "Kunne ikke kopiere automatisk. Marker teksten og kopier manuelt."
       );
     }
+  }
+
+  async function handleGenerateAiPfuDraft() {
+    if (!caseItem) return;
+
+    setIsGeneratingAiDraft(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+    setCopyMessage("");
+
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+
+    const accessToken = sessionData.session?.access_token;
+
+    if (sessionError || !accessToken) {
+      setErrorMessage("Du må være innlogget for å generere PFU-klage med KI.");
+      setIsGeneratingAiDraft(false);
+      return;
+    }
+
+    const response = await fetch(`/api/cases/${params.id}/generate-pfu-draft`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      setErrorMessage(result.error || "Kunne ikke generere PFU-klage med KI.");
+      setIsGeneratingAiDraft(false);
+      return;
+    }
+
+    if (!result.report) {
+      setErrorMessage("PFU-klagen ble generert, men svaret manglet rapportdata.");
+      setIsGeneratingAiDraft(false);
+      return;
+    }
+
+    const generatedDraft = result.report as CaseReportRow;
+
+    setPfuDrafts((current) => [generatedDraft, ...current]);
+    setReports((current) => [generatedDraft, ...current]);
+    setSelectedPfuDraftId(generatedDraft.id);
+    setSuccessMessage(`PFU-klageutkast v${generatedDraft.version} er generert og lagret.`);
+    setIsGeneratingAiDraft(false);
   }
 
   async function handleSavePfuDraft() {
@@ -303,10 +363,10 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
     setErrorMessage("");
     setSuccessMessage("");
 
+    const allKnownVersions = [...reports, ...pfuDrafts].map((item) => item.version);
+
     const nextVersion =
-      pfuDrafts.length > 0
-        ? Math.max(...pfuDrafts.map((item) => item.version)) + 1
-        : 1;
+      allKnownVersions.length > 0 ? Math.max(...allKnownVersions) + 1 : 1;
 
     const { error } = await supabase.from("case_reports").insert({
       case_id: caseItem.id,
@@ -324,9 +384,11 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
     setSuccessMessage(`PFU-utkast v${nextVersion} er lagret.`);
 
+    const newPfuDraftId = crypto.randomUUID();
+
     setPfuDrafts((current) => [
       {
-        id: crypto.randomUUID(),
+        id: newPfuDraftId,
         version: nextVersion,
         report_type: "pfu_draft",
         pfu_draft: draftText,
@@ -336,6 +398,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
       ...current,
     ]);
 
+    setSelectedPfuDraftId(newPfuDraftId);
     setIsSaving(false);
   }
 
@@ -390,30 +453,41 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               </p>
             ) : null}
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href={`/min-side/saker/${params.id}`}
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                Til saken
-              </Link>
-
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
               <button
                 type="button"
-                onClick={handleCopyDraft}
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+                onClick={handleGenerateAiPfuDraft}
+                disabled={isGeneratingAiDraft}
+                className="col-span-2 w-full rounded-2xl bg-cyan-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
               >
-                Kopier PFU-utkast
+                {isGeneratingAiDraft
+                  ? "Genererer..."
+                  : "Generer PFU-klage med KI"}
               </button>
 
               <button
                 type="button"
                 onClick={handleSavePfuDraft}
                 disabled={isSaving}
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                className="col-span-2 w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-base font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
               >
-                {isSaving ? "Lagrer..." : "Lagre PFU-utkast"}
+                {isSaving ? "Lagrer..." : "Lagre regelbasert utkast"}
               </button>
+
+              <button
+                type="button"
+                onClick={handleCopyDraft}
+                className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-3 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
+              >
+                Kopier
+              </button>
+
+              <Link
+                href={`/min-side/saker/${params.id}`}
+                className="col-span-1 w-full rounded-2xl border border-slate-300 bg-white px-3 py-4 text-center text-base font-black text-slate-950 hover:bg-slate-100 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
+              >
+                Til saken
+              </Link>
             </div>
           </section>
 
@@ -440,11 +514,13 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               Kladd
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
-              PFU-klageutkast
+              {activePfuDraft
+                ? `PFU-klageutkast v${activePfuDraft.version}`
+                : "PFU-klageutkast"}
             </h2>
 
             <pre className="mt-8 whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800 sm:p-7">
-              {draftText}
+              {activePfuDraftText}
             </pre>
 
             {errorMessage ? (
@@ -485,19 +561,34 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                     ønsker å bevare denne versjonen.
                   </p>
                 ) : (
-                  pfuDrafts.map((draft) => (
-                    <div
-                      key={`${draft.id}-${draft.version}`}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                    >
-                      <p className="font-black text-slate-950">
-                        PFU-utkast v{draft.version}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-600">
-                        {formatDate(draft.created_at)}
-                      </p>
-                    </div>
-                  ))
+                  pfuDrafts.map((draft) => {
+                    const isSelected = activePfuDraft?.id === draft.id;
+
+                    return (
+                      <button
+                        key={`${draft.id}-${draft.version}`}
+                        type="button"
+                        onClick={() => setSelectedPfuDraftId(draft.id)}
+                        className={`rounded-2xl border p-4 text-left transition ${
+                          isSelected
+                            ? "border-cyan-400 bg-cyan-50 shadow-sm"
+                            : "border-slate-200 bg-slate-50 hover:bg-cyan-50"
+                        }`}
+                      >
+                        <p className="font-black text-slate-950">
+                          PFU-klageutkast v{draft.version}
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-600">
+                          {formatDate(draft.created_at)}
+                        </p>
+                        {isSelected ? (
+                          <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                            Vises nå
+                          </p>
+                        ) : null}
+                      </button>
+                    );
+                  })
                 )}
               </div>
             </div>
