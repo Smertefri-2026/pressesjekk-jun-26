@@ -347,7 +347,30 @@ async function createReportPdf(reportText: string) {
     "Saksopplysninger",
     "Dokumentgrunnlag",
     "Forbehold",
+    "POLITIANMELDELSE",
   ]);
+
+  const isPoliceReport = reportText.includes("POLITIANMELDELSE");
+
+  function valueAfterHeading(heading: string) {
+    const lines = reportText.split("\n").map((line) => line.trim());
+    const index = lines.findIndex((line) => line === heading);
+
+    if (index === -1) return "";
+
+    for (let i = index + 1; i < lines.length; i += 1) {
+      if (lines[i]) return lines[i];
+    }
+
+    return "";
+  }
+
+  function valueAfterPrefix(prefix: string) {
+    const lines = reportText.split("\n").map((line) => line.trim());
+    const match = lines.find((line) => line.startsWith(prefix));
+
+    return match ? match.replace(prefix, "").trim() : "";
+  }
 
   function drawHeader(currentPage: any) {
     currentPage.drawRectangle({
@@ -460,9 +483,152 @@ async function createReportPdf(reportText: string) {
     y -= 24;
   }
 
-  drawHeader(page);
+  function drawPoliceCoverPage() {
+    drawHeader(page);
 
-  page.drawText("PresseSjekk-rapport", {
+    const caseTitle = valueAfterHeading("Sak") || "Ikke registrert";
+    const source = valueAfterHeading("Kilde / artikkel") || "Ikke registrert";
+    const reportLabel = valueAfterHeading("Rapport") || "Politianmeldelse";
+    const sender = valueAfterPrefix("Navn:") || "Anmelder / klager";
+
+    y = 635;
+
+    page.drawText("POLITIANMELDELSE", {
+      x: margin,
+      y,
+      size: 28,
+      font: boldFont,
+      color: dark,
+    });
+
+    y -= 28;
+
+    page.drawText("Foreløpig utkast basert på innsendte opplysninger", {
+      x: margin,
+      y,
+      size: 12,
+      font: boldFont,
+      color: cyan,
+    });
+
+    y -= 34;
+
+    page.drawRectangle({
+      x: margin,
+      y: y - 10,
+      width: contentWidth,
+      height: 1,
+      color: border,
+    });
+
+    y -= 38;
+
+    const coverRows = [
+      ["Til", "Politiet / relevant mottaker"],
+      ["Fra", sender],
+      ["Dato", reportLabel.replace("Politianmeldelse -", "").trim()],
+      ["Sak", caseTitle],
+      ["Medieomtale", source],
+      ["Dokumenttype", "Politianmeldelse med vedlagt vurderingsgrunnlag"],
+    ];
+
+    for (const [label, value] of coverRows) {
+      page.drawText(`${label}:`, {
+        x: margin,
+        y,
+        size: 10.5,
+        font: boldFont,
+        color: dark,
+      });
+
+      const lines = wrapLine(value, 68);
+
+      for (let i = 0; i < lines.length; i += 1) {
+        page.drawText(lines[i], {
+          x: margin + 105,
+          y,
+          size: 10.5,
+          font: regularFont,
+          color: dark,
+        });
+
+        if (i < lines.length - 1) y -= lineHeight;
+      }
+
+      y -= 24;
+    }
+
+    y -= 14;
+
+    page.drawText("Kort forklaring", {
+      x: margin,
+      y,
+      size: 13,
+      font: boldFont,
+      color: dark,
+    });
+
+    y -= 22;
+
+    const explanation =
+      "Dette dokumentet er generert av PresseSjekk basert på kundens innsendte opplysninger. Dokumentet er ment som et strukturert utkast til politianmeldelse og må kvalitetssikres før eventuell innsending.";
+
+    for (const line of wrapLine(explanation, 78)) {
+      page.drawText(line, {
+        x: margin,
+        y,
+        size: 10.5,
+        font: regularFont,
+        color: dark,
+      });
+
+      y -= lineHeight;
+    }
+
+    y -= 18;
+
+    page.drawText("Vedlegg / grunnlag", {
+      x: margin,
+      y,
+      size: 13,
+      font: boldFont,
+      color: dark,
+    });
+
+    y -= 22;
+
+    const bullets = [
+      "Saksopplysninger",
+      "Medieomtale / artikkel",
+      "Eventuell PFU-klage og PFU-avgjørelse",
+      "Opplastet dokumentasjon",
+      "Vedlagt vurderingsgrunnlag",
+    ];
+
+    for (const bullet of bullets) {
+      page.drawText(`- ${bullet}`, {
+        x: margin,
+        y,
+        size: 10.5,
+        font: regularFont,
+        color: dark,
+      });
+
+      y -= lineHeight;
+    }
+
+    page = pdfDoc.addPage([pageWidth, pageHeight]);
+    drawHeader(page);
+    y = 700;
+  }
+
+  if (isPoliceReport) {
+    drawPoliceCoverPage();
+  } else {
+    drawHeader(page);
+  }
+
+  page.drawText(isPoliceReport ? "PresseSjekk politianmeldelse" : "PresseSjekk-rapport", {
     x: margin,
     y,
     size: 24,
@@ -472,13 +638,18 @@ async function createReportPdf(reportText: string) {
 
   y -= 26;
 
-  page.drawText("Strukturert kontroll av medieomtale basert på innsendte opplysninger.", {
-    x: margin,
-    y,
-    size: 10.5,
-    font: regularFont,
-    color: slate,
-  });
+  page.drawText(
+    isPoliceReport
+      ? "Strukturert utkast til politianmeldelse basert på innsendte opplysninger."
+      : "Strukturert kontroll av medieomtale basert på innsendte opplysninger.",
+    {
+      x: margin,
+      y,
+      size: 10.5,
+      font: regularFont,
+      color: slate,
+    }
+  );
 
   y -= 34;
 
