@@ -121,6 +121,7 @@ export default function CaseDetailPage() {
   const params = useParams<{ id: string }>();
 
   const [user, setUser] = useState<User | null>(null);
+  const [workflowType, setWorkflowType] = useState<"standard" | "journalist">("standard");
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
@@ -154,6 +155,16 @@ export default function CaseDetailPage() {
       }
 
       setUser(user);
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("role_type")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setWorkflowType(
+        profileData?.role_type === "journalist" ? "journalist" : "standard"
+      );
 
       const { data, error } = await supabase
         .from("cases")
@@ -595,6 +606,7 @@ export default function CaseDetailPage() {
             caseId={params.id}
             statusLabel={statusLabel(caseItem.status)}
             activeStep="case"
+            workflowType={workflowType}
             stepsDone={{
               caseRegistered: true,
               caseInputs: Boolean(caseInput),

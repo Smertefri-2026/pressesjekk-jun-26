@@ -86,6 +86,7 @@ export default function CaseReportPage() {
   const params = useParams<{ id: string }>();
 
   const [user, setUser] = useState<User | null>(null);
+  const [workflowType, setWorkflowType] = useState<"standard" | "journalist">("standard");
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
@@ -116,6 +117,16 @@ export default function CaseReportPage() {
       }
 
       setUser(user);
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("role_type")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setWorkflowType(
+        profileData?.role_type === "journalist" ? "journalist" : "standard"
+      );
 
       const { data: caseData, error: caseError } = await supabase
         .from("cases")
@@ -675,6 +686,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
             caseId={params.id}
             statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
             activeStep="rapport"
+            workflowType={workflowType}
             stepsDone={{
               caseRegistered: true,
               caseInputs: Boolean(caseInput),

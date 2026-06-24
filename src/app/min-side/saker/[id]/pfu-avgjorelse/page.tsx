@@ -68,6 +68,7 @@ export default function PfuDecisionPage() {
   const params = useParams<{ id: string }>();
 
   const [user, setUser] = useState<User | null>(null);
+  const [workflowType, setWorkflowType] = useState<"standard" | "journalist">("standard");
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
@@ -113,6 +114,16 @@ export default function PfuDecisionPage() {
       }
 
       setUser(user);
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("role_type")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setWorkflowType(
+        profileData?.role_type === "journalist" ? "journalist" : "standard"
+      );
 
       const { data: caseData, error: caseError } = await supabase
         .from("cases")
@@ -633,6 +644,7 @@ export default function PfuDecisionPage() {
               caseId={params.id}
               statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
               activeStep="pfu-avgjorelse"
+            workflowType={workflowType}
               stepsDone={{
                 caseRegistered: true,
                 caseInputs: Boolean(caseInput),

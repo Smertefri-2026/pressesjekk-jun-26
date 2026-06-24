@@ -49,6 +49,7 @@ export default function EditCasePage() {
   const params = useParams<{ id: string }>();
 
   const [user, setUser] = useState<User | null>(null);
+  const [workflowType, setWorkflowType] = useState<"standard" | "journalist">("standard");
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
@@ -80,6 +81,16 @@ export default function EditCasePage() {
       }
 
       setUser(user);
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("role_type")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setWorkflowType(
+        profileData?.role_type === "journalist" ? "journalist" : "standard"
+      );
 
       const { data, error } = await supabase
         .from("cases")
@@ -258,6 +269,7 @@ export default function EditCasePage() {
             caseId={params.id}
             statusLabel={statusLabel(status)}
             activeStep="case"
+            workflowType={workflowType}
             stepsDone={{
               caseRegistered: true,
               caseInputs: Boolean(caseInput),

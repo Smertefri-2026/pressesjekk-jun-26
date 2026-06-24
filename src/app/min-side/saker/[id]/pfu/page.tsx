@@ -618,6 +618,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               caseId={params.id}
               statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
               activeStep="pfu"
+              workflowType={profile?.role_type === "journalist" ? "journalist" : "standard"}
               stepsDone={{
                 caseRegistered: true,
                 caseInputs: Boolean(caseInput),
