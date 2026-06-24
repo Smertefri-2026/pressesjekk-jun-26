@@ -56,7 +56,7 @@ const packages = [
   {
     tag: "Manuell hjelp",
     name: "Utredningspakke",
-    price: "Fra 9 900 kr",
+    price: "Fra 100 000 kr",
     description:
       "For større eller mer alvorlige saker der du ønsker manuell gjennomgang, strukturering og videre strategi.",
     features: [
@@ -87,6 +87,35 @@ const upgrades = [
   },
 ];
 
+const stepExplanations = [
+  {
+    title: "Steg 1–3",
+    subtitle: "Rapport",
+    text: "Saken registreres, opplysninger legges inn, og PresseSjekk lager en strukturert rapport eller redaksjonell sjekk.",
+  },
+  {
+    title: "Steg 1–4",
+    subtitle: "PFU-klage",
+    text: "Alt i rapportpakken, i tillegg til et strukturert PFU-klageutkast basert på saken og presseetiske vurderinger.",
+  },
+  {
+    title: "Steg 1–6",
+    subtitle: "Full dokumentpakke",
+    text: "Komplett digital saksgang med rapport, PFU-spor, PFU-status og politianmeldelse/dokumentgrunnlag.",
+  },
+];
+
+const paymentModels = [
+  {
+    title: "Enkeltkjøp per sak",
+    text: "Best for privatpersoner, virksomheter og journalister som vil vurdere én konkret sak.",
+  },
+  {
+    title: "Månedlig profftilgang",
+    text: "Best for advokater, rådgivere, organisasjoner og redaksjoner som jobber med flere saker.",
+  },
+];
+
 export default function PriserPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -107,9 +136,9 @@ export default function PriserPage() {
           </h1>
 
           <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-            PresseSjekk kan brukes til enkel rapport, PFU-klage, full dokumentpakke
-            eller manuell utredning. Du kan starte enkelt og oppgradere dersom saken
-            trenger mer oppfølging.
+            PresseSjekk kan kjøpes som enkeltpakke per sak eller som månedlig
+            profftilgang for brukere med flere saker. Du kan starte enkelt og
+            oppgradere dersom saken trenger mer oppfølging.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -128,11 +157,64 @@ export default function PriserPage() {
           </div>
         </div>
 
-        <section className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-12 grid gap-6 lg:grid-cols-[1fr_420px]">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              Hva betyr pakkene?
+            </p>
+            <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
+              Prisene følger saksgangen.
+            </h2>
+            <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+              Jo lenger saken skal følges opp, desto mer omfattende blir
+              dokumentasjonen. Derfor er pakkene bygget rundt stegene i Min Side.
+            </p>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              {stepExplanations.map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                >
+                  <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-700">
+                    {item.title}
+                  </p>
+                  <h3 className="mt-2 text-xl font-black text-slate-950">
+                    {item.subtitle}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    {item.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-8">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              Betaling
+            </p>
+            <h2 className="mt-3 text-3xl font-black text-slate-950">
+              Per sak eller per måned.
+            </h2>
+            <div className="mt-6 space-y-4">
+              {paymentModels.map((item) => (
+                <div key={item.title} className="rounded-2xl bg-white p-5 shadow-sm">
+                  <h3 className="font-black text-slate-950">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {item.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </section>
+
+        <section className="mt-16 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
           {packages.map((plan) => (
             <article
               key={plan.name}
-              className="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+              className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
             >
               <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
                 {plan.tag}
@@ -150,7 +232,7 @@ export default function PriserPage() {
                 {plan.description}
               </p>
 
-              <ul className="mt-6 space-y-3 text-sm font-medium text-slate-700">
+              <ul className="mb-8 mt-6 space-y-3 text-sm font-medium text-slate-700">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex gap-2">
                     <span className="text-cyan-700">✓</span>
@@ -161,7 +243,7 @@ export default function PriserPage() {
 
               <Link
                 href={plan.href}
-                className="mt-8 block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
+                className="mt-auto block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
               >
                 {plan.button}
               </Link>
@@ -223,8 +305,9 @@ export default function PriserPage() {
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <p className="font-black text-white">Profftilgang</p>
               <p className="mt-3 text-sm leading-7 text-slate-300">
-                Første forslag: fra 4 990 kr per måned for virksomheter med
-                løpende behov. Endelig pris avhenger av antall brukere og saker.
+                Mulig modell: 1 990 kr/mnd for 3 saker, 4 990 kr/mnd for 15
+                saker og 9 990 kr/mnd for større brukere. Enterprise prises
+                etter antall brukere, saker og behov for support.
               </p>
               <Link
                 href="/kontakt"
@@ -246,8 +329,8 @@ export default function PriserPage() {
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-700">
-            Du kan begynne med rapportpakken og oppgradere dersom saken bør tas
-            videre til PFU, full dokumentpakke eller utredningspakke.
+            Du kan begynne med rapportpakken per sak, eller velge profftilgang
+            dersom du jobber med flere saker hver måned.
           </p>
 
           <div className="mt-7 flex flex-wrap justify-center gap-3">
