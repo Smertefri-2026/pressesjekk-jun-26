@@ -148,7 +148,7 @@ export default function PoliceReportPage() {
 
   const activePoliceDraftText =
     activePoliceDraft?.police_draft ||
-    "Ingen vurdering er generert ennå. Trykk på «Generer vurderingsnotat med KI» for å lage et utkast.";
+    "Ingen politianmeldelse er generert ennå. Trykk på «Generer politianmeldelse med KI» for å lage et utkast.";
 
   async function handleGeneratePoliceDraft() {
     if (!caseItem) return;
@@ -163,7 +163,7 @@ export default function PoliceReportPage() {
     const accessToken = sessionData.session?.access_token;
 
     if (sessionError || !accessToken) {
-      setErrorMessage("Du må være innlogget for å generere vurderingsnotat.");
+      setErrorMessage("Du må være innlogget for å generere politianmeldelse.");
       setIsGeneratingPoliceDraft(false);
       return;
     }
@@ -200,12 +200,12 @@ export default function PoliceReportPage() {
       setPoliceDrafts((current) => [generatedDraft, ...current]);
       setReports((current) => [generatedDraft, ...current]);
       setSelectedPoliceDraftId(generatedDraft.id);
-      setSuccessMessage(`Vurderingsnotat v${generatedDraft.version} er generert og lagret.`);
+      setSuccessMessage(`Politianmeldelse v${generatedDraft.version} er generert og lagret.`);
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message);
       } else {
-        setErrorMessage("Kunne ikke generere vurderingsnotat.");
+        setErrorMessage("Kunne ikke generere politianmeldelse.");
       }
     } finally {
       setIsGeneratingPoliceDraft(false);
@@ -227,8 +227,8 @@ export default function PoliceReportPage() {
 
     link.href = url;
     link.download = `${safeTitle}-${activePoliceDraft
-      ? `vurderingsnotat-v${activePoliceDraft.version}`
-      : "vurderingsnotat"}.txt`;
+      ? `politianmeldelse-v${activePoliceDraft.version}`
+      : "politianmeldelse"}.txt`;
 
     document.body.appendChild(link);
     link.click();
@@ -239,7 +239,7 @@ export default function PoliceReportPage() {
 
   async function handleDownloadPoliceDraftPdf() {
     if (!activePoliceDraft) {
-      setErrorMessage("Du må velge et lagret vurderingsnotat før du kan laste ned PDF.");
+      setErrorMessage("Du må velge et lagret politianmeldelse før du kan laste ned PDF.");
       return;
     }
 
@@ -281,7 +281,7 @@ export default function PoliceReportPage() {
       .replace(/^-+|-+$/g, "");
 
     link.href = url;
-    link.download = `${safeTitle}-vurderingsnotat-v${activePoliceDraft.version}.pdf`;
+    link.download = `${safeTitle}-politianmeldelse-v${activePoliceDraft.version}.pdf`;
 
     document.body.appendChild(link);
     link.click();
@@ -354,25 +354,25 @@ export default function PoliceReportPage() {
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Dette steget bruker informasjonen fra saken, rapporten,
               PFU-klagen og eventuell PFU-avgjørelse til å lage et nøkternt
-              vurderingsnotat. Utkastet er ikke juridisk rådgivning og må
+              politianmeldelse. Utkastet er ikke juridisk rådgivning og må
               kvalitetssikres før eventuell innsending.
             </p>
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                Vurderingsnotat
+                Politianmeldelse
               </p>
 
               <h2 className="mt-3 text-4xl font-black text-slate-950">
                 {activePoliceDraft
-                  ? `Vurderingsnotat v${activePoliceDraft.version}`
-                  : "Vurderingsnotat"}
+                  ? `Politianmeldelse v${activePoliceDraft.version}`
+                  : "Politianmeldelse"}
               </h2>
 
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
                 {activePoliceDraft
-                  ? "Dette er valgt lagret vurderingsnotat. Du kan laste ned PDF, laste ned tekst eller generere en ny versjon."
-                  : "Generer et KI-basert vurderingsnotat som kan brukes som arbeidsgrunnlag før eventuell politianmeldelse eller videre vurdering."}
+                  ? "Dette er valgt lagret politianmeldelse. Du kan laste ned PDF, laste ned tekst eller generere en ny versjon."
+                  : "Generer et KI-basert politianmeldelse som kan brukes som arbeidsgrunnlag før eventuell politianmeldelse eller videre vurdering."}
               </p>
 
               <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
@@ -384,7 +384,7 @@ export default function PoliceReportPage() {
                 >
                   {isGeneratingPoliceDraft
                     ? "Genererer..."
-                    : "Generer vurderingsnotat med KI"}
+                    : "Generer politianmeldelse med KI"}
                 </button>
 
                 <button
@@ -482,7 +482,7 @@ export default function PoliceReportPage() {
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                Lagrede vurderinger
+                Lagrede politianmeldelser
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
                 {policeDrafts.length > 1
@@ -495,7 +495,7 @@ export default function PoliceReportPage() {
               <div className="mt-5 grid gap-3">
                 {policeDrafts.length === 0 ? (
                   <p className="leading-8 text-slate-700">
-                    Ingen vurderingsnotater er lagret ennå. Generer et KI-utkast
+                    Ingen politianmeldelseer er lagret ennå. Generer et KI-utkast
                     når saken er klar for videre vurdering.
                   </p>
                 ) : (
@@ -514,7 +514,7 @@ export default function PoliceReportPage() {
                         }`}
                       >
                         <p className="font-black text-slate-950">
-                          Vurderingsnotat v{draft.version}
+                          Politianmeldelse v{draft.version}
                         </p>
                         <p className="mt-1 text-sm font-semibold text-slate-600">
                           {formatDate(draft.created_at)}
