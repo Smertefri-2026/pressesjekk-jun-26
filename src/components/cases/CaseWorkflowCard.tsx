@@ -100,6 +100,42 @@ export function CaseWorkflowCard({
 
     return workflowSteps;
   }, [workflowType]);
+
+  function getStepText(step: (typeof workflowSteps)[number]) {
+    if (workflowType !== "journalist") {
+      return {
+        label: step.label,
+        description: step.description,
+      };
+    }
+
+    if (step.key === "case") {
+      return {
+        label: "Sak opprettet",
+        description: "Artikkelidé / publisering",
+      };
+    }
+
+    if (step.key === "opplysninger") {
+      return {
+        label: "Publiseringsgrunnlag",
+        description: "Fakta, kilder og tilsvar",
+      };
+    }
+
+    if (step.key === "rapport") {
+      return {
+        label: "Redaksjonell sjekk",
+        description: "Presseetisk rapport",
+      };
+    }
+
+    return {
+      label: step.label,
+      description: step.description,
+    };
+  }
+
   return (
     <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
       <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
@@ -145,7 +181,7 @@ export function CaseWorkflowCard({
                 </span>
 
                 <div>
-                  <p className="font-black">{step.label}</p>
+                  <p className="font-black">{getStepText(step).label}</p>
                   <p
                     className={`mt-0.5 text-xs leading-5 ${
                       isActive
@@ -159,7 +195,7 @@ export function CaseWorkflowCard({
                       ? "Aktiv side"
                       : isDone
                         ? "Utført / påbegynt"
-                        : step.description}
+                        : getStepText(step).description}
                   </p>
                 </div>
               </div>
