@@ -42,13 +42,48 @@ function formatDate(value: string | null | undefined) {
   }
 }
 
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "Ukjent dato";
+
+  try {
+    return new Intl.DateTimeFormat("nb-NO", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(value));
+  } catch {
+    return "Ukjent dato";
+  }
+}
+
+function formatFileDate(value: string | null | undefined) {
+  if (!value) return "ukjent-dato";
+
+  try {
+    const date = new Date(value);
+    const pad = (number: number) => String(number).padStart(2, "0");
+
+    return [
+      date.getFullYear(),
+      pad(date.getMonth() + 1),
+      pad(date.getDate()),
+      `${pad(date.getHours())}${pad(date.getMinutes())}`,
+    ].join("-");
+  } catch {
+    return "ukjent-dato";
+  }
+}
+
 function reportTypeLabel(
   type: string | null | undefined,
-  version: number | null | undefined
+  version: number | null | undefined,
+  createdAt?: string | null | undefined
 ) {
   if (type === "full_report") return `KI-rapport v${version ?? "1"}`;
   if (type === "pfu_draft") return `PFU-klageutkast v${version ?? "1"}`;
-  if (type === "police_draft") return `Vurderingsnotat v${version ?? "1"}`;
+  if (type === "police_draft") return `Politianmeldelse - ${formatDateTime(createdAt)}`;
   return `Regelbasert rapport v${version ?? "1"}`;
 }
 
@@ -94,7 +129,7 @@ function buildPoliceDraftText({
       : "- Ingen dokumenter registrert.";
 
   return [
-    "PresseSjekk vurderingsnotat",
+    "PresseSjekk politianmeldelse",
     "",
     "Sak",
     safeText(caseItem.title || "Ukjent sak"),
@@ -111,19 +146,19 @@ function buildPoliceDraftText({
     ),
     "",
     "Rapport",
-    reportTypeLabel(report.report_type, report.version),
+    reportTypeLabel(report.report_type, report.version, report.created_at),
     "",
     "Rapportdato",
     formatDate(report.created_at),
     "",
-    "Vurderingsnotat / mulig politianmeldelse",
+    "POLITIANMELDELSE",
     safeText(report.police_draft || "Ingen vurderingstekst registrert."),
     "",
     "Dokumentgrunnlag",
     documentLines,
     "",
     "Forbehold",
-    "Dette er et foreløpig og veiledende vurderingsnotat. Det er ikke juridisk rådgivning, politianmeldelse, advokatvurdering eller konklusjon om straffbart forhold. Teksten bør kontrolleres og kvalitetssikres før eventuell bruk eller innsending.",
+    "Dette er et foreløpig og veiledende utkast til politianmeldelse basert på kundens innsendte opplysninger. Det er ikke juridisk rådgivning, advokatvurdering, politiets vurdering eller konklusjon om straffbart forhold. Teksten bør kontrolleres og kvalitetssikres før eventuell bruk eller innsending.",
   ].join("\n");
 }
 
@@ -165,7 +200,7 @@ function buildPfuDraftText({
     ),
     "",
     "Rapport",
-    reportTypeLabel(report.report_type, report.version),
+    reportTypeLabel(report.report_type, report.version, report.created_at),
     "",
     "Rapportdato",
     formatDate(report.created_at),
@@ -252,7 +287,7 @@ function buildReportText({
     formatDate(caseItem.publication_date ?? caseItem.article_date ?? caseItem.published_at ?? caseItem.created_at),
     "",
     "Rapport",
-    reportTypeLabel(report.report_type, report.version),
+    reportTypeLabel(report.report_type, report.version, report.created_at),
     "",
     "Rapportdato",
     formatDate(report.created_at),
@@ -607,7 +642,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
   const fileName =
     report.report_type === "police_draft"
-      ? `pressesjekk-vurderingsnotat-v${report.version ?? "1"}.pdf`
+      ? `pressesjekk-politianmeldelse-${formatFileDate(report.created_at)}.pdf`
       : report.report_type === "pfu_draft"
         ? `pressesjekk-pfu-klageutkast-v${report.version ?? "1"}.pdf`
         : `pressesjekk-rapport-v${report.version ?? "1"}.pdf`;
