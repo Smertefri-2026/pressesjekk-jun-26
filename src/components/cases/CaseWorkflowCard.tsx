@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo } from "react";
 import Link from "next/link";
 
 export type CaseWorkflowStep =
@@ -13,6 +16,7 @@ type CaseWorkflowCardProps = {
   caseId: string;
   statusLabel: string;
   activeStep?: CaseWorkflowStep;
+  workflowType?: "standard" | "journalist";
   stepsDone?: {
     caseRegistered?: boolean;
     caseInputs?: boolean;
@@ -84,8 +88,18 @@ export function CaseWorkflowCard({
   caseId,
   statusLabel,
   activeStep = "case",
+  workflowType = "standard",
   stepsDone,
 }: CaseWorkflowCardProps) {
+  const visibleWorkflowSteps = useMemo(() => {
+    if (workflowType === "journalist") {
+      return workflowSteps.filter((step) =>
+        ["case", "opplysninger", "rapport"].includes(step.key)
+      );
+    }
+
+    return workflowSteps;
+  }, [workflowType]);
   return (
     <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
       <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
@@ -97,7 +111,7 @@ export function CaseWorkflowCard({
       </h2>
 
       <div className="mt-6 grid gap-3">
-        {workflowSteps.map((step, index) => {
+        {visibleWorkflowSteps.map((step, index) => {
           const isDone =
             step.doneKey === "caseRegistered"
               ? true
