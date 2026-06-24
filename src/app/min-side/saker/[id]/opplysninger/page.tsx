@@ -178,6 +178,8 @@ export default function CaseInputsPage() {
   const [documentationSummary, setDocumentationSummary] = useState("");
   const [desiredOutcome, setDesiredOutcome] = useState("");
 
+  const isJournalist = workflowType === "journalist";
+
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -654,17 +656,17 @@ export default function CaseInputsPage() {
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
-              Saksopplysninger
+              {isJournalist ? "Publiseringsgrunnlag" : "Saksopplysninger"}
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Saksopplysninger
+              {isJournalist ? "Publiseringsgrunnlag" : "Saksopplysninger"}
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Samle det viktigste om saken på ett sted. Opplysningene brukes
-              som grunnlag for rapport, dokumentasjonsliste og eventuelt
-              PFU-klageutkast.
+              {isJournalist
+                ? "Samle publiseringsgrunnlag, kilder, dokumentasjon, tilsvar og redaksjonelle vurderinger på ett sted. Dette brukes som grunnlag for redaksjonell kvalitetssikring før publisering eller videre arbeid."
+                : "Samle det viktigste om saken på ett sted. Opplysningene brukes som grunnlag for rapport, dokumentasjonsliste og eventuelt PFU-klageutkast."}
             </p>
 
             {isEditingInputs ? (
@@ -676,7 +678,7 @@ export default function CaseInputsPage() {
               Opplysninger
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
-              Hva bør vurderes?
+              {isJournalist ? "Hva skal kvalitetssikres?" : "Hva bør vurderes?"}
             </h2>
 
             <div className="mt-8 grid gap-6">
@@ -685,14 +687,14 @@ export default function CaseInputsPage() {
                   htmlFor="articleText"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Artikkeltekst eller utdrag
+                  {isJournalist ? "Publiseringsutkast eller artikkeltekst" : "Artikkeltekst eller utdrag"}
                 </label>
                 <textarea
                   id="articleText"
                   rows={7}
                   value={articleText}
                   onChange={(event) => setArticleText(event.target.value)}
-                  placeholder="Lim inn artikkeltekst eller relevante utdrag her..."
+                  placeholder={isJournalist ? "Lim inn publiseringsutkast, artikkeltekst eller relevante utdrag her..." : "Lim inn artikkeltekst eller relevante utdrag her..."}
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
                 />
               </div>
@@ -702,46 +704,48 @@ export default function CaseInputsPage() {
                   htmlFor="whatHappened"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Hva skjedde?
+                  {isJournalist ? "Redaksjonell problemstilling" : "Hva skjedde?"}
                 </label>
                 <textarea
                   id="whatHappened"
                   rows={5}
                   value={whatHappened}
                   onChange={(event) => setWhatHappened(event.target.value)}
-                  placeholder="Forklar kort hva saken handler om, og hva du mener bør undersøkes..."
+                  placeholder={isJournalist ? "Forklar hva som bør kvalitetssikres: fakta, kildegrunnlag, vinkling, tilsvar, identifisering eller publiseringsrisiko..." : "Forklar kort hva saken handler om, og hva du mener bør undersøkes..."}
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
                 />
               </div>
 
-              <div>
-                <label
-                  htmlFor="yourRole"
-                  className="text-sm font-bold text-slate-800"
-                >
-                  Din rolle i saken
-                </label>
-                <select
-                  id="yourRole"
-                  value={yourRole}
-                  onChange={(event) => setYourRole(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
-                >
-                  <option value="">Velg rolle i saken</option>
-                  {yourRole && !caseRoleOptions.includes(yourRole) ? (
-                    <option value={yourRole}>{yourRole}</option>
-                  ) : null}
-                  {caseRoleOptions.map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Dette gjelder rollen din i denne konkrete saken. Profilrollen
-                  din lagres separat på profilsiden.
-                </p>
-              </div>
+              {!isJournalist ? (
+                <div>
+                  <label
+                    htmlFor="yourRole"
+                    className="text-sm font-bold text-slate-800"
+                  >
+                    Din rolle i saken
+                  </label>
+                  <select
+                    id="yourRole"
+                    value={yourRole}
+                    onChange={(event) => setYourRole(event.target.value)}
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  >
+                    <option value="">Velg rolle i saken</option>
+                    {yourRole && !caseRoleOptions.includes(yourRole) ? (
+                      <option value={yourRole}>{yourRole}</option>
+                    ) : null}
+                    {caseRoleOptions.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    Dette gjelder rollen din i denne konkrete saken. Profilrollen
+                    din lagres separat på profilsiden.
+                  </p>
+                </div>
+              ) : null}
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                 <label className="flex items-start gap-3">
@@ -753,11 +757,12 @@ export default function CaseInputsPage() {
                   />
                   <span>
                     <span className="block font-black text-slate-950">
-                      Tilsvar eller svar er sendt til redaksjonen
+                      {isJournalist ? "Kontakt med berørt part er gjennomført" : "Tilsvar eller svar er sendt til redaksjonen"}
                     </span>
                     <span className="mt-1 block text-sm leading-6 text-slate-600">
-                      Huk av hvis du har bedt om retting, tilsvar, samtidig
-                      imøtegåelse eller sendt annen henvendelse.
+                      {isJournalist
+                        ? "Huk av hvis berørt part, kilde, omtalt person eller virksomhet er kontaktet for kommentar, tilsvar eller samtidig imøtegåelse."
+                        : "Huk av hvis du har bedt om retting, tilsvar, samtidig imøtegåelse eller sendt annen henvendelse."}
                     </span>
                   </span>
                 </label>
@@ -768,14 +773,14 @@ export default function CaseInputsPage() {
                   htmlFor="replyText"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Tilsvar eller henvendelse til redaksjonen
+                  {isJournalist ? "Kontakt med kilde eller berørt part" : "Tilsvar eller henvendelse til redaksjonen"}
                 </label>
                 <textarea
                   id="replyText"
                   rows={6}
                   value={replyText}
                   onChange={(event) => setReplyText(event.target.value)}
-                  placeholder="Lim inn eller oppsummer hva du sendte til redaksjonen..."
+                  placeholder={isJournalist ? "Lim inn eller oppsummer spørsmål, tilsvar, sitatsjekk, samtidig imøtegåelse eller kontakt med berørt part..." : "Lim inn eller oppsummer hva du sendte til redaksjonen..."}
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
                 />
               </div>
@@ -785,14 +790,14 @@ export default function CaseInputsPage() {
                   htmlFor="editorResponse"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Svar fra redaksjonen
+                  {isJournalist ? "Svar fra kilde eller berørt part" : "Svar fra redaksjonen"}
                 </label>
                 <textarea
                   id="editorResponse"
                   rows={5}
                   value={editorResponse}
                   onChange={(event) => setEditorResponse(event.target.value)}
-                  placeholder="Skriv kort hva redaksjonen svarte, eller lim inn relevant svar..."
+                  placeholder={isJournalist ? "Skriv kort hva kilden eller den berørte parten svarte, eller lim inn relevant svar..." : "Skriv kort hva redaksjonen svarte, eller lim inn relevant svar..."}
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
                 />
               </div>
@@ -802,7 +807,7 @@ export default function CaseInputsPage() {
                   htmlFor="legalStatus"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Rettsstatus
+                  {isJournalist ? "Risiko/status" : "Rettsstatus"}
                 </label>
                 <select
                   id="legalStatus"
@@ -810,7 +815,7 @@ export default function CaseInputsPage() {
                   onChange={(event) => setLegalStatus(event.target.value)}
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
                 >
-                  <option value="">Velg rettsstatus</option>
+                  <option value="">{isJournalist ? "Velg status" : "Velg rettsstatus"}</option>
                   <option value="not_relevant">Ikke relevant</option>
                   <option value="unknown">Uavklart</option>
                   <option value="reported">Anmeldt</option>
@@ -826,7 +831,7 @@ export default function CaseInputsPage() {
                   htmlFor="legalStatusDetails"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Detaljer om rettsstatus
+                  {isJournalist ? "Detaljer om risiko/status" : "Detaljer om rettsstatus"}
                 </label>
                 <textarea
                   id="legalStatusDetails"
@@ -835,7 +840,7 @@ export default function CaseInputsPage() {
                   onChange={(event) =>
                     setLegalStatusDetails(event.target.value)
                   }
-                  placeholder="Forklar kort om saken er anmeldt, henlagt, avgjort, påklaget eller annet..."
+                  placeholder={isJournalist ? "Forklar kort om det finnes publiseringsrisiko, uavklarte fakta, kildekonflikt, identifisering, rettslig prosess eller andre forhold..." : "Forklar kort om saken er anmeldt, henlagt, avgjort, påklaget eller annet..."}
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
                 />
               </div>
@@ -854,7 +859,7 @@ export default function CaseInputsPage() {
                   onChange={(event) =>
                     setDocumentationSummary(event.target.value)
                   }
-                  placeholder="List opp dokumenter, e-poster, SMS, vedlegg, skjermbilder eller andre bevis som finnes..."
+                  placeholder={isJournalist ? "List opp kilder, dokumenter, e-poster, sitatsjekk, tilsvar, faktagrunnlag, åpne kilder eller annen dokumentasjon..." : "List opp dokumenter, e-poster, SMS, vedlegg, skjermbilder eller andre bevis som finnes..."}
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
                 />
               </div>
@@ -864,14 +869,14 @@ export default function CaseInputsPage() {
                   htmlFor="desiredOutcome"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Hva ønsker du å oppnå?
+                  {isJournalist ? "Ønsket redaksjonell avklaring" : "Hva ønsker du å oppnå?"}
                 </label>
                 <textarea
                   id="desiredOutcome"
                   rows={4}
                   value={desiredOutcome}
                   onChange={(event) => setDesiredOutcome(event.target.value)}
-                  placeholder="F.eks. retting, tilsvar, beklagelse, avindeksering, PFU-klage eller bedre dokumentasjon..."
+                  placeholder={isJournalist ? "F.eks. styrke faktagrunnlag, avklare vinkling, redusere publiseringsrisiko, sikre tilsvar eller dokumentere redaksjonelle vurderinger..." : "F.eks. retting, tilsvar, beklagelse, avindeksering, PFU-klage eller bedre dokumentasjon..."}
                   className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
                 />
               </div>
@@ -914,7 +919,7 @@ export default function CaseInputsPage() {
 
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <h2 className="mt-3 text-4xl font-black text-slate-950">
-                  Fakta, tilsvar og dokumentasjon
+                  {isJournalist ? "Fakta, kilder og redaksjonell dokumentasjon" : "Fakta, tilsvar og dokumentasjon"}
                 </h2>
 
                 <button
@@ -930,8 +935,9 @@ export default function CaseInputsPage() {
               </div>
 
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-                Dette er opplysningene som brukes videre som grunnlag for
-                rapport, PFU-klage og dokumentasjon.
+                {isJournalist
+                  ? "Dette er publiseringsgrunnlaget som brukes videre som grunnlag for redaksjonell sjekk, dokumentasjon og presseetisk vurdering."
+                  : "Dette er opplysningene som brukes videre som grunnlag for rapport, PFU-klage og dokumentasjon."}
               </p>
 
               {saveMessage ? (
@@ -952,7 +958,7 @@ export default function CaseInputsPage() {
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
-                    Hva skjedde?
+                    {isJournalist ? "Redaksjonell problemstilling" : "Hva skjedde?"}
                   </p>
                   <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
                     {whatHappened || "Ikke lagt inn ennå."}
@@ -1474,8 +1480,9 @@ export default function CaseInputsPage() {
                 Første rapportutkast
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Når opplysninger er lagret, kan du gå tilbake til saken og
-                jobbe videre med rapportutkast, PFU-spor eller redigering.
+                {isJournalist
+                  ? "Når publiseringsgrunnlaget er lagret, kan du gå videre til redaksjonell sjekk og bruke rapporten som dokumentasjon i det videre arbeidet."
+                  : "Når opplysninger er lagret, kan du gå tilbake til saken og jobbe videre med rapportutkast, PFU-spor eller redigering."}
               </p>
             </div>
           </aside>
