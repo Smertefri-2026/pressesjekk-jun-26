@@ -89,7 +89,7 @@ export default function PersonvernPage() {
               Personvern
             </p>
 
-            <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl md:text-7xl">
               Personvernerklæring for PresseSjekk.
             </h1>
 
@@ -114,7 +114,7 @@ export default function PersonvernPage() {
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
             Erklæring
           </p>
-          <h2 className="mt-3 text-4xl font-black text-slate-950">
+          <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
             Slik behandler vi personopplysninger
           </h2>
 
@@ -124,7 +124,7 @@ export default function PersonvernPage() {
                 key={section.title}
                 className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
               >
-                <h3 className="text-xl font-black text-slate-950">
+                <h3 className="text-lg font-black text-slate-950 sm:text-xl">
                   {section.title}
                 </h3>
                 <p className="mt-3 leading-8 text-slate-700">
