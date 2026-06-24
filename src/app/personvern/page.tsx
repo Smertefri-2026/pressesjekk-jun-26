@@ -2,28 +2,10 @@ import Link from "next/link";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 
-const quickPoints = [
-  "Vi samler bare inn opplysninger som er nødvendige for å levere tjenesten.",
-  "Du skal ikke sende sensitive dokumenter via kontaktskjemaet.",
-  "Når Min Side er aktiv, skal du kunne be om innsyn, retting og sletting.",
-  "AI-analyser er veiledende og skal ikke brukes som endelig juridisk vurdering.",
-];
-
-const dataTypes = [
-  "Navn og e-postadresse",
-  "Artikkel-URL, artikkeltekst eller PDF",
-  "Opplysninger om kontakt med journalist eller redaksjon",
-  "Tilsvar, svarfrist og redaktørsvar",
-  "Dokumentasjon, skjermbilder og vedlegg",
-  "Rettstatus, henleggelse, dom, frifinnelse eller ny utvikling",
-  "Rapporter, rapportversjoner og PFU-klageutkast",
-  "Tekniske opplysninger som IP-adresse, sikkerhetslogger og spamkontroll",
-];
-
 const sections = [
   {
     title: "1. Behandlingsansvarlig",
-    text: "PresseSjekk er behandlingsansvarlig for personopplysninger som behandles gjennom tjenesten, med mindre annet er avtalt skriftlig. Når endelig selskapsstruktur er klar, skal navn på behandlingsansvarlig virksomhet, organisasjonsnummer og kontaktpunkt for personvern legges inn her.",
+    text: "Behandlingsansvarlig for PresseSjekk er eier og driver av tjenesten. Kontakt for personvernspørsmål: post [a] pressesjekk.no.",
   },
   {
     title: "2. Hva er PresseSjekk?",
@@ -66,8 +48,8 @@ const sections = [
     text: "PresseSjekk kan bruke eksterne leverandører for hosting, database, sikkerhet, e-post, betaling, dokumentlagring og AI-analyse. Disse leverandørene kan behandle personopplysninger på vegne av PresseSjekk. Før lansering må konkrete leverandører og nødvendige databehandleravtaler dokumenteres.",
   },
   {
-    title: "12. Betaling og credits",
-    text: "Når betaling kobles på, kan opplysninger om kjøp, credits, kvitteringer og abonnement behandles. Betalingsopplysninger vil normalt håndteres av en betalingsleverandør. PresseSjekk bør ikke lagre kortinformasjon direkte.",
+    title: "12. Betaling og dokumentpakker",
+    text: "Når betaling kobles på, kan opplysninger om kjøp av dokumentpakker, rapportpakker, utredningspakker, kvitteringer og abonnement behandles. Betalingsopplysninger vil normalt håndteres av en betalingsleverandør. PresseSjekk bør ikke lagre kortinformasjon direkte.",
   },
   {
     title: "13. Lagringstid",
@@ -91,15 +73,6 @@ const sections = [
   },
 ];
 
-const laterTasks = [
-  "Legg inn behandlingsansvarlig virksomhet og organisasjonsnummer",
-  "Bestem personvernkontakt",
-  "Beskriv endelige leverandører og databehandlere",
-  "Fastsett lagringstid for saker, vedlegg og rapporter",
-  "Avklar AI-behandling og databehandleravtaler",
-  "Lag rutine for innsyn, retting og sletting",
-];
-
 export default function PersonvernPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -110,7 +83,7 @@ export default function PersonvernPage() {
           ← Tilbake til forsiden
         </Link>
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
+        <div className="mt-10">
           <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
               Personvern
@@ -133,92 +106,9 @@ export default function PersonvernPage() {
               >
                 Kontakt oss
               </Link>
-              <Link
-                href="/vilkar"
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                Se vilkår
-              </Link>
             </div>
           </section>
-
-          <aside className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-              Foreløpig versjon
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Må kvalitetssikres før lansering
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Denne teksten er et gjennomarbeidet utkast. Den må oppdateres når
-              endelig teknisk løsning, leverandører, lagringstid og
-              behandlingsansvarlig virksomhet er bestemt.
-            </p>
-          </aside>
         </div>
-
-        <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Kort forklart
-            </p>
-            <h2 className="mt-3 text-4xl font-black text-slate-950">
-              Hovedprinsippene
-            </h2>
-
-            <div className="mt-8 grid gap-3">
-              {quickPoints.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
-                >
-                  <span className="mr-2 text-cyan-700">✓</span>
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Viktig for brukere
-            </p>
-            <h2 className="mt-3 text-3xl font-black text-slate-950">
-              Ikke send mer enn nødvendig
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Mediesaker kan inneholde private eller belastende opplysninger.
-              Legg bare inn informasjon som er relevant for saken, og ikke send
-              sensitive dokumenter via kontaktskjemaet.
-            </p>
-          </aside>
-        </section>
-
-        <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-            Opplysninger
-          </p>
-          <h2 className="mt-3 text-4xl font-black text-slate-950">
-            Eksempler på opplysninger som kan behandles
-          </h2>
-          <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-            Hvilke opplysninger som behandles avhenger av hvordan du bruker
-            tjenesten. En enkel kontaktmelding krever lite informasjon. En full
-            PresseSjekk-sak kan inneholde mer dokumentasjon.
-          </p>
-
-          <div className="mt-8 grid gap-3 md:grid-cols-2">
-            {dataTypes.map((item) => (
-              <div
-                key={item}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
-              >
-                <span className="mr-2 text-cyan-700">✓</span>
-                {item}
-              </div>
-            ))}
-          </div>
-        </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
@@ -242,35 +132,6 @@ export default function PersonvernPage() {
                 </p>
               </article>
             ))}
-          </div>
-        </section>
-
-        <section className="mt-16 rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Før lansering
-              </p>
-              <h2 className="mt-3 text-4xl font-black">
-                Dette må fylles inn senere
-              </h2>
-              <p className="mt-5 max-w-3xl leading-8 text-slate-300">
-                Når teknisk løsning er endelig, bør denne siden oppdateres med
-                konkret informasjon om selskap, leverandører, databehandleravtaler,
-                lagringstid, sletting og kontaktpunkt.
-              </p>
-            </div>
-
-            <div className="grid gap-3">
-              {laterTasks.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-white/10 bg-white/4 p-4 text-sm font-semibold text-slate-200"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
           </div>
         </section>
       </section>
