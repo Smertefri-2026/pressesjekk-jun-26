@@ -2,17 +2,10 @@ import Link from "next/link";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 
-const quickPoints = [
-  "PresseSjekk gir veiledende analyser og dokumenthjelp.",
-  "Tjenesten erstatter ikke advokat, PFU, redaktøransvar eller domstolene.",
-  "Brukeren har ansvar for å kontrollere rapporter og klageutkast før bruk.",
-  "Sensitive dokumenter bør ikke sendes via kontaktskjema.",
-];
-
 const sections = [
   {
     title: "1. Om tjenesten",
-    text: "PresseSjekk er en digital tjeneste som hjelper brukere med å strukturere og vurdere medieomtale, tilsvar, dokumentasjon, rettsstatus og mulige presseetiske problemstillinger. Tjenesten kan brukes til forhåndssjekk, rapporter, rapportversjoner og utkast til PFU-klage eller annen videre oppfølging.",
+    text: "PresseSjekk er en digital tjeneste som hjelper brukere med å strukturere og vurdere medieomtale, tilsvar, dokumentasjon, rettsstatus og mulige presseetiske problemstillinger. Tjenesten kan brukes til forhåndssjekk, rapporter, rapportversjoner, utkast til PFU-klage, politianmeldelse og annen videre oppfølging.",
   },
   {
     title: "2. Hvem kan bruke PresseSjekk?",
@@ -43,8 +36,8 @@ const sections = [
     text: "Gratis forhåndssjekk kan gi en kort og foreløpig vurdering av mulige problemområder. Gratisversjonen er ikke en full rapport og kan ha begrensninger i dybde, dokumentasjon, lagring og videre oppfølging.",
   },
   {
-    title: "9. Betalte rapporter og credits",
-    text: "Betalte funksjoner kan senere omfatte full rapport, rapportversjoner, PFU-klageutkast, dokumentasjonsliste, profftilgang og credits. Priser, innhold og vilkår kan endres før lansering og vil fremgå tydelig før kjøp.",
+    title: "9. Betalte dokumentpakker og utredningspakker",
+    text: "Betalte funksjoner kan omfatte full rapport, rapportversjoner, PFU-klageutkast, politianmeldelse, dokumentasjonsliste, dokumentpakker, rapportpakker, utredningspakker og eventuell profftilgang. Priser, innhold og vilkår vil fremgå tydelig før kjøp.",
   },
   {
     title: "10. Rapportversjoner",
@@ -52,7 +45,7 @@ const sections = [
   },
   {
     title: "11. Profftilgang",
-    text: "Profftilgang kan senere tilbys advokater, rådgivere, organisasjoner og virksomheter. Proffbrukere kan få tilgang til flere saker, klientmapper, flere brukere, rapportoversikt, credits og utvidede funksjoner.",
+    text: "Profftilgang kan senere tilbys advokater, rådgivere, organisasjoner og virksomheter. Proffbrukere kan få tilgang til flere saker, klientmapper, flere brukere, rapportoversikt, dokumentpakker og utvidede funksjoner.",
   },
   {
     title: "12. Tilgjengelighet og tekniske feil",
@@ -76,15 +69,6 @@ const sections = [
   },
 ];
 
-const beforeLaunch = [
-  "Legg inn juridisk navn på virksomheten",
-  "Avklar refusjon/angrerett for digitale rapporter",
-  "Avklar endelige priser og credits",
-  "Avklar ansvar ved AI-feil og brukerfeil",
-  "Avklar proffavtale for advokater/rådgivere",
-  "Kvalitetssikre vilkårene juridisk før lansering",
-];
-
 export default function VilkarPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -95,7 +79,7 @@ export default function VilkarPage() {
           ← Tilbake til forsiden
         </Link>
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
+        <div className="mt-10">
           <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
               Vilkår
@@ -108,7 +92,7 @@ export default function VilkarPage() {
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Disse vilkårene beskriver hvordan PresseSjekk kan brukes, hva
               tjenesten leverer, hvilke forbehold som gjelder, og hvilket ansvar
-              brukeren selv har ved bruk av rapporter og klageutkast.
+              brukeren selv har ved bruk av rapporter, klageutkast, politianmeldelser og andre dokumenter.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -126,62 +110,11 @@ export default function VilkarPage() {
               </Link>
             </div>
           </section>
-
-          <aside className="rounded-3xl border border-amber-200 bg-amber-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-              Foreløpig versjon
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Må kvalitetssikres før lansering
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Dette er et gjennomarbeidet utkast. Vilkårene må oppdateres når
-              endelig selskap, betalingsløsning, AI-løsning og datalagring er
-              bestemt.
-            </p>
-          </aside>
         </div>
-
-        <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Kort forklart
-            </p>
-            <h2 className="mt-3 text-4xl font-black text-slate-950">
-              De viktigste forbeholdene
-            </h2>
-
-            <div className="mt-8 grid gap-3">
-              {quickPoints.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
-                >
-                  <span className="mr-2 text-cyan-700">✓</span>
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Hovedprinsipp
-            </p>
-            <h2 className="mt-3 text-3xl font-black text-slate-950">
-              Struktur og dokumenthjelp
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              PresseSjekk skal hjelpe brukeren med å forstå, strukturere og
-              dokumentere en mediesak. Tjenesten skal ikke erstatte faglige,
-              juridiske eller redaksjonelle vurderinger.
-            </p>
-          </aside>
-        </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-            Utkast til vilkår
+            Vilkår
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
             Bruksvilkår
@@ -201,35 +134,6 @@ export default function VilkarPage() {
                 </p>
               </article>
             ))}
-          </div>
-        </section>
-
-        <section className="mt-16 rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Før lansering
-              </p>
-              <h2 className="mt-3 text-4xl font-black">
-                Dette må avklares senere
-              </h2>
-              <p className="mt-5 max-w-3xl leading-8 text-slate-300">
-                Når tjenesten er nærmere lansering, bør vilkårene oppdateres
-                med konkrete betalingsvilkår, refusjon, angrerett, juridisk
-                virksomhetsnavn og tydelig ansvarsbegrensning.
-              </p>
-            </div>
-
-            <div className="grid gap-3">
-              {beforeLaunch.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
           </div>
         </section>
       </section>
