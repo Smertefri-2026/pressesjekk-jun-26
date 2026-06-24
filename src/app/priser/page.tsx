@@ -196,85 +196,41 @@ export default function PriserPage() {
           ← Tilbake til forsiden
         </Link>
 
-        <div className="mt-10">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
-            Priser
-          </p>
+        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_420px] lg:items-start">
+          <section>
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+              Priser
+            </p>
 
-          <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl md:text-7xl">
-            Velg pakken som passer saken.
-          </h1>
+            <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl md:text-7xl">
+              Velg pakken som passer saken.
+            </h1>
 
-          <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-            Start med enkeltkjøp per sak, eller velg månedlig profftilgang hvis
-            du jobber med flere saker, klienter eller redaksjonelle vurderinger.
-          </p>
+            <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
+              Start med enkeltkjøp per sak, eller velg månedlig profftilgang hvis
+              du jobber med flere saker, klienter eller redaksjonelle vurderinger.
+            </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/pressesjekk"
-              className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
-            >
-              Start sjekk
-            </Link>
-            <Link
-              href="/eksempelrapport"
-              className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-            >
-              Se eksempelrapport
-            </Link>
-          </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/pressesjekk"
+                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
+              >
+                Start sjekk
+              </Link>
+              <Link
+                href="/eksempelrapport"
+                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+              >
+                Se eksempelrapport
+              </Link>
+            </div>
+          </section>
+
+
         </div>
 
-        <section className="mt-12 grid gap-6 lg:grid-cols-[1fr_420px]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Hva betyr pakkene?
-            </p>
-            <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
-              Prisene følger saksgangen.
-            </h2>
-            <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-              Jo lenger saken skal følges opp, desto mer omfattende blir
-              dokumentasjonen. Derfor er pakkene bygget rundt stegene i Min Side.
-            </p>
-
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {stepExplanations.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
-                >
-                  <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-700">
-                    {item.title}
-                  </p>
-                  <h3 className="mt-2 text-xl font-black text-slate-950">
-                    {item.subtitle}
-                  </h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
-                    {item.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Betaling
-            </p>
-            <h2 className="mt-3 text-3xl font-black text-slate-950">
-              Enkeltkjøp eller profftilgang.
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Enkeltkjøp passer best for én konkret sak. Månedlig profftilgang
-              passer best for advokater, rådgivere, organisasjoner og
-              redaksjoner med flere saker.
-            </p>
-          </aside>
-        </section>
-
-        <section className="mt-14">
+        <section className="mt-16">
           <div className="inline-flex rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
             <button
               type="button"
@@ -346,6 +302,54 @@ export default function PriserPage() {
               </Link>
             </article>
           ))}
+        </section>
+
+        <section className="mt-12">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              Hva betyr pakkene?
+            </p>
+            <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
+              Prisene følger saksgangen.
+            </h2>
+            <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+              Jo lenger saken skal følges opp, desto mer omfattende blir
+              dokumentasjonen. Derfor er pakkene bygget rundt stegene i Min Side.
+            </p>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              {stepExplanations.map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                >
+                  <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-700">
+                    {item.title}
+                  </p>
+                  <h3 className="mt-2 text-xl font-black text-slate-950">
+                    {item.subtitle}
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    {item.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-8">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              Betaling
+            </p>
+            <h2 className="mt-3 text-3xl font-black text-slate-950">
+              Enkeltkjøp eller profftilgang.
+            </h2>
+            <p className="mt-4 leading-8 text-slate-700">
+              Enkeltkjøp passer best for én konkret sak. Månedlig profftilgang
+              passer best for advokater, rådgivere, organisasjoner og
+              redaksjoner med flere saker.
+            </p>
+          </aside>
         </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
