@@ -1,8 +1,13 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 
-const packages = [
+type PricingTab = "single" | "monthly";
+
+const singlePackages = [
   {
     tag: "Steg 1–3",
     name: "Rapportpakke",
@@ -15,7 +20,7 @@ const packages = [
       "Saksopplysninger / publiseringsgrunnlag",
       "Rapport med KI-basert vurdering",
       "Nedlasting som PDF og tekst",
-      "Passer for både privatpersoner, virksomheter og journalister",
+      "Passer for privatpersoner, virksomheter og journalister",
     ],
     href: "/pressesjekk",
     button: "Start med rapportpakke",
@@ -72,18 +77,71 @@ const packages = [
   },
 ];
 
-const upgrades = [
+const monthlyPackages = [
   {
-    title: "Fra rapport til PFU",
-    text: "Har du startet med Rapportpakke, kan du oppgradere til PFU-pakke dersom saken bør klages videre.",
+    tag: "Proff start",
+    name: "3 saker",
+    price: "1 990 kr/mnd",
+    description:
+      "For enkeltpersoner, mindre virksomheter eller rådgivere som jevnlig vurderer mediesaker.",
+    features: [
+      "Inntil 3 aktive saker per måned",
+      "Rapportpakker inkludert",
+      "Mulighet for oppgradering til PFU-pakke",
+      "Dokumentasjon og rapportversjoner",
+      "Passer for små organisasjoner og rådgivere",
+    ],
+    href: "/kontakt",
+    button: "Kontakt oss",
   },
   {
-    title: "Fra PFU til full dokumentpakke",
-    text: "Har du PFU-pakke, kan du oppgradere til full dokumentpakke med politianmeldelse og mer komplett dokumentgrunnlag.",
+    tag: "Anbefalt",
+    name: "15 saker",
+    price: "4 990 kr/mnd",
+    description:
+      "For advokater, PR-rådgivere, organisasjoner og redaksjoner med løpende behov.",
+    features: [
+      "Inntil 15 aktive saker per måned",
+      "Rapportpakker inkludert",
+      "Rabattert oppgradering til PFU-pakke",
+      "Egnet for klientarbeid og intern kvalitetssikring",
+      "Prioritert videreutvikling og support etter avtale",
+    ],
+    href: "/kontakt",
+    button: "Be om profftilgang",
   },
   {
-    title: "Flere saker",
-    text: "Brukere som jobber med flere saker bør kunne kjøpe ekstra saksplasser eller en større pakke.",
+    tag: "Byrå / redaksjon",
+    name: "50 saker inkludert",
+    price: "14 990 kr/mnd",
+    description:
+      "For større miljøer som trenger løpende kontroll, dokumentasjon og oversikt over mange saker.",
+    features: [
+      "50 saker inkludert per måned",
+      "Ekstra saker etter avtale",
+      "Flere brukere / team etter avtale",
+      "Rapportpakker inkludert",
+      "Egnet for redaksjoner, byråer og organisasjoner",
+      "Mulighet for tilpasset fakturering",
+    ],
+    href: "/kontakt",
+    button: "Kontakt oss",
+  },
+  {
+    tag: "Enterprise",
+    name: "Tilpasset",
+    price: "Etter avtale",
+    description:
+      "For større aktører med behov for flere brukere, mange saker, support eller spesialtilpasning.",
+    features: [
+      "Tilpasset antall saker",
+      "Tilpasset antall brukere",
+      "Mulighet for opplæring",
+      "Mulighet for egne arbeidsflyter",
+      "Pris etter behov og omfang",
+    ],
+    href: "/kontakt",
+    button: "Be om tilbud",
   },
 ];
 
@@ -105,24 +163,36 @@ const stepExplanations = [
   },
 ];
 
-const paymentModels = [
+const upgrades = [
   {
-    title: "Enkeltkjøp per sak",
-    text: "Best for privatpersoner, virksomheter og journalister som vil vurdere én konkret sak.",
+    title: "Start enkelt",
+    text: "Begynn med Rapportpakke dersom du først vil få oversikt over saken.",
   },
   {
-    title: "Månedlig profftilgang",
-    text: "Best for advokater, rådgivere, organisasjoner og redaksjoner som jobber med flere saker.",
+    title: "Oppgrader ved behov",
+    text: "Gå videre til PFU-pakke eller full dokumentpakke dersom saken bør følges opp.",
+  },
+  {
+    title: "Velg profftilgang",
+    text: "Bruk månedlig tilgang hvis du jobber med flere saker, klienter eller redaksjonelle vurderinger.",
   },
 ];
 
 export default function PriserPage() {
+  const [activeTab, setActiveTab] = useState<PricingTab>("single");
+
+  const visiblePackages =
+    activeTab === "single" ? singlePackages : monthlyPackages;
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link href="/" className="text-sm font-semibold text-cyan-700 hover:text-cyan-900">
+        <Link
+          href="/"
+          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+        >
           ← Tilbake til forsiden
         </Link>
 
@@ -136,9 +206,8 @@ export default function PriserPage() {
           </h1>
 
           <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-            PresseSjekk kan kjøpes som enkeltpakke per sak eller som månedlig
-            profftilgang for brukere med flere saker. Du kan starte enkelt og
-            oppgradere dersom saken trenger mer oppfølging.
+            Start med enkeltkjøp per sak, eller velg månedlig profftilgang hvis
+            du jobber med flere saker, klienter eller redaksjonelle vurderinger.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -195,23 +264,51 @@ export default function PriserPage() {
               Betaling
             </p>
             <h2 className="mt-3 text-3xl font-black text-slate-950">
-              Per sak eller per måned.
+              Enkeltkjøp eller profftilgang.
             </h2>
-            <div className="mt-6 space-y-4">
-              {paymentModels.map((item) => (
-                <div key={item.title} className="rounded-2xl bg-white p-5 shadow-sm">
-                  <h3 className="font-black text-slate-950">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {item.text}
-                  </p>
-                </div>
-              ))}
-            </div>
+            <p className="mt-4 leading-8 text-slate-700">
+              Enkeltkjøp passer best for én konkret sak. Månedlig profftilgang
+              passer best for advokater, rådgivere, organisasjoner og
+              redaksjoner med flere saker.
+            </p>
           </aside>
         </section>
 
-        <section className="mt-16 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {packages.map((plan) => (
+        <section className="mt-14">
+          <div className="inline-flex rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setActiveTab("single")}
+              className={`rounded-xl px-5 py-3 text-sm font-black transition ${
+                activeTab === "single"
+                  ? "bg-slate-950 text-white"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+              }`}
+            >
+              Enkeltkjøp
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("monthly")}
+              className={`rounded-xl px-5 py-3 text-sm font-black transition ${
+                activeTab === "monthly"
+                  ? "bg-slate-950 text-white"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+              }`}
+            >
+              Månedlig profftilgang
+            </button>
+          </div>
+
+          <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+            {activeTab === "single"
+              ? "Enkeltkjøp er best når du vil vurdere én konkret sak og eventuelt oppgradere underveis."
+              : "Månedlig profftilgang er best for brukere som jobber med flere saker hver måned."}
+          </p>
+        </section>
+
+        <section className="mt-8 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
+          {visiblePackages.map((plan) => (
             <article
               key={plan.name}
               className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
@@ -261,8 +358,8 @@ export default function PriserPage() {
           </h2>
 
           <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-            Mange saker starter med behov for oversikt. Dersom rapporten viser at
-            saken bør tas videre, kan brukeren oppgradere til PFU-pakke, full
+            Mange saker starter med behov for oversikt. Dersom rapporten viser
+            at saken bør tas videre, kan brukeren oppgradere til PFU-pakke, full
             dokumentpakke eller utredningspakke.
           </p>
 
@@ -283,42 +380,6 @@ export default function PriserPage() {
           </div>
         </section>
 
-        <section className="mt-16 rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-center">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Proffbrukere
-              </p>
-
-              <h2 className="mt-3 text-3xl font-black sm:text-4xl">
-                For advokater, rådgivere, organisasjoner og redaksjoner.
-              </h2>
-
-              <p className="mt-5 max-w-3xl leading-8 text-slate-300">
-                Profesjonelle brukere kan ha behov for flere saker, flere
-                dokumentpakker, klientoversikt, redaksjonell kvalitetssikring og
-                løpende tilgang. Proffløsning bør prises etter antall brukere,
-                saker og rapportvolum.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-              <p className="font-black text-white">Profftilgang</p>
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                Mulig modell: 1 990 kr/mnd for 3 saker, 4 990 kr/mnd for 15
-                saker og 9 990 kr/mnd for større brukere. Enterprise prises
-                etter antall brukere, saker og behov for support.
-              </p>
-              <Link
-                href="/kontakt"
-                className="mt-5 inline-block rounded-xl bg-cyan-400 px-5 py-3 font-black text-slate-950 hover:bg-cyan-300"
-              >
-                Kontakt oss
-              </Link>
-            </div>
-          </div>
-        </section>
-
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 text-center shadow-sm sm:p-8">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
             Klar til å starte?
@@ -329,7 +390,7 @@ export default function PriserPage() {
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-700">
-            Du kan begynne med rapportpakken per sak, eller velge profftilgang
+            Du kan begynne med enkeltkjøp per sak, eller velge profftilgang
             dersom du jobber med flere saker hver måned.
           </p>
 
