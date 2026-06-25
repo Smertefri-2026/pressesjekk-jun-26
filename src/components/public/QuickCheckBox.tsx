@@ -35,6 +35,10 @@ export function QuickCheckBox() {
   const [role, setRole] = useState("reader");
   const [quickResultUrl, setQuickResultUrl] = useState("");
   const [quickRole, setQuickRole] = useState("");
+  const [checkCount, setCheckCount] = useState<number | null>(null);
+  const [lastCheckedAt, setLastCheckedAt] = useState<string | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+  const [quickError, setQuickError] = useState("");
 
   useEffect(() => {
     const incomingUrl = getSearchParam("url");
@@ -52,13 +56,53 @@ export function QuickCheckBox() {
 
     if (quick === "1" && incomingUrl) {
       setQuickResultUrl(incomingUrl);
+
+      if (incomingRole === "reader" || !incomingRole) {
+        registerQuickCheck(incomingUrl, "reader");
+      }
     }
   }, []);
 
   const quickDomain = useMemo(() => getDomain(quickResultUrl), [quickResultUrl]);
   const encodedQuickUrl = encodeURIComponent(quickResultUrl);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function registerQuickCheck(targetUrl: string, targetRole: string) {
+    setIsChecking(true);
+    setQuickError("");
+
+    try {
+      const response = await fetch("/api/quick-check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: targetUrl,
+          role: targetRole,
+        }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        setQuickError(payload?.error ?? "Kunne ikke kjøre rask sjekk.");
+        return false;
+      }
+
+      setCheckCount(payload.quickCheck?.check_count ?? null);
+      setLastCheckedAt(payload.quickCheck?.last_checked_at ?? null);
+      return true;
+    } catch (error) {
+      setQuickError(
+        error instanceof Error ? error.message : "Kunne ikke kjøre rask sjekk."
+      );
+      return false;
+    } finally {
+      setIsChecking(false);
+    }
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedUrl = normalizeUrl(url);
@@ -68,7 +112,19 @@ export function QuickCheckBox() {
     const encodedUrl = encodeURIComponent(trimmedUrl);
 
     if (role === "reader") {
-      window.location.href = `/pressesjekk?quick=1&role=reader&url=${encodedUrl}`;
+      const ok = await registerQuickCheck(trimmedUrl, role);
+
+      if (!ok) return;
+
+      setQuickResultUrl(trimmedUrl);
+      setQuickRole("reader");
+
+      window.history.replaceState(
+        null,
+        "",
+        `/pressesjekk?quick=1&role=reader&url=${encodedUrl}`
+      );
+
       return;
     }
 
@@ -129,7 +185,11 @@ export function QuickCheckBox() {
           type="submit"
           className="mt-4 block w-full rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
         >
-          {role === "reader" ? "Kjør rask sjekk" : "Gå videre til sak"}
+          {isChecking
+            ? "Sjekker..."
+            : role === "reader"
+              ? "Kjør rask sjekk"
+              : "Gå videre til sak"}
         </button>
       </form>
 
@@ -158,7 +218,35 @@ export function QuickCheckBox() {
             <p className="mt-2 text-sm font-semibold text-cyan-800">
               Kilde: {quickDomain}
             </p>
+
+            <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
+              <p className="text-sm font-black text-slate-950">
+                {checkCount === null
+                  ? "Søketeller lastes..."
+                  : `Denne artikkelen er sjekket ${checkCount} ${
+                      checkCount === 1 ? "gang" : "ganger"
+                    }.`}
+              </p>
+              {lastCheckedAt ? (
+                <p className="mt-1 text-xs font-semibold text-slate-600">
+                  Sist sjekket:{" "}
+                  {new Intl.DateTimeFormat("nb-NO", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }).format(new Date(lastCheckedAt))}
+                </p>
+              ) : null}
+            </div>
           </div>
+
+          {quickError ? (
+            <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
+              {quickError}
+            </div>
+          ) : null}
 
           <div className="mt-4 grid gap-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -209,8 +297,8 @@ export function QuickCheckBox() {
           </div>
 
           <p className="mt-5 text-xs leading-6 text-slate-500">
-            Søketeller og ekte KI-basert raskrapport kan kobles på i neste
-            versjon. Da kan siden vise hvor mange ganger samme URL er sjekket.
+            Dette er en enkel offentlig raskrapport. Neste versjon kan kobles
+            til en kort KI-basert vurdering uten innlogging.
           </p>
         </section>
       ) : null}
