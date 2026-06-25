@@ -734,9 +734,9 @@ export default function MinSidePage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Her administrerer du sakene dine. Du kan opprette
-              mapper, undermapper og saker, flytte innhold mellom mapper, bruke
-              papirkurv og bytte mellom liste- og symbolvisning.
+              Her administrerer du mediesakene dine. Du kan opprette saker,
+              samle dokumentasjon, lage rapporter, PFU-klager,
+              politianmeldelser og utredninger, og organisere alt i mapper.
             </p>
           </section>
 
@@ -774,8 +774,11 @@ export default function MinSidePage() {
           id="oversikt"
         >
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="font-bold text-slate-500">Dokumentpakker igjen</p>
-            <p className="mt-4 text-5xl font-black text-cyan-700">0</p>
+            <p className="font-bold text-slate-500">Tilgang / pakker</p>
+            <p className="mt-4 text-3xl font-black text-cyan-700">Kommer</p>
+            <p className="mt-3 text-sm font-semibold text-slate-500">
+              Kobles til Stripe senere
+            </p>
           </div>
 
           <a
@@ -979,7 +982,7 @@ export default function MinSidePage() {
                       ? "Slettede mapper og saker vises her. Når papirkurven er tom, er det ingenting å gjenopprette."
                       : selectedFolder
                         ? "Denne mappen har ingen saker ennå. Opprett en sak eller en undermappe direkte her."
-                        : "Opprett en mappe eller en sak for å komme i gang."}
+                        : "Opprett en sak for å komme i gang. Mapper kan brukes senere dersom du vil organisere flere saker."}
                   </p>
 
                   <div className="mt-6 flex flex-wrap gap-3">
@@ -1327,8 +1330,8 @@ export default function MinSidePage() {
 
               {activityItems.length === 0 ? (
                 <p className="mt-4 leading-8 text-slate-300">
-                  Aktivitet vises her når du har opprettet din første sak eller
-                  mappe.
+                  Aktivitet vises her når du har opprettet din første sak,
+                  rapport, PFU-klage, politianmeldelse eller utredning.
                 </p>
               ) : (
                 <div className="mt-5 grid gap-3">
