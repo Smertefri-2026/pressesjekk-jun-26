@@ -30,7 +30,16 @@ type CaseInputRow = {
 
 type CaseReportRow = {
   id: string;
-  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft";
+  version: number | null;
+  report_type:
+    | "free_check"
+    | "full_report"
+    | "pfu_draft"
+    | "police_draft"
+    | "investigation_draft";
+  investigation_draft: string | null;
+  status: "draft" | "ready" | "archived" | null;
+  created_at: string | null;
 };
 
 type PfuDecisionRow = {
@@ -50,9 +59,17 @@ export default function InvestigationPage() {
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
+  const [investigationDrafts, setInvestigationDrafts] = useState<CaseReportRow[]>(
+    []
+  );
+  const [selectedInvestigationDraftId, setSelectedInvestigationDraftId] =
+    useState<string | null>(null);
   const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeneratingInvestigation, setIsGeneratingInvestigation] =
+    useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     async function loadData() {
@@ -116,10 +133,22 @@ export default function InvestigationPage() {
 
       const { data: reportsData } = await supabase
         .from("case_reports")
-        .select("id,report_type")
-        .eq("case_id", params.id);
+        .select("id,version,report_type,investigation_draft,status,created_at")
+        .eq("case_id", params.id)
+        .order("version", { ascending: false });
 
-      setReports((reportsData ?? []) as CaseReportRow[]);
+      const loadedReports = (reportsData ?? []) as CaseReportRow[];
+
+      setReports(loadedReports);
+
+      const loadedInvestigationDrafts = loadedReports.filter(
+        (report) => report.report_type === "investigation_draft"
+      );
+
+      setInvestigationDrafts(loadedInvestigationDrafts);
+      setSelectedInvestigationDraftId(
+        loadedInvestigationDrafts[0]?.id ?? null
+      );
 
       const { data: decisionData } = await supabase
         .from("pfu_decisions")
@@ -158,6 +187,85 @@ export default function InvestigationPage() {
         <LightPublicFooter />
       </main>
     );
+  }
+
+  const activeInvestigationDraft =
+    investigationDrafts.find(
+      (draft) => draft.id === selectedInvestigationDraftId
+    ) ?? investigationDrafts[0] ?? null;
+
+  async function handleGenerateInvestigationDraft() {
+    setIsGeneratingInvestigation(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      setErrorMessage("Du må være innlogget for å generere utredning.");
+      setIsGeneratingInvestigation(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/cases/${params.id}/generate-investigation-draft`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.error ?? "Kunne ikke generere utredning.");
+        setIsGeneratingInvestigation(false);
+        return;
+      }
+
+      const newReport = data.report as CaseReportRow;
+
+      setInvestigationDrafts((current) => [newReport, ...current]);
+      setReports((current) => [newReport, ...current]);
+      setSelectedInvestigationDraftId(newReport.id);
+      setSuccessMessage("Utredningsutkastet ble generert og lagret.");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Ukjent feil ved generering av utredning.";
+
+      setErrorMessage(message);
+    } finally {
+      setIsGeneratingInvestigation(false);
+    }
+  }
+
+  function handleDownloadText() {
+    if (!activeInvestigationDraft?.investigation_draft) return;
+
+    const blob = new Blob([activeInvestigationDraft.investigation_draft], {
+      type: "text/plain;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `pressesjekk-utredning-v${
+      activeInvestigationDraft.version ?? "1"
+    }.txt`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -316,12 +424,25 @@ export default function InvestigationPage() {
               </div>
 
               <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/kontakt"
-                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+                <button
+                  type="button"
+                  onClick={handleGenerateInvestigationDraft}
+                  disabled={isGeneratingInvestigation}
+                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
                 >
-                  Generer utredning med KI
-                </Link>
+                  {isGeneratingInvestigation
+                    ? "Genererer utredning..."
+                    : "Generer utredning med KI"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadText}
+                  disabled={!activeInvestigationDraft?.investigation_draft}
+                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Last ned tekst
+                </button>
                 <Link
                   href={`/min-side/saker/${params.id}`}
                   className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
@@ -329,6 +450,32 @@ export default function InvestigationPage() {
                   Til saken
                 </Link>
               </div>
+
+              {successMessage ? (
+                <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
+                  {successMessage}
+                </div>
+              ) : null}
+
+              {errorMessage ? (
+                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
+                  {errorMessage}
+                </div>
+              ) : null}
+
+              {activeInvestigationDraft?.investigation_draft ? (
+                <div className="mt-8">
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                    Utredningsutkast
+                  </p>
+                  <h2 className="mt-3 text-3xl font-black text-slate-950">
+                    Utredning v{activeInvestigationDraft.version ?? ""}
+                  </h2>
+                  <pre className="mt-5 max-h-[900px] overflow-auto whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800">
+                    {activeInvestigationDraft.investigation_draft}
+                  </pre>
+                </div>
+              ) : null}
             </div>
           </section>
 
@@ -357,6 +504,47 @@ export default function InvestigationPage() {
                 investigation: false,
               }}
             />
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                Lagrede utredninger
+              </p>
+              <h2 className="mt-3 text-3xl font-black text-slate-950">
+                {investigationDrafts.length > 0
+                  ? `${investigationDrafts.length} lagret`
+                  : "Ingen lagret"}
+              </h2>
+
+              <div className="mt-5 grid gap-3">
+                {investigationDrafts.length > 0 ? (
+                  investigationDrafts.map((draft) => (
+                    <button
+                      key={draft.id}
+                      type="button"
+                      onClick={() => setSelectedInvestigationDraftId(draft.id)}
+                      className={`rounded-2xl border p-4 text-left ${
+                        selectedInvestigationDraftId === draft.id
+                          ? "border-cyan-400 bg-cyan-50"
+                          : "border-slate-200 bg-slate-50 hover:bg-white"
+                      }`}
+                    >
+                      <p className="font-black text-slate-950">
+                        Utredning v{draft.version ?? ""}
+                      </p>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">
+                        {draft.created_at
+                          ? new Date(draft.created_at).toLocaleDateString("nb-NO")
+                          : "Ukjent dato"}
+                      </p>
+                    </button>
+                  ))
+                ) : (
+                  <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                    Generer første utredningsutkast for å lagre en versjon.
+                  </p>
+                )}
+              </div>
+            </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
