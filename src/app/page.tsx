@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { QuickCheckBox } from "@/components/public/QuickCheckBox";
 
 const mainBenefits = [
   {
@@ -122,33 +123,7 @@ export default function HomePage() {
               PFU-klage, politianmeldelse og utredning i samme saksgang.
             </p>
 
-            <form
-              action="/pressesjekk"
-              method="get"
-              className="mt-6 rounded-2xl bg-white p-5 shadow-sm"
-            >
-              <label
-                htmlFor="frontpage-article-url"
-                className="text-sm font-semibold text-slate-600"
-              >
-                Artikkel-URL
-              </label>
-
-              <input
-                id="frontpage-article-url"
-                name="url"
-                type="url"
-                placeholder="https://avis.no/artikkel/..."
-                className="mt-3 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-950 outline-none focus:border-cyan-500"
-              />
-
-              <button
-                type="submit"
-                className="mt-4 block w-full rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
-              >
-                Start sjekk
-              </button>
-            </form>
+            <QuickCheckBox />
 
             <p className="mt-5 text-xs leading-6 text-slate-600">
               PresseSjekk gir veiledende dokumenthjelp. Tjenesten erstatter ikke

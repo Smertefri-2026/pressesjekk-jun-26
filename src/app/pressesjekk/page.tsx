@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { QuickCheckBox } from "@/components/public/QuickCheckBox";
 
 const startOptions = [
   {
@@ -98,26 +99,22 @@ export default function PresseSjekkPage() {
 
           <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-7 shadow-sm">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Første steg
+              Rask sjekk eller egen sak
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Opprett saken på Min Side
+              Start med URL og rolle
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
-              Når du starter en sak, får du en egen saksgang med rapport,
-              PFU-klage, PFU-avgjørelse, politianmeldelse og utredning.
+              Lesere kan starte med en rask offentlig sjekk. Er du omtalt,
+              pårørende eller representerer en virksomhet, bør du opprette en
+              sak slik at dokumentasjonen blir lagret.
             </p>
 
-            <Link
-              href="/min-side/saker/ny"
-              className="mt-6 block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
-            >
-              Gå til ny sak
-            </Link>
+            <QuickCheckBox />
 
             <p className="mt-5 text-xs leading-6 text-slate-600">
-              Du må være innlogget for å lagre saken. Hvis du ikke er innlogget,
-              blir du sendt til innlogging først.
+              Rask lesersjekk kan brukes uten innlogging. Full saksgang krever
+              innlogging slik at saken kan lagres og bygges videre.
             </p>
           </aside>
         </div>
