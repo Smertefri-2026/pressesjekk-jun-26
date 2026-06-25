@@ -138,12 +138,9 @@ function getPackageLabel(packageId: PackagePlanId) {
 
 function getPackageAccessLabel(packageId: PackagePlanId) {
   const steps = packageAccessSteps[packageId] ?? [1, 2, 3];
+  const lastStep = steps[steps.length - 1] ?? 3;
 
-  if (steps.length >= 6) {
-    return "Tilgang: steg 1–6";
-  }
-
-  return `Tilgang: steg 1–${steps[steps.length - 1]}`;
+  return `Tilgang: steg 1–${lastStep}`;
 }
 
 export function CaseWorkflowCard({

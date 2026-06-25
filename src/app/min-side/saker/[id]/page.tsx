@@ -178,13 +178,12 @@ export default function CaseDetailPage() {
         .from("case_access")
         .select("package_id,status")
         .eq("case_id", params.id)
-        .eq("user_id", user.id)
         .eq("status", "active")
         .maybeSingle();
 
-      setCaseAccessPackageId(
-        accessData ? (accessData as CaseAccessRow).package_id : null
-      );
+      const caseAccess = accessData as CaseAccessRow | null;
+
+      setCaseAccessPackageId(caseAccess?.package_id ?? null);
 
       const { data, error } = await supabase
         .from("cases")
