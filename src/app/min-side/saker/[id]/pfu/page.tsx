@@ -558,7 +558,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
                 {activePfuDraft
                   ? "Dette er valgt lagret PFU-klage. Du kan laste ned PDF, laste ned tekst eller lage et nytt KI-utkast."
-                  : "Bruk KI-knappen for å lage et gjennomarbeidet PFU-klage basert på saken og relevante presseetiske punkter."}
+                  : "Bruk KI-knappen for å lage en gjennomarbeidet PFU-klage basert på saken og relevante presseetiske punkter."}
               </p>
 
               <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
@@ -624,6 +624,13 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                 </Link>
 
                 <Link
+                  href={`/min-side/saker/${params.id}/politianmeldelse`}
+                  className="rounded-2xl border border-cyan-300 bg-cyan-50 px-6 py-4 font-black text-cyan-900 hover:bg-cyan-100"
+                >
+                  Gå til politianmeldelse
+                </Link>
+
+                <Link
                   href={`/min-side/saker/${params.id}`}
                   className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
                 >
@@ -643,19 +650,25 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               stepsDone={{
                 caseRegistered: true,
                 caseInputs: Boolean(caseInput),
-                report: reports.some((report) => report.report_type !== "pfu_draft"),
+                report: reports.some(
+                  (report) =>
+                    report.report_type === "free_check" ||
+                    report.report_type === "full_report"
+                ),
                 pfuDraft: pfuDrafts.length > 0,
                 pfuDecision: Boolean(
                   pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
                 ),
                 policeReport: reports.some((report) => report.report_type === "police_draft"),
-              investigation: reports.some((report) => report.report_type === "investigation_draft"),
+                investigation: reports.some(
+                  (report) => report.report_type === "investigation_draft"
+                ),
               }}
             />
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                Lagrede utkast
+                Lagrede PFU-klager
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
                 {pfuDrafts.length > 1
@@ -708,7 +721,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                 Videre arbeid
               </p>
               <h2 className="mt-3 text-3xl font-black">
-                Fra utkast til klage
+                Fra klage til oppfølging
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
                 Bruk utkastet som et arbeidsgrunnlag. Før innsending bør teksten
