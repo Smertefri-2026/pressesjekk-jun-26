@@ -34,7 +34,12 @@ type ReportRow = {
   id: string;
   case_id: string;
   version: number;
-  report_type: "free_check" | "full_report" | "pfu_draft";
+  report_type:
+    | "free_check"
+    | "full_report"
+    | "pfu_draft"
+    | "police_draft"
+    | "investigation_draft";
   created_at: string;
 };
 
@@ -477,7 +482,11 @@ export default function MinSidePage() {
         title:
           report.report_type === "pfu_draft"
             ? `PFU-utkast v${report.version} lagret`
-            : `Rapport v${report.version} lagret`,
+            : report.report_type === "police_draft"
+              ? `Politianmeldelse v${report.version} lagret`
+              : report.report_type === "investigation_draft"
+                ? `Utredning v${report.version} lagret`
+                : `Rapport v${report.version} lagret`,
         description: linkedCase
           ? linkedCase.title
           : "Rapportutkast lagret på en sak",
@@ -485,7 +494,11 @@ export default function MinSidePage() {
         href:
           report.report_type === "pfu_draft"
             ? `/min-side/saker/${report.case_id}/pfu`
-            : `/min-side/saker/${report.case_id}/rapport`,
+            : report.report_type === "police_draft"
+              ? `/min-side/saker/${report.case_id}/politianmeldelse`
+              : report.report_type === "investigation_draft"
+                ? `/min-side/saker/${report.case_id}/utredning`
+                : `/min-side/saker/${report.case_id}/rapport`,
       };
     }),
     ...cases.map((caseItem) => ({
