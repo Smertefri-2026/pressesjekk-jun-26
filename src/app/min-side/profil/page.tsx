@@ -304,7 +304,7 @@ export default function ProfilePage() {
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Profilen brukes til rapporter, PFU-klager, kontaktinformasjon,
-              betaling og eventuell bestilling av full utredning. For
+              betaling og eventuell bestilling av utredningspakke. For
               profesjonelle brukere kan profilen også brukes til
               firmaopplysninger, klientarbeid og fakturering.
             </p>
@@ -321,8 +321,8 @@ export default function ProfilePage() {
 
             <p className="mt-4 leading-8 text-slate-700">
               Opplysningene du legger inn her kan brukes automatisk i rapporter,
-              klageutkast, fakturaer og senere bestillinger av trykte
-              utredninger. Du kan starte enkelt og fylle ut mer senere.
+              PFU-klager, fakturaer og senere bestillinger av
+              utredningspakker. Du kan starte enkelt og fylle ut mer senere.
             </p>
           </aside>
         </div>
@@ -649,8 +649,8 @@ export default function ProfilePage() {
                     Faktura og levering
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Valgfritt. Brukes senere hvis faktura eller trykket
-                    utredning skal sendes til en annen adresse.
+                    Valgfritt. Brukes senere hvis faktura, dokumentpakke eller
+                    utredningspakke skal sendes til en annen adresse.
                   </p>
                 </div>
 
@@ -801,7 +801,7 @@ export default function ProfilePage() {
 
               <p className="mt-4 leading-8 text-slate-700">
                 Legg inn fornavn og etternavn for at navn skal kunne brukes
-                automatisk i rapporter og klageutkast.
+                automatisk i rapporter, PFU-klager og dokumentpakker.
               </p>
             </div>
           </aside>
