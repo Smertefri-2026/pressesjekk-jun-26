@@ -15,6 +15,7 @@ export type CaseWorkflowStep =
   | "pfu"
   | "pfu-avgjorelse"
   | "politianmeldelse"
+  | "utredning"
   | "rediger";
 
 type CaseWorkflowCardProps = {
@@ -30,6 +31,7 @@ type CaseWorkflowCardProps = {
     pfuDraft?: boolean;
     pfuDecision?: boolean;
     policeReport?: boolean;
+    investigation?: boolean;
   };
 };
 
@@ -44,7 +46,8 @@ const workflowSteps: {
     | "report"
     | "pfuDraft"
     | "pfuDecision"
-    | "policeReport";
+    | "policeReport"
+    | "investigation";
 }[] = [
   {
     key: "case",
@@ -88,11 +91,22 @@ const workflowSteps: {
     href: (caseId) => `/min-side/saker/${caseId}/politianmeldelse`,
     doneKey: "policeReport",
   },
+  {
+    key: "utredning",
+    label: "Utredningspakke",
+    description: "Manuell gjennomgang",
+    href: (caseId) => `/min-side/saker/${caseId}/utredning`,
+    doneKey: "investigation",
+  },
 ];
 
 function inferPackageFromActiveStep(activeStep: CaseWorkflowStep): PackagePlanId {
   if (activeStep === "pfu") {
     return "pfu_pack";
+  }
+
+  if (activeStep === "utredning") {
+    return "investigation_pack";
   }
 
   if (activeStep === "pfu-avgjorelse" || activeStep === "politianmeldelse") {

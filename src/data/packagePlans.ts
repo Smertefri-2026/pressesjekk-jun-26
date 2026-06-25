@@ -182,7 +182,7 @@ export const packageAccessSteps: Record<PackagePlanId, number[]> = {
   report_pack: [1, 2, 3],
   pfu_pack: [1, 2, 3, 4],
   full_pack: [1, 2, 3, 4, 5, 6],
-  investigation_pack: [1, 2, 3, 4, 5, 6],
+  investigation_pack: [1, 2, 3, 4, 5, 6, 7],
   monthly_start: [1, 2, 3],
   monthly_pro: [1, 2, 3],
   monthly_agency: [1, 2, 3],
