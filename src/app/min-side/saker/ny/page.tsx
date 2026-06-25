@@ -23,7 +23,34 @@ export default function NewCasePage() {
   const [shortDescription, setShortDescription] = useState("");
 
   useEffect(() => {
-    setFolderId(new URLSearchParams(window.location.search).get("folderId"));
+    const params = new URLSearchParams(window.location.search);
+    const nextFolderId = params.get("folderId");
+    const urlFromQuickCheck = params.get("url");
+    const roleFromQuickCheck = params.get("role");
+
+    setFolderId(nextFolderId);
+
+    if (urlFromQuickCheck) {
+      setArticleUrl(urlFromQuickCheck);
+    }
+
+    if (roleFromQuickCheck === "mentioned") {
+      setShortDescription(
+        "Jeg er omtalt i saken og ønsker å vurdere om artikkelen bør følges opp."
+      );
+    } else if (roleFromQuickCheck === "company") {
+      setShortDescription(
+        "Saken gjelder en virksomhet eller organisasjon som er omtalt i media."
+      );
+    } else if (roleFromQuickCheck === "family") {
+      setShortDescription(
+        "Jeg er pårørende eller nærstående til noen som er omtalt i saken."
+      );
+    } else if (roleFromQuickCheck === "pro") {
+      setShortDescription(
+        "Jeg vurderer saken som profesjonell bruker på vegne av en klient, virksomhet eller redaksjon."
+      );
+    }
 
     async function checkUser() {
       const {
@@ -134,7 +161,8 @@ export default function NewCasePage() {
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Start med grunninformasjonen om artikkelen eller mediesaken.
               Når saken er opprettet, kan du bygge den videre med opplysninger,
-              rapport, PFU-utkast og annen dokumentasjon.
+              rapport, PFU-klage, politianmeldelse, utredning og annen
+              dokumentasjon.
               {folderId ? " Saken lagres i valgt mappe." : ""}
             </p>
 
@@ -303,21 +331,22 @@ export default function NewCasePage() {
               </h2>
               <p className="mt-4 leading-8 text-slate-700">
                 Når saken er opprettet, får du en egen saksside hvor du kan
-                legge til flere opplysninger, skrive rapport og jobbe videre
-                med PFU-utkast eller annen dokumentasjon.
+                legge til flere opplysninger, lage rapport og jobbe videre med
+                PFU-klage, politianmeldelse eller utredning.
               </p>
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Neste versjon
+                Etter opprettelse
               </p>
               <h2 className="mt-3 text-3xl font-black">
-                Tilsvar og dokumentasjon
+                Bygg saken steg for steg
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Etter opprettelse åpnes saken automatisk, slik at du kan
-                fortsette arbeidet direkte.
+                Etter opprettelse åpnes saken automatisk. Der kan du fylle inn
+                saksopplysninger, generere rapport og gå videre til PFU,
+                politianmeldelse eller utredning ved behov.
               </p>
             </div>
           </aside>
