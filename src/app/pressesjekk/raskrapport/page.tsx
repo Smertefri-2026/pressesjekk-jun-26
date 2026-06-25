@@ -167,6 +167,10 @@ export default function QuickReportPage() {
             <p className="text-lg font-bold text-slate-700">
               Lager raskrapport...
             </p>
+            <p className="mt-3 max-w-2xl leading-8 text-slate-600">
+              Dette kan ta opptil 2 minutter første gang en artikkel sjekkes.
+              Ikke oppdater siden mens rapporten lages.
+            </p>
           </div>
         ) : errorMessage ? (
           <div className="mt-12 rounded-3xl border border-red-200 bg-red-50 p-8 shadow-sm">

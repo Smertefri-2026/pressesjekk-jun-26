@@ -194,7 +194,8 @@ export function QuickCheckBox() {
 
         <button
           type="submit"
-          className="mt-4 block w-full rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
+          disabled={isChecking}
+          className="mt-4 block w-full rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isChecking
             ? "Sjekker..."
@@ -202,6 +203,13 @@ export function QuickCheckBox() {
               ? "Kjør rask sjekk"
               : "Gå videre til sak"}
         </button>
+
+        {role === "reader" ? (
+          <p className="mt-3 text-xs leading-6 text-slate-500">
+            KI-raskrapporten kan ta opptil 2 minutter. Ikke oppdater siden mens
+            den lages.
+          </p>
+        ) : null}
       </form>
 
       {false && quickResultUrl && quickRole === "reader" ? (
@@ -247,7 +255,7 @@ export function QuickCheckBox() {
                     year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
-                  }).format(new Date(lastCheckedAt))}
+                  }).format(new Date(String(lastCheckedAt)))}
                 </p>
               ) : null}
             </div>
