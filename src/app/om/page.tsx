@@ -8,12 +8,12 @@ const audienceCards = [
     text: "For deg som ønsker oversikt over hva som er publisert, om du fikk mulighet til tilsvar, og hvilken dokumentasjon som finnes.",
   },
   {
-    title: "Advokater og rådgivere",
-    text: "For fagpersoner som ønsker en strukturert saksoversikt, dokumentasjonsliste og et tydeligere grunnlag for videre vurdering.",
+    title: "Proffbrukere",
+    text: "For advokater, PR-rådgivere, redaksjoner og organisasjoner som ønsker en strukturert saksoversikt og et tydeligere grunnlag for videre vurdering.",
   },
   {
     title: "Journalister og redaksjoner",
-    text: "For redaksjoner som ønsker bedre kontroll på tilsvar, dokumentasjon, rettsstatus og mulige presseetiske risikopunkter.",
+    text: "For redaksjoner som ønsker et ekstra kontrollpunkt for tilsvar, dokumentasjon, rettsstatus og mulige presseetiske risikopunkter før eller etter publisering.",
   },
   {
     title: "Organisasjoner og virksomheter",
@@ -26,8 +26,9 @@ const principles = [
   "Strukturert gjennomgang av artikkel, tilsvar og rettsstatus",
   "Veiledende analyser, ikke bastante konklusjoner",
   "Rapporter som kan oppdateres når saken utvikler seg",
-  "Bedre grunnlag før dialog med redaksjon, advokat eller PFU",
+  "Bedre grunnlag før dialog med redaksjon, advokat, PFU eller videre oppfølging",
   "Ryddig dokumenthjelp for krevende mediesaker",
+  "Mulighet for å bygge saken videre fra rapport til utredningspakke",
 ];
 
 const steps = [
@@ -68,7 +69,8 @@ export default function OmPage() {
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               PresseSjekk er laget for å hjelpe mennesker, virksomheter,
               rådgivere og redaksjoner med å strukturere mediesaker, vurdere
-              dokumentasjon og forstå hvilke spørsmål som bør undersøkes videre.
+              dokumentasjon og forstå hvilke spørsmål som bør undersøkes videre
+              før rapport, PFU-klage, politianmeldelse eller utredning.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -97,7 +99,8 @@ export default function OmPage() {
             <p className="mt-4 leading-8 text-slate-700">
               PresseSjekk skal ikke forhåndsdømme medier, personer eller saker.
               Målet er å samle fakta, tilsvar, dokumentasjon og rettsstatus på
-              en måte som gir bedre grunnlag for videre vurdering.
+              en måte som gir bedre grunnlag for videre vurdering, enten det
+              gjelder rapport, PFU-klage, politianmeldelse eller utredning.
             </p>
           </aside>
         </section>

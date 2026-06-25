@@ -6,30 +6,32 @@ import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 const contactOptions = [
   {
     title: "Jeg er omtalt i media",
-    text: "Bruk PresseSjekk hvis du ønsker å vurdere en artikkel, dokumentere tilsvar eller forberede videre oppfølging.",
+    text: "Start med rask sjekk eller opprett en lagret sak dersom du ønsker rapport, PFU-klage eller videre dokumentasjon.",
     href: "/pressesjekk",
     label: "Start sjekk",
   },
   {
     title: "Jeg ønsker profftilgang",
-    text: "For advokater, PR-rådgivere, organisasjoner eller bedrifter som ønsker klientmapper, flere saker og credits.",
+    text: "For advokater, PR-rådgivere, redaksjoner, organisasjoner og virksomheter som jobber med flere mediesaker.",
     href: "/proff",
     label: "Les om proffløsning",
   },
   {
-    title: "Jeg er journalist eller redaksjon",
-    text: "For spørsmål om bruk av PresseSjekk før publisering, redaksjonell kontroll eller presseetisk kvalitetssikring.",
-    href: "/proff",
-    label: "For journalister",
+    title: "Jeg vurderer utredningspakke",
+    text: "For større saker der dokumentasjon, tidslinje, rapporter, PFU-spor og videre vurdering bør samles i en komplett utredning.",
+    href: "/kontakt",
+    label: "Send henvendelse",
   },
 ];
 
 const formTopics = [
   "Spørsmål om PresseSjekk",
+  "Rask sjekk eller rapport",
+  "Utredningspakke",
   "Profftilgang",
-  "Feil eller problem med rapport",
-  "Presse/redaksjon",
+  "Teknisk feil eller problem",
   "Personvern eller sletting",
+  "Presse, redaksjon eller samarbeid",
   "Annet",
 ];
 
@@ -54,9 +56,9 @@ export default function KontaktPage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Har du spørsmål om en mediesak, profftilgang, rapporter,
-              personvern eller hvordan PresseSjekk fungerer? Send en melding,
-              eller start direkte med en gratis forhåndssjekk.
+              Har du spørsmål om en mediesak, rapportpakke, utredningspakke,
+              profftilgang, personvern eller hvordan PresseSjekk fungerer?
+              Send en melding, eller start direkte med rask sjekk.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -83,15 +85,16 @@ export default function KontaktPage() {
               Gjelder det en konkret artikkel?
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
-              Da er det ofte best å starte med en gratis forhåndssjekk. Da får
-              du samlet artikkel, tilsvar og dokumentasjon på ett sted.
+              Da er det ofte best å starte med rask sjekk. Er du omtalt i
+              saken, kan du deretter opprette en lagret sak og samle artikkel,
+              tilsvar og dokumentasjon på Min Side.
             </p>
 
             <Link
               href="/pressesjekk"
               className="mt-6 block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
             >
-              Start gratis sjekk
+              Start sjekk
             </Link>
           </aside>
         </div>
@@ -186,14 +189,14 @@ export default function KontaktPage() {
 
             <section className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Profftilgang
+                Proff og utredning
               </p>
               <h2 className="mt-3 text-2xl font-black">
-                For advokater og rådgivere
+                For profesjonelle brukere
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Proffbrukere bør kunne få klientmapper, flere saker, credits og
-                rapportoversikt.
+                Proffbrukere kan jobbe med flere saker, rapportpakker,
+                dokumentpakker og utredningsgrunnlag over tid.
               </p>
               <Link
                 href="/proff"
