@@ -84,6 +84,7 @@ function reportTypeLabel(
   if (type === "full_report") return `KI-rapport v${version ?? "1"}`;
   if (type === "pfu_draft") return `PFU-klageutkast v${version ?? "1"}`;
   if (type === "police_draft") return `Politianmeldelse - ${formatDateTime(createdAt)}`;
+  if (type === "investigation_draft") return `Utredning v${version ?? "1"}`;
   return `Regelbasert rapport v${version ?? "1"}`;
 }
 
@@ -106,6 +107,62 @@ function wrapLine(text: string, maxCharacters: number) {
   if (current) lines.push(current);
 
   return lines.length > 0 ? lines : [""];
+}
+
+function buildInvestigationDraftText({
+  caseItem,
+  report,
+  documents,
+}: {
+  caseItem: any;
+  report: any;
+  documents: any[];
+}) {
+  const documentLines =
+    documents.length > 0
+      ? documents
+          .map((item, index) => {
+            const number = String(index + 1).padStart(2, "0");
+            const name = safeText(item.file_name || item.title || "Dokument");
+            const category = safeText(item.category || "dokument");
+            const date = formatDate(item.created_at);
+            return `Vedlegg ${number}: ${name} (${category}) - ${date}`;
+          })
+          .join("\n")
+      : "Ingen dokumenter registrert.";
+
+  return [
+    "PresseSjekk utredning",
+    "",
+    "Sak",
+    safeText(caseItem.title || "Ukjent sak"),
+    "",
+    "Kilde / artikkel",
+    safeText(
+      caseItem.article_url ??
+        caseItem.url ??
+        caseItem.source_url ??
+        caseItem.link ??
+        caseItem.media_name ??
+        caseItem.publisher ??
+        "Ikke registrert"
+    ),
+    "",
+    "Rapport",
+    reportTypeLabel(report.report_type, report.version, report.created_at),
+    "",
+    "Rapportdato",
+    formatDate(report.created_at),
+    "",
+    "UTREDNING",
+    safeText(report.investigation_draft || "Ingen utredningstekst registrert."),
+    "",
+    "Vedleggsliste",
+    documentLines,
+    "",
+    "Forbehold",
+    "Dette er et foreløpig og veiledende utredningsutkast generert av PresseSjekk basert på innsendte opplysninger og dokumentasjon. Det er ikke juridisk rådgivning, advokatvurdering, PFU-avgjørelse, politiets vurdering eller endelig konklusjon. Teksten bør kontrolleres og kvalitetssikres før bruk i alvorlige prosesser.",
+  ].join("\n");
 }
 
 function buildPoliceDraftText({
@@ -348,9 +405,12 @@ async function createReportPdf(reportText: string) {
     "Dokumentgrunnlag",
     "Forbehold",
     "POLITIANMELDELSE",
+    "UTREDNING",
+    "Vedleggsliste",
   ]);
 
   const isPoliceReport = reportText.includes("POLITIANMELDELSE");
+  const isInvestigationReport = reportText.includes("UTREDNING");
 
   function valueAfterHeading(heading: string) {
     const lines = reportText.split("\n").map((line) => line.trim());
@@ -622,26 +682,153 @@ async function createReportPdf(reportText: string) {
     y = 700;
   }
 
+  function drawInvestigationCoverPage() {
+    drawHeader(page);
+
+    const caseTitle = valueAfterHeading("Sak") || "Ikke registrert";
+    const source = valueAfterHeading("Kilde / artikkel") || "Ikke registrert";
+    const reportLabel = valueAfterHeading("Rapport") || "Utredning";
+
+    y = 635;
+
+    page.drawText("UTREDNING", {
+      x: margin,
+      y,
+      size: 34,
+      font: boldFont,
+      color: dark,
+    });
+
+    y -= 30;
+
+    page.drawText("Komplett utredningsgrunnlag for mediesak", {
+      x: margin,
+      y,
+      size: 12,
+      font: boldFont,
+      color: cyan,
+    });
+
+    y -= 34;
+
+    page.drawRectangle({
+      x: margin,
+      y: y - 10,
+      width: contentWidth,
+      height: 1,
+      color: border,
+    });
+
+    y -= 38;
+
+    const coverRows = [
+      ["Dokumenttype", "PresseSjekk utredning"],
+      ["Sak", caseTitle],
+      ["Medieomtale", source],
+      ["Dato", formatDate(new Date().toISOString())],
+      ["Rapport", reportLabel],
+      ["Innhold", "Utredning, kronologisk gjennomgang og vedleggsliste"],
+    ];
+
+    for (const [label, value] of coverRows) {
+      page.drawText(`${label}:`, {
+        x: margin,
+        y,
+        size: 10.5,
+        font: boldFont,
+        color: dark,
+      });
+
+      const lines = wrapLine(value, 68);
+
+      for (let i = 0; i < lines.length; i += 1) {
+        page.drawText(lines[i], {
+          x: margin + 105,
+          y,
+          size: 10.5,
+          font: regularFont,
+          color: dark,
+        });
+
+        if (i < lines.length - 1) y -= lineHeight;
+      }
+
+      y -= 24;
+    }
+
+    y -= 14;
+
+    page.drawRectangle({
+      x: margin,
+      y: 170,
+      width: contentWidth,
+      height: 110,
+      color: lightCyan,
+      borderColor: rgb(0.35, 0.90, 1),
+      borderWidth: 1,
+    });
+
+    page.drawText("Formål", {
+      x: margin + 18,
+      y: 250,
+      size: 13,
+      font: boldFont,
+      color: dark,
+    });
+
+    const explanation =
+      "Dette dokumentet samler brukerens versjon av saken, dokumentasjon, tidslinje, vurderingstemaer og vedleggsliste i ett strukturert utredningsgrunnlag.";
+
+    let explanationY = 226;
+
+    for (const line of wrapLine(explanation, 72)) {
+      page.drawText(line, {
+        x: margin + 18,
+        y: explanationY,
+        size: 10.5,
+        font: regularFont,
+        color: dark,
+      });
+
+      explanationY -= lineHeight;
+    }
+
+    page = pdfDoc.addPage([pageWidth, pageHeight]);
+    drawHeader(page);
+    y = 700;
+  }
+
   if (isPoliceReport) {
     drawPoliceCoverPage();
+  } else if (isInvestigationReport) {
+    drawInvestigationCoverPage();
   } else {
     drawHeader(page);
   }
 
-  page.drawText(isPoliceReport ? "PresseSjekk politianmeldelse" : "PresseSjekk-rapport", {
-    x: margin,
-    y,
-    size: 24,
-    font: boldFont,
-    color: dark,
-  });
+  page.drawText(
+    isPoliceReport
+      ? "PresseSjekk politianmeldelse"
+      : isInvestigationReport
+        ? "PresseSjekk utredning"
+        : "PresseSjekk-rapport",
+    {
+      x: margin,
+      y,
+      size: 24,
+      font: boldFont,
+      color: dark,
+    }
+  );
 
   y -= 26;
 
   page.drawText(
     isPoliceReport
       ? "Strukturert utkast til politianmeldelse basert på innsendte opplysninger."
-      : "Strukturert kontroll av medieomtale basert på innsendte opplysninger.",
+      : isInvestigationReport
+        ? "Samlet utredningsgrunnlag basert på saken og innsendt dokumentasjon."
+        : "Strukturert kontroll av medieomtale basert på innsendte opplysninger.",
     {
       x: margin,
       y,
@@ -666,7 +853,11 @@ async function createReportPdf(reportText: string) {
   for (const paragraph of reportText.split("\n")) {
     const trimmed = paragraph.trim();
 
-    if (!trimmed || trimmed === "PresseSjekk rapport") {
+    if (
+      !trimmed ||
+      trimmed === "PresseSjekk rapport" ||
+      trimmed === "PresseSjekk utredning"
+    ) {
       if (!trimmed) y -= 4;
       continue;
     }
@@ -790,33 +981,41 @@ export async function GET(request: NextRequest, context: RouteContext) {
     .order("created_at", { ascending: true });
 
   const reportText =
-    report.report_type === "police_draft"
-      ? buildPoliceDraftText({
+    report.report_type === "investigation_draft"
+      ? buildInvestigationDraftText({
           caseItem,
           report,
           documents: documents ?? [],
         })
-      : report.report_type === "pfu_draft"
-        ? buildPfuDraftText({
+      : report.report_type === "police_draft"
+        ? buildPoliceDraftText({
             caseItem,
             report,
             documents: documents ?? [],
           })
-        : buildReportText({
-            caseItem,
-            report,
-            inputs: inputs ?? [],
-            documents: documents ?? [],
-          });
+        : report.report_type === "pfu_draft"
+          ? buildPfuDraftText({
+              caseItem,
+              report,
+              documents: documents ?? [],
+            })
+          : buildReportText({
+              caseItem,
+              report,
+              inputs: inputs ?? [],
+              documents: documents ?? [],
+            });
 
   const pdfBytes = await createReportPdf(reportText);
 
   const fileName =
-    report.report_type === "police_draft"
-      ? `pressesjekk-politianmeldelse-${formatFileDate(report.created_at)}.pdf`
-      : report.report_type === "pfu_draft"
-        ? `pressesjekk-pfu-klageutkast-v${report.version ?? "1"}.pdf`
-        : `pressesjekk-rapport-v${report.version ?? "1"}.pdf`;
+    report.report_type === "investigation_draft"
+      ? `pressesjekk-utredning-v${report.version ?? "1"}.pdf`
+      : report.report_type === "police_draft"
+        ? `pressesjekk-politianmeldelse-${formatFileDate(report.created_at)}.pdf`
+        : report.report_type === "pfu_draft"
+          ? `pressesjekk-pfu-klageutkast-v${report.version ?? "1"}.pdf`
+          : `pressesjekk-rapport-v${report.version ?? "1"}.pdf`;
 
     return new NextResponse(Buffer.from(pdfBytes), {
       status: 200,

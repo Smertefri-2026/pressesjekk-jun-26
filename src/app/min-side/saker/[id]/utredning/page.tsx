@@ -246,6 +246,51 @@ export default function InvestigationPage() {
     }
   }
 
+  async function handleDownloadPdf() {
+    if (!activeInvestigationDraft?.id) return;
+
+    setErrorMessage("");
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      setErrorMessage("Du må være innlogget for å laste ned PDF.");
+      return;
+    }
+
+    const response = await fetch(
+      `/api/cases/${params.id}/reports/${activeInvestigationDraft.id}/pdf`,
+      {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      setErrorMessage(data?.error ?? "Kunne ikke laste ned PDF.");
+      return;
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `pressesjekk-utredning-v${
+      activeInvestigationDraft.version ?? "1"
+    }.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
+
   function handleDownloadText() {
     if (!activeInvestigationDraft?.investigation_draft) return;
 
@@ -322,6 +367,15 @@ export default function InvestigationPage() {
                   {isGeneratingInvestigation
                     ? "Genererer utredning..."
                     : "Generer utredning med KI"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={!activeInvestigationDraft?.investigation_draft}
+                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Last ned PDF
                 </button>
 
                 <button
