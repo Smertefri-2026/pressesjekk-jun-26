@@ -78,21 +78,6 @@ export default function HomePage() {
               bør følges opp.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/pressesjekk"
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
-              >
-                Start sjekk
-              </Link>
-              <Link
-                href="/eksempelrapport"
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                Se eksempelrapport
-              </Link>
-            </div>
-
             <div className="mt-8 flex flex-wrap gap-3 text-sm font-semibold text-slate-600">
               <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
                 For privatpersoner
