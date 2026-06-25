@@ -182,7 +182,7 @@ PRESSESJEKK UTREDNING
 - Hva dokumentasjonen foreløpig viser
 
 3. Kronologisk saksgjennomgang
-- Lag en ryddig tidslinje basert på saken, saksopplysninger, rapporter, PFU-spor og dokumenter.
+- Lag en ryddig tidslinje basert på saken, saksopplysninger, rapporter, PFU-klage og PFU-avgjørelse og dokumenter.
 - Bruk datoer der de finnes.
 - Marker tydelig når dato mangler eller er usikker.
 - Knytt gjerne hendelser til dokumenter/vedlegg dersom mulig.

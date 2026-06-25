@@ -7,7 +7,7 @@ export function DashboardStats({ activeCases }: DashboardStatsProps) {
     { label: "Dokumentpakker igjen", value: "3", highlight: true },
     { label: "Aktive saker", value: String(activeCases) },
     { label: "Rapporter", value: "2" },
-    { label: "PFU-utkast", value: "1" },
+    { label: "PFU-klage", value: "1" },
   ];
 
   return (

@@ -29,7 +29,7 @@ const steps = [
   },
   {
     title: "Utredningspakke",
-    text: "For større saker kan du samle rapport, PFU-spor, politianmeldelse, dokumentasjon, tidslinje og vedlegg i en mer komplett utredning.",
+    text: "For større saker kan du samle rapport, PFU-klage, PFU-avgjørelse, politianmeldelse, dokumentasjon, tidslinje og vedlegg i en mer komplett utredning.",
   },
 ];
 
@@ -46,7 +46,7 @@ const packages = [
   },
   {
     title: "Full dokumentpakke",
-    text: "Gir tilgang til rapport, PFU-spor, PFU-avgjørelse og politianmeldelse.",
+    text: "Gir tilgang til rapport, PFU-klage og PFU-avgjørelse, PFU-avgjørelse og politianmeldelse.",
     steps: "Steg 1–6",
   },
   {
@@ -65,7 +65,7 @@ const checks = [
   "Privatliv og bildebruk",
   "Rettstatus, dom og henleggelse",
   "Oppdateringsbehov",
-  "PFU-spor",
+  "PFU-klage og PFU-avgjørelse",
   "Videre oppfølging",
 ];
 

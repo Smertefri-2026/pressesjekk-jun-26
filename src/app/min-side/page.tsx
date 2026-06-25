@@ -481,7 +481,7 @@ export default function MinSidePage() {
         id: `report-${report.id}`,
         title:
           report.report_type === "pfu_draft"
-            ? `PFU-utkast v${report.version} lagret`
+            ? `PFU-klage v${report.version} lagret`
             : report.report_type === "police_draft"
               ? `Politianmeldelse v${report.version} lagret`
               : report.report_type === "investigation_draft"
@@ -821,7 +821,7 @@ export default function MinSidePage() {
           </a>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="font-bold text-slate-500">PFU-utkast</p>
+            <p className="font-bold text-slate-500">PFU-klage</p>
             <p className="mt-4 text-5xl font-black text-slate-950">
               {pfuDraftCount}
             </p>

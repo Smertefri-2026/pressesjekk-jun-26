@@ -141,7 +141,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const prompt = `
 Du er en norsk presseetisk skriveassistent for PresseSjekk.
 
-Oppgaven din er å lage et strukturert PFU-klageutkast på norsk.
+Oppgaven din er å lage et strukturert PFU-klage på norsk.
 
 VIKTIG:
 - Ikke konkluder med at mediet har brutt god presseskikk.
@@ -224,7 +224,7 @@ ${pfuContextText}
 ANDRE MULIGE SPOR UTENFOR PFU:
 ${legalContextText}
 
-Lag PFU-klageutkastet med denne strukturen:
+Lag PFU-klageet med denne strukturen:
 
 PFU-KLAGEUTKAST
 
@@ -255,7 +255,7 @@ Skriv klart, rolig, profesjonelt og nøkternt.
     const pfuDraft = response.output_text?.trim();
 
     if (!pfuDraft) {
-      return jsonError("KI svarte uten PFU-utkast.", 500);
+      return jsonError("KI svarte uten PFU-klage.", 500);
     }
 
     const { data: insertedReport, error: insertError } = await supabaseUser

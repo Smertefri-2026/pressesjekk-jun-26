@@ -82,7 +82,7 @@ function reportTypeLabel(
   createdAt?: string | null | undefined
 ) {
   if (type === "full_report") return `KI-rapport v${version ?? "1"}`;
-  if (type === "pfu_draft") return `PFU-klageutkast v${version ?? "1"}`;
+  if (type === "pfu_draft") return `PFU-klage v${version ?? "1"}`;
   if (type === "police_draft") return `Politianmeldelse - ${formatDateTime(createdAt)}`;
   if (type === "investigation_draft") return `Utredning v${version ?? "1"}`;
   return `Regelbasert rapport v${version ?? "1"}`;
@@ -240,7 +240,7 @@ function buildPfuDraftText({
       : "- Ingen dokumenter registrert.";
 
   return [
-    "PresseSjekk PFU-klageutkast",
+    "PresseSjekk PFU-klage",
     "",
     "Sak",
     safeText(caseItem.title || "Ukjent sak"),
@@ -262,14 +262,14 @@ function buildPfuDraftText({
     "Rapportdato",
     formatDate(report.created_at),
     "",
-    "PFU-klageutkast",
+    "PFU-klage",
     safeText(report.pfu_draft || "Ingen PFU-tekst registrert."),
     "",
     "Dokumentgrunnlag",
     documentLines,
     "",
     "Forbehold",
-    "Dette er et foreløpig og veiledende PFU-klageutkast. Det er ikke juridisk rådgivning, PFU-avgjørelse eller endelig presseetisk vurdering. Teksten bør kontrolleres og tilpasses før eventuell innsending.",
+    "Dette er et foreløpig og veiledende PFU-klage. Det er ikke juridisk rådgivning, PFU-avgjørelse eller endelig presseetisk vurdering. Teksten bør kontrolleres og tilpasses før eventuell innsending.",
   ].join("\n");
 }
 

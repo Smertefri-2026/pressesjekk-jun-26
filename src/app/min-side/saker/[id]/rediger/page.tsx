@@ -272,7 +272,7 @@ export default function EditCasePage() {
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Oppdater grunninformasjon, status, mediehus, artikkellenke og
-              kort beskrivelse. Saksopplysninger, rapport, PFU-spor og videre
+              kort beskrivelse. Saksopplysninger, rapport, PFU-klage og PFU-avgjørelse og videre
               vurdering håndteres i saksgangen.
             </p>
 
@@ -471,7 +471,7 @@ export default function EditCasePage() {
               </h2>
               <p className="mt-4 leading-8 text-slate-700">
                 Hvis du endrer artikkeldata, status eller beskrivelse, kan det
-                være lurt å gå gjennom rapport og PFU-utkast på nytt.
+                være lurt å gå gjennom rapport og PFU-klage på nytt.
               </p>
             </div>
 

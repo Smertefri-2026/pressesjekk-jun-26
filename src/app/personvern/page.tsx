@@ -41,11 +41,11 @@ const sections = [
   },
   {
     title: "10. Min Side og lagrede saker",
-    text: "Når du bruker Min Side og innlogging, kan du opprette og lagre saker. En sak kan bestå av artikkeldata, dokumentasjon, tilsvar, rettsstatus, rapporter, PFU-klageutkast, politianmeldelse, utredning og vedlegg. Brukeren bør kunne oppdatere saken, legge til nye dokumenter og generere nye rapportversjoner.",
+    text: "Når du bruker Min Side og innlogging, kan du opprette og lagre saker. En sak kan bestå av artikkeldata, dokumentasjon, tilsvar, rettsstatus, rapporter, PFU-klage, politianmeldelse, utredning og vedlegg. Brukeren bør kunne oppdatere saken, legge til nye dokumenter og generere nye rapportversjoner.",
   },
   {
     title: "11. Bruk av kunstig intelligens",
-    text: "PresseSjekk kan bruke kunstig intelligens for å lage raskrapporter, analysere artikkeltekst, tilsvar, dokumentasjon og rettsstatus, og generere rapporter, PFU-klageutkast, politianmeldelse og utredning. AI-resultater er veiledende. De skal ikke forstås som juridisk rådgivning, PFU-avgjørelse, politiets vurdering eller garanti for utfallet av en klage. Brukeren må alltid kontrollere innhold før bruk.",
+    text: "PresseSjekk kan bruke kunstig intelligens for å lage raskrapporter, analysere artikkeltekst, tilsvar, dokumentasjon og rettsstatus, og generere rapporter, PFU-klage, politianmeldelse og utredning. AI-resultater er veiledende. De skal ikke forstås som juridisk rådgivning, PFU-avgjørelse, politiets vurdering eller garanti for utfallet av en klage. Brukeren må alltid kontrollere innhold før bruk.",
   },
   {
     title: "12. Leverandører og databehandlere",

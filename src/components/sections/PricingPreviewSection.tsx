@@ -12,7 +12,7 @@ const plans = [
   {
     name: "PresseSjekk + PFU",
     price: "790 kr",
-    text: "Rapportpakke, tilsvarsvurdering og PFU-klageutkast.",
+    text: "Rapportpakke, tilsvarsvurdering og PFU-klage.",
   },
 ];
 

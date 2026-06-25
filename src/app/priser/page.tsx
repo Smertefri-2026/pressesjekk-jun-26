@@ -17,12 +17,12 @@ const stepExplanations = [
   {
     title: "Steg 1–4",
     subtitle: "PFU-pakke",
-    text: "Alt i rapportpakken, i tillegg til et strukturert PFU-klageutkast basert på saken og presseetiske vurderinger.",
+    text: "Alt i rapportpakken, i tillegg til et strukturert PFU-klage basert på saken og presseetiske vurderinger.",
   },
   {
     title: "Steg 1–6",
     subtitle: "Full dokumentpakke",
-    text: "Komplett digital saksgang med rapport, PFU-spor, PFU-status og politianmeldelse/dokumentgrunnlag.",
+    text: "Komplett digital saksgang med rapport, PFU-klage og PFU-avgjørelse, PFU-status og politianmeldelse/dokumentgrunnlag.",
   },
   {
     title: "Steg 1–7",

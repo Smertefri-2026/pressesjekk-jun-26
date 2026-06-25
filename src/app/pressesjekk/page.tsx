@@ -23,7 +23,7 @@ const whatYouCanDo = [
   "Legge inn saksopplysninger og tilsvar",
   "Laste opp dokumentasjon og vedlegg",
   "Generere rapport",
-  "Lage PFU-klageutkast",
+  "Lage PFU-klage",
   "Lage politianmeldelse i alvorlige saker",
   "Bygge komplett utredningspakke",
 ];

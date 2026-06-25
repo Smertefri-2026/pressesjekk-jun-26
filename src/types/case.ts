@@ -3,7 +3,7 @@ export type RiskLevel = "Lav" | "Middels" | "Middels/høy" | "Høy";
 export type CaseStatus =
   | "Rask sjekk"
   | "Rapportpakke kjøpt"
-  | "PFU-klageutkast klart"
+  | "PFU-klage klart"
   | "Venter på analyse"
   | "Avsluttet";
 

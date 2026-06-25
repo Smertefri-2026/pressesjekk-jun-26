@@ -1,10 +1,10 @@
 export function CasePfuDraft() {
   return (
     <section className="mt-8 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-      <h2 className="text-2xl font-bold">PFU-klageutkast</h2>
+      <h2 className="text-2xl font-bold">PFU-klage</h2>
       <p className="mt-4 leading-8 text-slate-300">
         Basert på artikkel, tilsvar, rettsstatus og dokumentasjon kan
-        PresseSjekk senere generere et strukturert PFU-klageutkast med
+        PresseSjekk senere generere et strukturert PFU-klage med
         vedleggsliste.
       </p>
 

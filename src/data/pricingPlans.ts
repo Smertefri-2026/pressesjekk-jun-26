@@ -40,7 +40,7 @@ export const pricingPlans: PricingPlan[] = [
       "Tilsvar og samtidig imøtegåelse",
       "Straffesak, dom og rettsstatus",
       "Vedleggsliste",
-      "PFU-klageutkast",
+      "PFU-klage",
     ],
   },
   {
@@ -53,7 +53,7 @@ export const pricingPlans: PricingPlan[] = [
       "Samlet vurdering",
       "Tidslinje",
       "Felles dokumentasjon",
-      "Samlet PFU-klageutkast",
+      "Samlet PFU-klage",
     ],
   },
   {

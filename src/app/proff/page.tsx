@@ -10,7 +10,7 @@ const audiences = [
   },
   {
     title: "Advokater",
-    text: "Samle medieomtale, dokumentasjon, tidslinje, PFU-spor og utredningsgrunnlag på ett sted før videre vurdering.",
+    text: "Samle medieomtale, dokumentasjon, tidslinje, PFU-klage og PFU-avgjørelse og utredningsgrunnlag på ett sted før videre vurdering.",
   },
   {
     title: "PR-rådgivere og kommunikasjonsmiljøer",
@@ -27,7 +27,7 @@ const workflow = [
   "Legg inn artikkel, lenke og hovedopplysninger",
   "Samle dokumentasjon, tilsvar og redaktørsvar",
   "Generer rapport eller redaksjonell sjekk",
-  "Lag PFU-klageutkast ved behov",
+  "Lag PFU-klage ved behov",
   "Bygg politianmeldelse eller utredningspakke for større saker",
 ];
 

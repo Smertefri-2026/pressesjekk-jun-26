@@ -685,7 +685,7 @@ export default function CaseInputsPage() {
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               {isJournalist
                 ? "Samle publiseringsgrunnlag, kilder, dokumentasjon, tilsvar og redaksjonelle vurderinger på ett sted. Dette brukes som grunnlag for redaksjonell kvalitetssikring før publisering eller videre arbeid."
-                : "Samle det viktigste om saken på ett sted. Opplysningene brukes som grunnlag for rapport, dokumentasjonsliste og eventuelt PFU-klageutkast."}
+                : "Samle det viktigste om saken på ett sted. Opplysningene brukes som grunnlag for rapport, dokumentasjonsliste og eventuelt PFU-klage."}
             </p>
 
             {isEditingInputs ? (
@@ -1503,7 +1503,7 @@ export default function CaseInputsPage() {
               <p className="mt-4 leading-8 text-slate-300">
                 {isJournalist
                   ? "Når publiseringsgrunnlaget er lagret, kan du gå videre til redaksjonell sjekk og bruke rapporten som dokumentasjon i det videre arbeidet."
-                  : "Når opplysninger er lagret, kan du gå tilbake til saken og jobbe videre med rapportutkast, PFU-spor eller redigering."}
+                  : "Når opplysninger er lagret, kan du gå tilbake til saken og jobbe videre med rapportutkast, PFU-klage og PFU-avgjørelse eller redigering."}
               </p>
             </div>
           </aside>

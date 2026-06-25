@@ -303,7 +303,7 @@ export default function ProfilePage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Profilen brukes til rapporter, PFU-utkast, kontaktinformasjon,
+              Profilen brukes til rapporter, PFU-klager, kontaktinformasjon,
               betaling og eventuell bestilling av full utredning. For
               profesjonelle brukere kan profilen også brukes til
               firmaopplysninger, klientarbeid og fakturering.

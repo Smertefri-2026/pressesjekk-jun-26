@@ -92,7 +92,7 @@ export function AuthForm() {
         <p className="mt-4 leading-8 text-slate-700">
           {mode === "login"
             ? "Logg inn for å se lagrede saker, rapporter og dokumentasjon."
-            : "Opprett konto for å kunne lagre PresseSjekk-saker, rapporter og PFU-utkast."}
+            : "Opprett konto for å kunne lagre PresseSjekk-saker, rapporter og PFU-klager."}
         </p>
       </div>
 
@@ -171,7 +171,7 @@ export function AuthForm() {
               </select>
               <p className="mt-2 text-sm leading-6 text-slate-500">
                 Rollen brukes senere for å tilpasse Min Side, rapporter og
-                PFU-utkast.
+                PFU-klage.
               </p>
             </div>
           </>

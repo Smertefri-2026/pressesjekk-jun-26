@@ -170,7 +170,7 @@ UTKAST TIL POLITIANMELDELSE / VURDERINGSNOTAT
 6. Hva som oppleves uriktig, krenkende eller skadelig
 7. Dokumentasjon
 8. Kontakt med redaksjonen / samtidig imøtegåelse / tilsvar
-9. PFU-spor og eventuell PFU-avgjørelse
+9. PFU-klage og eventuell PFU-avgjørelse
 10. Mulige rettslige spørsmål som bes vurdert
 11. Mulig sivilt spor / erstatningsspor
 12. Hva politiet bes vurdere

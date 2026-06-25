@@ -247,7 +247,7 @@ export default function HomePage() {
               <p className="mt-5 max-w-3xl leading-8 text-slate-300">
                 PresseSjekk er ikke bare en enkel URL-sjekk. Tjenesten er en
                 trygg saksflyt der artikkel, tilsvar, rettsstatus,
-                dokumentasjon, rapport, PFU-spor, politianmeldelse og
+                dokumentasjon, rapport, PFU-klage, PFU-avgjørelse, politianmeldelse og
                 utredningspakke kan bygges i samme sak.
               </p>
             </div>

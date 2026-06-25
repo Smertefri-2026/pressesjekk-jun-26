@@ -26,7 +26,7 @@ export const demoCaseSummaries: CaseSummary[] = [
     title: "Artikkel om rettssak og identifisering",
     media: "Nettavis",
     date: "09.06.2026",
-    status: "PFU-klageutkast klart",
+    status: "PFU-klage klart",
     nextStep: "Last ned klage",
     risk: "Middels/høy",
     href: "/min-side/saker/demo-1",

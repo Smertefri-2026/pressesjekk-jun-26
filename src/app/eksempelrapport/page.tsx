@@ -73,7 +73,7 @@ const exampleData = {
     ],
   },
   pfu: {
-    eyebrow: "PFU-klageutkast",
+    eyebrow: "PFU-klage",
     title: "Utkast til PFU-klage",
     subtitle:
       "Et strukturert klageutkast basert på sak, rapport og dokumentasjon.",
@@ -140,7 +140,7 @@ const exampleData = {
     eyebrow: "PresseSjekk utredning",
     title: "Komplett utredningsgrunnlag",
     subtitle:
-      "Samlet dokumentpakke med sak, tidslinje, rapport, PFU-spor, politianmeldelse og vedleggsliste.",
+      "Samlet dokumentpakke med sak, tidslinje, rapport, PFU-klage, PFU-avgjørelse, politianmeldelse og vedleggsliste.",
     summary:
       "Utredningen samler hele saken om Ola Nordmann i én strukturert fremstilling. Målet er å gi en ryddig oversikt over publisering, dokumentasjon, kronologi, presseetiske spørsmål, mulige rettslige spor og videre anbefalt arbeid.",
     sections: [
@@ -158,7 +158,7 @@ const exampleData = {
       },
       {
         title: "4. Videre anbefalt arbeid",
-        text: "Sorter dokumentasjonen, kvalitetssikre tidslinjen, vurder PFU-spor, vurder behov for juridisk bistand og oppdater saken dersom nye opplysninger kommer til.",
+        text: "Sorter dokumentasjonen, kvalitetssikre tidslinjen, vurder PFU-klage og PFU-avgjørelse, vurder behov for juridisk bistand og oppdater saken dersom nye opplysninger kommer til.",
       },
     ],
     bullets: [

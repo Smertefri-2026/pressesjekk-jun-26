@@ -18,7 +18,7 @@ const contactOptions = [
   },
   {
     title: "Jeg vurderer utredningspakke",
-    text: "For større saker der dokumentasjon, tidslinje, rapporter, PFU-spor og videre vurdering bør samles i en komplett utredning.",
+    text: "For større saker der dokumentasjon, tidslinje, rapporter, PFU-klage og PFU-avgjørelse og videre vurdering bør samles i en komplett utredning.",
     href: "/kontakt",
     label: "Send henvendelse",
   },

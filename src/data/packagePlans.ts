@@ -49,10 +49,10 @@ export const singlePackages: PackagePlan[] = [
     name: "PFU-pakke",
     price: "Fra 1 490 kr",
     description:
-      "For deg som vil gå videre fra rapport til et strukturert PFU-klageutkast.",
+      "For deg som vil gå videre fra rapport til et strukturert PFU-klage.",
     features: [
       "Alt i Rapportpakke",
-      "PFU-klageutkast med KI",
+      "PFU-klage med KI",
       "Presseetisk vurdering opp mot VVP",
       "Nedlasting av PFU-klage som PDF og tekst",
       "Kan oppgraderes videre til full dokumentpakke",
@@ -67,7 +67,7 @@ export const singlePackages: PackagePlan[] = [
     name: "Full dokumentpakke",
     price: "Fra 2 990 kr",
     description:
-      "For deg som ønsker komplett digital saksgang med rapport, PFU-spor og politianmeldelse.",
+      "For deg som ønsker komplett digital saksgang med rapport, PFU-klage og PFU-avgjørelse og politianmeldelse.",
     features: [
       "Alt i PFU-pakke",
       "PFU-avgjørelse / status",
