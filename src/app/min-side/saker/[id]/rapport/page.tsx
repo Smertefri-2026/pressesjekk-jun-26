@@ -296,9 +296,7 @@ export default function CaseReportPage() {
   const activeReportTitle = activeReport
     ? activeReport.report_type === "full_report"
       ? `KI-rapport v${activeReport.version}`
-      : activeReport.report_type === "pfu_draft"
-        ? `PFU-utkast v${activeReport.version}`
-        : `Regelbasert rapport v${activeReport.version}`
+      : `Regelbasert rapport v${activeReport.version}`
     : "Rapportutkast";
 
   const visibleReports = reports.slice(0, visibleReportCount);
@@ -455,18 +453,30 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
     const nextVersion =
       reports.length > 0 ? Math.max(...reports.map((item) => item.version)) + 1 : 1;
 
-    const { error } = await supabase.from("case_reports").insert({
-      case_id: caseItem.id,
-      version: nextVersion,
-      report_type: "free_check",
-      summary: draft.summary,
-      findings: draft.findings,
-      recommendations: draft.recommendations,
-      status: "ready",
-    });
+    const { data: savedReport, error } = await supabase
+      .from("case_reports")
+      .insert({
+        case_id: caseItem.id,
+        version: nextVersion,
+        report_type: "free_check",
+        summary: draft.summary,
+        findings: draft.findings,
+        recommendations: draft.recommendations,
+        status: "ready",
+      })
+      .select(
+        "id,version,report_type,summary,findings,recommendations,pfu_draft,status,created_at"
+      )
+      .single();
 
     if (error) {
       setErrorMessage(error.message);
+      setIsSaving(false);
+      return;
+    }
+
+    if (!savedReport?.id) {
+      setErrorMessage("Rapporten ble lagret, men vi fant ikke rapport-ID.");
       setIsSaving(false);
       return;
     }
@@ -476,25 +486,14 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
       .update({ status: "report_ready" })
       .eq("id", caseItem.id);
 
-    setSuccessMessage(`Regelbasert rapportutkast v${nextVersion} er lagret.`);
-    const newReportId = crypto.randomUUID();
+    setSuccessMessage(`Regelbasert rapport v${nextVersion} er lagret.`);
 
-    const newReport: CaseReportRow = {
-      id: newReportId,
-      version: nextVersion,
-      report_type: "free_check",
-      summary: draft.summary,
-      findings: draft.findings,
-      recommendations: draft.recommendations,
-      pfu_draft: null,
-      status: "ready",
-      created_at: new Date().toISOString(),
-    };
+    const newReport = savedReport as CaseReportRow;
 
     setReports((current) => [newReport, ...current]);
     setAllReports((current) => [newReport, ...current]);
 
-    setSelectedReportId(newReportId);
+    setSelectedReportId(newReport.id);
     setCaseItem({ ...caseItem, status: "report_ready" });
     setIsSaving(false);
   }
@@ -612,8 +611,8 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Rapportutkastet bygger på grunninformasjon og saksopplysninger
               som allerede er lagret på saken. Utkastet kan brukes som
-              arbeidsgrunnlag før videre vurdering, PFU-spor eller full
-              utredning.
+              arbeidsgrunnlag før videre vurdering, PFU-klage,
+              politianmeldelse eller utredning.
             </p>
 
 
@@ -716,6 +715,9 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                 pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
               ),
               policeReport: allReports.some((report) => report.report_type === "police_draft"),
+              investigation: allReports.some(
+                (report) => report.report_type === "investigation_draft"
+              ),
             }}
           />
 
@@ -733,8 +735,8 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
               <div className="mt-5 grid gap-3">
                 {reports.length === 0 ? (
                   <p className="leading-8 text-slate-700">
-                    Ingen rapporter er lagret ennå. Lagre regelbasert utkastet når du
-                    ønsker å bevare denne versjonen.
+                    Ingen rapporter er lagret ennå. Generer en KI-rapport eller lagre
+                    den regelbaserte rapporten når du ønsker å bevare en versjon.
                   </p>
                 ) : (
                   visibleReports.map((report) => {
@@ -790,8 +792,8 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
                 Etter at rapportutkastet er lagret, kan saken brukes videre som
-                grunnlag for PFU-klage, dokumentasjon, redigering eller full
-                utredning.
+                grunnlag for PFU-klage, politianmeldelse, dokumentasjon,
+                redigering eller utredning.
               </p>
             </div>
           </aside>
