@@ -134,11 +134,7 @@ export function QuickCheckBox() {
       setQuickResultUrl(trimmedUrl);
       setQuickRole("reader");
 
-      window.history.replaceState(
-        null,
-        "",
-        `/pressesjekk?quick=1&role=reader&url=${encodedUrl}`
-      );
+      window.location.href = `/pressesjekk/raskrapport?url=${encodedUrl}`;
 
       return;
     }
@@ -208,7 +204,7 @@ export function QuickCheckBox() {
         </button>
       </form>
 
-      {quickResultUrl && quickRole === "reader" ? (
+      {false && quickResultUrl && quickRole === "reader" ? (
         <section className="mt-5 rounded-3xl border border-cyan-200 bg-white p-5 shadow-sm">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-800">
             Raskrapport
