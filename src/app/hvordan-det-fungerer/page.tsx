@@ -4,64 +4,76 @@ import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 
 const steps = [
   {
-    title: "Legg inn artikkel",
-    text: "Start med URL, PDF eller artikkeltekst. PresseSjekk bruker dette som grunnlag for å forstå hva saken handler om, hvem som omtales og hvilke påstander som fremsettes.",
+    title: "Sak registrert",
+    text: "Start med å opprette en sak. Du legger inn tittel, medieomtale, lenke eller artikkeltekst og en kort forklaring av hva saken gjelder.",
   },
   {
-    title: "Svar på spørsmål om tilsvar",
-    text: "Du registrerer om du ble kontaktet før publisering, om beskyldningene ble forelagt tydelig, hvor lang svarfrist du fikk og om svaret ditt ble tatt med.",
+    title: "Saksopplysninger",
+    text: "Her samler du fakta, tilsvar, kontakt med redaksjonen, rettsstatus, dokumentasjon og vedlegg. Dette blir grunnlaget for resten av saksgangen.",
   },
   {
-    title: "Legg til rettsstatus",
-    text: "Hvis saken gjelder mistanke, siktelse, tiltale, dom, henleggelse eller frifinnelse, kan dette legges inn som en del av vurderingen.",
+    title: "Rapport",
+    text: "PresseSjekk kan lage en strukturert rapport som peker på mulige presseetiske problemområder, dokumentasjon og anbefalte neste steg.",
   },
   {
-    title: "Last opp dokumentasjon",
-    text: "Samle e-post, SMS, skjermbilder, dommer, henleggelser, tilsvar og annen dokumentasjon som kan være relevant for saken.",
+    title: "PFU-klage",
+    text: "Dersom saken bør vurderes videre, kan systemet lage et utkast til PFU-klage basert på saken, rapporten og dokumentasjonen.",
   },
   {
-    title: "Få foreløpig vurdering",
-    text: "Gratis forhåndssjekk gir en kort oversikt over mulige problemområder og om saken kan være verdt å gå videre med.",
+    title: "PFU-avgjørelse",
+    text: "Når PFU har behandlet saken, kan du registrere avgjørelsen og bruke den videre i dokumentasjonen.",
   },
   {
-    title: "Lås opp rapport og klageutkast",
-    text: "Full rapport kan gi strukturert vurdering, mulige presseetiske problemstillinger, vedleggsliste og utkast til PFU-klage.",
+    title: "Politianmeldelse",
+    text: "I alvorlige saker kan du lage et nøkternt utkast til politianmeldelse eller vurderingsgrunnlag. Dette må alltid kvalitetssikres før bruk.",
+  },
+  {
+    title: "Utredningspakke",
+    text: "For større saker kan du samle rapport, PFU-spor, politianmeldelse, dokumentasjon, tidslinje og vedlegg i en mer komplett utredning.",
+  },
+];
+
+const packages = [
+  {
+    title: "Rapportpakke",
+    text: "Gir tilgang til sak, saksopplysninger og rapport.",
+    steps: "Steg 1–3",
+  },
+  {
+    title: "PFU-pakke",
+    text: "Gir tilgang til rapport og utkast til PFU-klage.",
+    steps: "Steg 1–4",
+  },
+  {
+    title: "Full dokumentpakke",
+    text: "Gir tilgang til rapport, PFU-spor, PFU-avgjørelse og politianmeldelse.",
+    steps: "Steg 1–6",
+  },
+  {
+    title: "Utredningspakke",
+    text: "Gir tilgang til hele saksgangen og samlet utredning for større saker.",
+    steps: "Steg 1–7",
   },
 ];
 
 const checks = [
   "Samtidig imøtegåelse",
-  "Tilsvar",
+  "Tilsvar og svarfrist",
   "Kildebruk og dokumentasjon",
-  "Tittel og ingress",
-  "Identifisering",
-  "Privatliv",
-  "Bildebruk",
-  "Rettssak, dom og henleggelse",
+  "Tittel, ingress og helhetsinntrykk",
+  "Identifisering og skadevirkning",
+  "Privatliv og bildebruk",
+  "Rettstatus, dom og henleggelse",
   "Oppdateringsbehov",
-  "Helhetsinntrykk og balanse",
+  "PFU-spor",
+  "Videre oppfølging",
 ];
 
 const notDoing = [
   "PresseSjekk avgjør ikke om pressen har brutt god presseskikk.",
-  "PresseSjekk erstatter ikke advokat, PFU eller domstolene.",
-  "PresseSjekk garanterer ikke at en klage fører frem.",
+  "PresseSjekk erstatter ikke advokat, PFU, politiet eller domstolene.",
+  "PresseSjekk garanterer ikke at en klage eller anmeldelse fører frem.",
   "Brukeren må selv kontrollere og godkjenne alt før innsending.",
-];
-
-const outputs = [
-  {
-    title: "Gratis forhåndssjekk",
-    text: "Kort vurdering av mulig risiko, hovedtema i artikkelen og hvilke punkter som kan være relevante å se nærmere på.",
-  },
-  {
-    title: "Full rapport",
-    text: "Mer detaljert gjennomgang av artikkel, tilsvar, rettsstatus, dokumentasjon og mulige presseetiske problemområder.",
-  },
-  {
-    title: "PFU-klageutkast",
-    text: "Strukturert klageutkast med innledning, sakens bakgrunn, mulige klagepunkter og forslag til vedleggsliste.",
-  },
 ];
 
 export default function HvordanDetFungererPage() {
@@ -69,8 +81,11 @@ export default function HvordanDetFungererPage() {
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <LightPublicHeader />
 
-      <section className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
-        <Link href="/" className="text-sm font-semibold text-cyan-700 hover:text-cyan-900">
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <Link
+          href="/"
+          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+        >
           ← Tilbake til forsiden
         </Link>
 
@@ -81,13 +96,14 @@ export default function HvordanDetFungererPage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Fra medieartikkel til strukturert vurdering.
+              Fra medieartikkel til komplett dokumentpakke.
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              PresseSjekk er bygget som en saksflyt. Du legger inn artikkel,
-              tilsvar, rettsstatus og dokumentasjon, og får hjelp til å se om
-              saken kan reise presseetiske problemstillinger.
+              PresseSjekk er bygget som en saksgang. Du starter med én
+              mediesak, samler opplysninger og dokumentasjon, og kan deretter
+              bygge rapport, PFU-klage, politianmeldelse og utredning etter
+              behov.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -95,13 +111,13 @@ export default function HvordanDetFungererPage() {
                 href="/pressesjekk"
                 className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
               >
-                Start gratis sjekk
+                Start sjekk
               </Link>
               <Link
-                href="/eksempelrapport"
+                href="/priser"
                 className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
               >
-                Se eksempelrapport
+                Se pakker og priser
               </Link>
             </div>
           </section>
@@ -115,8 +131,8 @@ export default function HvordanDetFungererPage() {
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
               En mediesak handler ofte om mer enn teksten i artikkelen. Derfor
-              ser PresseSjekk også på prosessen før publisering, muligheten for
-              tilsvar, dokumentasjonen og eventuell rettslig utvikling.
+              ser PresseSjekk også på tilsvar, kontakt før publisering,
+              dokumentasjon, rettsstatus, vedlegg og videre oppfølging.
             </p>
 
             <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
@@ -124,11 +140,11 @@ export default function HvordanDetFungererPage() {
                 Hovedidé
               </p>
               <p className="mt-2 text-2xl font-black text-slate-950">
-                Artikkel + dokumentasjon + tilsvar
+                Artikkel + dokumentasjon + saksgang
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Jo bedre grunnlag du legger inn, desto bedre kan rapporten og
-                klageutkastet struktureres.
+                Jo bedre grunnlag du legger inn, desto bedre kan rapportene og
+                dokumentpakkene struktureres.
               </p>
             </div>
           </aside>
@@ -139,7 +155,7 @@ export default function HvordanDetFungererPage() {
             Prosessen
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
-            Seks steg fra artikkel til rapport
+            Syv steg fra sak til utredning
           </h2>
 
           <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -160,18 +176,35 @@ export default function HvordanDetFungererPage() {
           </div>
         </section>
 
+        <section className="mt-16 grid gap-6 lg:grid-cols-4">
+          {packages.map((item) => (
+            <article
+              key={item.title}
+              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+            >
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-700">
+                {item.steps}
+              </p>
+              <h2 className="mt-3 text-2xl font-black text-slate-950">
+                {item.title}
+              </h2>
+              <p className="mt-4 leading-7 text-slate-600">{item.text}</p>
+            </article>
+          ))}
+        </section>
+
         <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
               Hva vurderes?
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
-              Mulige presseetiske problemområder
+              Mulige problemområder i mediesaken
             </h2>
             <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-              PresseSjekk kan hjelpe med å strukturere spørsmål som ofte går
-              igjen i mediesaker: fikk den omtalte reell mulighet til å svare,
-              var saken godt nok dokumentert, og er identifiseringen
+              PresseSjekk hjelper deg å strukturere spørsmål som ofte går igjen
+              i mediesaker: fikk den omtalte reell mulighet til å svare, var
+              saken godt nok dokumentert, og er identifiseringen
               forholdsmessig?
             </p>
 
@@ -197,8 +230,8 @@ export default function HvordanDetFungererPage() {
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
               PresseSjekk skal gi struktur, oversikt og dokumenthjelp. Det er
-              ikke en domstol, ikke PFU og ikke en erstatning for juridisk
-              rådgivning.
+              ikke en domstol, ikke PFU, ikke politiet og ikke en erstatning for
+              juridisk rådgivning.
             </p>
 
             <ul className="mt-6 space-y-3 text-sm font-medium text-slate-700">
@@ -216,27 +249,40 @@ export default function HvordanDetFungererPage() {
                 Hva får du?
               </p>
               <h2 className="mt-3 text-4xl font-black">
-                Fra gratis vurdering til full rapport
+                En trinnvis vei videre
               </h2>
               <p className="mt-5 max-w-3xl leading-8 text-slate-300">
-                Brukeren kan starte enkelt og gratis. Dersom saken virker
-                alvorlig eller bør dokumenteres videre, kan man gå videre til
-                betalt rapport og klageutkast.
+                Du trenger ikke bestille alt med én gang. Start med saken, og
+                oppgrader til riktig dokumentpakke dersom saken krever mer
+                dokumentasjon, klageutkast eller utredning.
               </p>
             </div>
 
             <div className="grid gap-3">
-              {outputs.map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-2xl border border-white/10 bg-white/[0.04] p-5"
-                >
-                  <h3 className="font-black text-white">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-300">
-                    {item.text}
-                  </p>
-                </div>
-              ))}
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+                <h3 className="font-black text-white">Rapport</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Strukturert vurdering av saken og mulige problemområder.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+                <h3 className="font-black text-white">PFU-klage</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Utkast til klage basert på sak, rapport og dokumentasjon.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+                <h3 className="font-black text-white">Politianmeldelse</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Nøkternt utkast i alvorlige saker der dette må vurderes.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
+                <h3 className="font-black text-white">Utredning</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  Samlet dokumentpakke med utredningsgrunnlag og vedleggsliste.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -246,11 +292,11 @@ export default function HvordanDetFungererPage() {
             Klar til å prøve?
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
-            Start med én artikkel
+            Start med én sak
           </h2>
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-700">
             Du kan starte med URL eller artikkeltekst. Senere kan du legge til
-            mer dokumentasjon og bygge en mer komplett sak.
+            mer dokumentasjon og bygge en mer komplett dokumentpakke.
           </p>
 
           <div className="mt-7 flex flex-wrap justify-center gap-3">
@@ -258,11 +304,11 @@ export default function HvordanDetFungererPage() {
               href="/pressesjekk"
               className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950 hover:bg-cyan-400"
             >
-              Start gratis sjekk
+              Start sjekk
             </Link>
             <Link
               href="/priser"
-              className="rounded-xl border border-slate-300 px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+              className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
             >
               Se priser
             </Link>
