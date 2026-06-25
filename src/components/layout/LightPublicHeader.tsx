@@ -6,8 +6,7 @@ import { BrandLogo } from "@/components/layout/BrandLogo";
 
 const navLinks = [
   { href: "/hvordan-det-fungerer", label: "Slik fungerer det" },
-  { href: "/journalister", label: "Journalister" },
-  { href: "/advokater", label: "Advokater" },
+  { href: "/proff", label: "Proff" },
   { href: "/eksempelrapport", label: "Eksempelrapport" },
   { href: "/priser", label: "Priser" },
   { href: "/om", label: "Om" },
