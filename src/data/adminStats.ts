@@ -43,7 +43,7 @@ export const latestCases = [
   },
   {
     user: "Bedrift",
-    case: "Full rapport kjøpt",
+    case: "Rapportpakke kjøpt",
     status: "Betalt",
     time: "06:21",
   },

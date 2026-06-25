@@ -1,18 +1,18 @@
 const plans = [
   {
-    name: "Gratis forhåndssjekk",
+    name: "Rask sjekk",
     price: "0 kr",
     text: "Kort sammendrag, mulig risikonivå og problemområder.",
   },
   {
     name: "PresseSjekk Enkel",
     price: "490 kr",
-    text: "Full rapport for én artikkel med presseetisk vurdering.",
+    text: "Rapportpakke for én artikkel med presseetisk vurdering.",
   },
   {
     name: "PresseSjekk + PFU",
     price: "790 kr",
-    text: "Full rapport, tilsvarsvurdering og PFU-klageutkast.",
+    text: "Rapportpakke, tilsvarsvurdering og PFU-klageutkast.",
   },
 ];
 
@@ -24,7 +24,7 @@ export function PricingPreviewSection() {
           Priser
         </p>
         <h2 className="mt-3 text-3xl font-bold md:text-5xl">
-          Start gratis – betal for full rapport
+          Start med rask sjekk – velg rapportpakke ved behov
         </h2>
 
         <div className="mt-10 grid gap-6 md:grid-cols-3">

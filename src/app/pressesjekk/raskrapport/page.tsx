@@ -131,7 +131,7 @@ export default function QuickReportPage() {
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Dette er en rask offentlig vurdering basert på URL og generelle
               presseetiske og juridiske rammer. Den erstatter ikke en lagret sak,
-              full rapport, advokat, PFU eller domstolene.
+              rapportpakke, advokat, PFU eller domstolene.
             </p>
           </section>
 

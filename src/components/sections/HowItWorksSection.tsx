@@ -2,7 +2,7 @@ const steps = [
   "Legg inn artikkel",
   "Svar på tilsvar-spørsmål",
   "Få gratis forhåndsvurdering",
-  "Lås opp full rapport",
+  "Velg rapportpakke",
   "Generer PFU-klage",
 ];
 

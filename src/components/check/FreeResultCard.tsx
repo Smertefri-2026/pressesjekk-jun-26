@@ -25,7 +25,7 @@ export function FreeResultCard() {
       </div>
 
       <button className="mt-6 w-full rounded-xl bg-cyan-300 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-200">
-        Lås opp full rapport
+        Velg rapportpakke
       </button>
 
       <p className="mt-4 text-xs leading-6 text-slate-400">

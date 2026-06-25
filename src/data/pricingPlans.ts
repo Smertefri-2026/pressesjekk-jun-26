@@ -2,7 +2,7 @@ import type { PricingPlan } from "@/types/pricing";
 
 export const pricingPlans: PricingPlan[] = [
   {
-    name: "Gratis forhåndssjekk",
+    name: "Rask sjekk",
     price: "0 kr",
     tag: "Start her",
     description:
@@ -12,7 +12,7 @@ export const pricingPlans: PricingPlan[] = [
       "Kort sammendrag",
       "Foreløpig risikonivå",
       "Mulige presseetiske temaer",
-      "Ingen full rapport",
+      "Ingen betalt rapportpakke",
     ],
   },
   {
@@ -20,7 +20,7 @@ export const pricingPlans: PricingPlan[] = [
     price: "490 kr",
     tag: "Én artikkel",
     description:
-      "Full rapport for én artikkel med vurdering av presseetiske problemstillinger.",
+      "Rapportpakke for én artikkel med vurdering av presseetiske problemstillinger.",
     features: [
       "Full artikkelanalyse",
       "Vurdering av tittel og ingress",
@@ -34,7 +34,7 @@ export const pricingPlans: PricingPlan[] = [
     price: "790 kr",
     tag: "Mest relevant",
     description:
-      "Full rapport, tilsvarsvurdering, rettsstatus og utkast til PFU-klage.",
+      "Rapportpakke, tilsvarsvurdering, rettsstatus og utkast til PFU-klage.",
     features: [
       "Alt i PresseSjekk Enkel",
       "Tilsvar og samtidig imøtegåelse",
@@ -79,7 +79,7 @@ export const pricingPlans: PricingPlan[] = [
     features: [
       "Flere klientmapper",
       "Flere brukere",
-      "Månedsbaserte credits",
+      "Månedsbaserte dokumentpakker",
       "Adminoversikt",
       "Prioritert videreutvikling",
     ],

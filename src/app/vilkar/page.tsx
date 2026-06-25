@@ -33,7 +33,7 @@ const sections = [
   },
   {
     title: "8. Rask sjekk og raskrapport",
-    text: "Rask sjekk kan gi en kort og foreløpig vurdering av mulige problemområder uten innlogging. Raskrapporten er ikke en full rapport, og den bygger normalt på begrenset informasjon. Den kan vise søketeller, foreløpige temaer, mulige VVP-punkter, juridiske rammer og anbefalt neste steg.",
+    text: "Rask sjekk kan gi en kort og foreløpig vurdering av mulige problemområder uten innlogging. Raskrapporten er ikke en rapportpakke, og den bygger normalt på begrenset informasjon. Den kan vise søketeller, foreløpige temaer, mulige VVP-punkter, juridiske rammer og anbefalt neste steg.",
   },
   {
     title: "9. Betalte rapportpakker og dokumentpakker",

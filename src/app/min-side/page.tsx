@@ -761,7 +761,7 @@ export default function MinSidePage() {
           id="oversikt"
         >
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="font-bold text-slate-500">Credits igjen</p>
+            <p className="font-bold text-slate-500">Dokumentpakker igjen</p>
             <p className="mt-4 text-5xl font-black text-cyan-700">0</p>
           </div>
 

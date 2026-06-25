@@ -18,7 +18,7 @@ const mainBenefits = [
   },
   {
     title: "Få rapport og klageutkast",
-    text: "Full rapport kan gi mulige problemområder, anbefalt neste steg og strukturert utkast til PFU-klage.",
+    text: "Rapportpakke kan gi mulige problemområder, anbefalt neste steg og strukturert utkast til PFU-klage.",
   },
 ];
 
@@ -294,7 +294,7 @@ export default function HomePage() {
             Klar til å prøve?
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
-            Start med en gratis forhåndssjekk
+            Start med rask sjekk
           </h2>
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-700">
             Du kan starte enkelt med URL eller artikkeltekst. Senere kan du

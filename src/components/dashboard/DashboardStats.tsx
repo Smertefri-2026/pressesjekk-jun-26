@@ -4,7 +4,7 @@ type DashboardStatsProps = {
 
 export function DashboardStats({ activeCases }: DashboardStatsProps) {
   const stats = [
-    { label: "Credits igjen", value: "3", highlight: true },
+    { label: "Dokumentpakker igjen", value: "3", highlight: true },
     { label: "Aktive saker", value: String(activeCases) },
     { label: "Rapporter", value: "2" },
     { label: "PFU-utkast", value: "1" },
