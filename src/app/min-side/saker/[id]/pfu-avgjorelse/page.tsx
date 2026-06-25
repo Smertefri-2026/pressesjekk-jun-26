@@ -611,6 +611,9 @@ export default function PfuDecisionPage() {
                   <option value="police_report_interest">
                     Ja, jeg vil vurdere politianmeldelse
                   </option>
+                  <option value="investigation_interest">
+                    Ja, jeg vil vurdere utredningspakke
+                  </option>
                   <option value="not_now">Ikke nå</option>
                 </select>
               </div>
@@ -648,6 +651,13 @@ export default function PfuDecisionPage() {
                 </Link>
 
                 <Link
+                  href={`/min-side/saker/${params.id}/utredning`}
+                  className="col-span-2 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-6 py-4 text-center font-black text-cyan-900 hover:bg-cyan-100 sm:col-span-1 sm:w-auto"
+                >
+                  Gå til utredning
+                </Link>
+
+                <Link
                   href={`/min-side/saker/${params.id}`}
                   className="col-span-2 w-full rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center font-black text-slate-950 hover:bg-slate-100 sm:col-span-1 sm:w-auto"
                 >
@@ -663,16 +673,24 @@ export default function PfuDecisionPage() {
               caseId={params.id}
               statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
               activeStep="pfu-avgjorelse"
-            workflowType={workflowType}
+              workflowType={workflowType}
               currentPackageId={caseAccessPackageId ?? undefined}
               stepsDone={{
                 caseRegistered: true,
                 caseInputs: Boolean(caseInput),
-                report: reports.some((report) => report.report_type !== "pfu_draft"),
+                report: reports.some(
+                  (report) =>
+                    report.report_type === "free_check" ||
+                    report.report_type === "full_report"
+                ),
                 pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
                 pfuDecision: Boolean(decisionReceived || uploadedFileName),
-                policeReport: reports.some((report) => report.report_type === "police_draft"),
-              investigation: reports.some((report) => report.report_type === "investigation_draft"),
+                policeReport: reports.some(
+                  (report) => report.report_type === "police_draft"
+                ),
+                investigation: reports.some(
+                  (report) => report.report_type === "investigation_draft"
+                ),
               }}
             />
 
@@ -713,8 +731,8 @@ export default function PfuDecisionPage() {
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
                 En PFU-avgjørelse kan være viktig dokumentasjon i saken. Etter
-                avgjørelsen kan du vurdere retting, oppfølging, ny
-                dokumentasjon eller andre mulige steg.
+                avgjørelsen kan du vurdere retting, oppfølging,
+                politianmeldelse, utredningspakke eller andre mulige steg.
               </p>
             </div>
           </aside>
