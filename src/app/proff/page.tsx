@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { monthlyPackages } from "@/data/packagePlans";
 
 const audiences = [
   {
@@ -30,26 +31,7 @@ const workflow = [
   "Bygg politianmeldelse eller utredningspakke for større saker",
 ];
 
-const plans = [
-  {
-    name: "Proff Start",
-    price: "1 990 kr/mnd",
-    text: "For enkeltpersoner, mindre virksomheter og rådgivere som vurderer flere saker.",
-    items: ["3 saker per måned", "Rapportpakker inkludert", "Oppgradering ved behov"],
-  },
-  {
-    name: "Proff",
-    price: "4 990 kr/mnd",
-    text: "For advokater, PR-rådgivere, organisasjoner og redaksjoner med løpende behov.",
-    items: ["15 saker per måned", "Rapportpakker inkludert", "Rabatt på oppgraderinger"],
-  },
-  {
-    name: "Byrå / redaksjon",
-    price: "14 990 kr/mnd",
-    text: "For større miljøer som trenger løpende kontroll, dokumentasjon og oversikt.",
-    items: ["50 saker inkludert", "Flere brukere", "Egnet for fakturering"],
-  },
-];
+const plans = monthlyPackages;
 
 export default function ProffPage() {
   return (
@@ -184,37 +166,42 @@ export default function ProffPage() {
           </aside>
         </section>
 
-        <section className="mt-16 grid gap-6 lg:grid-cols-3">
+        <section className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {plans.map((plan) => (
             <article
               key={plan.name}
-              className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm"
+              className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-sm"
             >
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-700">
-                Proff
+              <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
+                {plan.tag}
               </p>
-              <h2 className="mt-4 text-2xl font-black text-slate-950">
+
+              <h2 className="mt-5 text-2xl font-black text-slate-950">
                 {plan.name}
               </h2>
+
               <p className="mt-3 text-4xl font-black text-slate-950">
                 {plan.price}
               </p>
-              <p className="mt-4 leading-8 text-slate-700">{plan.text}</p>
 
-              <ul className="mt-6 space-y-3 text-sm font-medium text-slate-700">
-                {plan.items.map((item) => (
-                  <li key={item}>
-                    <span className="mr-2 text-cyan-700">✓</span>
-                    {item}
+              <p className="mt-4 leading-8 text-slate-700">
+                {plan.description}
+              </p>
+
+              <ul className="mb-8 mt-6 space-y-3 text-sm font-medium text-slate-700">
+                {plan.features.map((item) => (
+                  <li key={item} className="flex gap-2">
+                    <span className="text-cyan-700">✓</span>
+                    <span>{item}</span>
                   </li>
                 ))}
               </ul>
 
               <Link
-                href="/kontakt"
-                className="mt-8 block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
+                href={plan.href}
+                className="mt-auto block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
               >
-                Kontakt oss
+                {plan.button}
               </Link>
             </article>
           ))}

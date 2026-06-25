@@ -11,18 +11,23 @@ type PricingTab = "single" | "monthly";
 const stepExplanations = [
   {
     title: "Steg 1–3",
-    subtitle: "Rapport",
+    subtitle: "Rapportpakke",
     text: "Saken registreres, opplysninger legges inn, og PresseSjekk lager en strukturert rapport eller redaksjonell sjekk.",
   },
   {
     title: "Steg 1–4",
-    subtitle: "PFU-klage",
+    subtitle: "PFU-pakke",
     text: "Alt i rapportpakken, i tillegg til et strukturert PFU-klageutkast basert på saken og presseetiske vurderinger.",
   },
   {
     title: "Steg 1–6",
     subtitle: "Full dokumentpakke",
     text: "Komplett digital saksgang med rapport, PFU-spor, PFU-status og politianmeldelse/dokumentgrunnlag.",
+  },
+  {
+    title: "Steg 1–7",
+    subtitle: "Utredningspakke",
+    text: "Hele saksgangen samlet i en mer komplett utredning med tidslinje, dokumentasjon, vurderinger og vedleggsliste.",
   },
 ];
 
@@ -90,7 +95,32 @@ export default function PriserPage() {
             </div>
           </section>
 
+          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-7 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              Fleksibel betaling
+            </p>
+            <h2 className="mt-4 text-3xl font-black text-slate-950">
+              Start med én sak eller velg profftilgang
+            </h2>
+            <p className="mt-4 leading-8 text-slate-700">
+              Enkeltkjøp passer for én konkret mediesak. Månedlig profftilgang
+              passer for advokater, rådgivere, redaksjoner og organisasjoner
+              som jobber med flere saker.
+            </p>
 
+            <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
+              <p className="text-sm font-semibold text-slate-500">
+                Oppgradering
+              </p>
+              <p className="mt-2 text-2xl font-black text-slate-950">
+                Du kan starte enkelt
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Begynn med rapportpakke og oppgrader dersom saken krever PFU,
+                politianmeldelse eller utredning.
+              </p>
+            </div>
+          </aside>
         </div>
 
         <section className="mt-16">
@@ -180,7 +210,7 @@ export default function PriserPage() {
               dokumentasjonen. Derfor er pakkene bygget rundt stegene i Min Side.
             </p>
 
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {stepExplanations.map((item) => (
                 <div
                   key={item.title}
@@ -200,19 +230,7 @@ export default function PriserPage() {
             </div>
           </div>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Betaling
-            </p>
-            <h2 className="mt-3 text-3xl font-black text-slate-950">
-              Enkeltkjøp eller profftilgang.
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Enkeltkjøp passer best for én konkret sak. Månedlig profftilgang
-              passer best for advokater, rådgivere, organisasjoner og
-              redaksjoner med flere saker.
-            </p>
-          </aside>
+
         </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
