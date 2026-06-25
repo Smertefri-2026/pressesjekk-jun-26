@@ -11,6 +11,21 @@ const roleOptions = [
   { value: "pro", label: "Advokat / PR / redaksjon" },
 ];
 
+const quickEthicsPoints = [
+  "VVP 4.1 – saklighet og omtanke i innhold og presentasjon",
+  "VVP 4.4 – tittel, ingress og henvisninger må ha dekning",
+  "VVP 4.7 – varsomhet med identifisering",
+  "VVP 4.13 – retting av feilaktige opplysninger",
+  "VVP 4.14 – samtidig imøtegåelse ved sterke beskyldninger",
+];
+
+const quickLegalPoints = [
+  "Grunnloven § 100 – ytringsfrihet og informasjonsfrihet",
+  "Grunnloven § 102 – privatliv og personvern",
+  "Skadeserstatningsloven § 3-6 a – mulig oppreisning ved ærekrenkelser",
+  "Straffeloven kan være relevant i helt særskilte og alvorlige tilfeller",
+];
+
 function getSearchParam(name: string) {
   if (typeof window === "undefined") return "";
 
@@ -205,7 +220,8 @@ export function QuickCheckBox() {
 
           <p className="mt-3 text-sm leading-7 text-slate-700">
             Dette er en enkel offentlig forhåndsvisning uten innlogging. Den
-            vurderer ikke saken ferdig, men viser hva som bør sjekkes videre.
+            vurderer ikke saken ferdig, men viser presseetiske og rettslige
+            temaer som ofte bør sjekkes videre.
           </p>
 
           <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -251,31 +267,58 @@ export function QuickCheckBox() {
           <div className="mt-4 grid gap-3">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p className="font-black text-slate-950">
-                1. Dette kan sjekkes raskt
+                1. Foreløpig presseetisk sjekk
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
-                Tittel, ingress, identifisering, sterke påstander, rettsstatus
-                og om saken kan ha behov for mer dokumentasjon.
+                En rask lesersjekk kan særlig peke på om artikkelen bør ses
+                nærmere på med tanke på tittel, ingress, identifisering, sterke
+                beskyldninger, tilsvar og oppdateringsbehov.
               </p>
+
+              <ul className="mt-3 space-y-2 text-xs font-semibold leading-5 text-slate-700">
+                {quickEthicsPoints.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p className="font-black text-slate-950">
-                2. Dette krever lagret sak
+                2. Mulige rettslige rammer
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
-                Tilsvar, e-post fra journalist, svarfrist, dokumenter, PFU-spor,
-                politianmeldelse og utredning bør legges inn på Min Side.
+                Ytringsfriheten står sterkt, men den må vurderes mot privatliv,
+                dokumentasjon, identifisering og mulig skadevirkning. Dette er
+                bare en foreløpig oversikt.
+              </p>
+
+              <ul className="mt-3 space-y-2 text-xs font-semibold leading-5 text-slate-700">
+                {quickLegalPoints.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
+              <p className="font-black text-slate-950">
+                3. Hva hurtigsjekken ikke vet ennå
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-700">
+                Den kjenner ikke din versjon, e-post fra journalist, svarfrist,
+                hva du svarte, dokumentasjon, PFU-historikk eller senere
+                utvikling. Derfor kan den ikke konkludere.
               </p>
             </div>
 
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <p className="font-black text-slate-950">
-                3. Anbefalt neste steg
+                4. Anbefalt neste steg
               </p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
                 Er du selv omtalt, pårørende eller representerer en virksomhet,
-                bør du opprette en sak slik at dokumentasjonen blir lagret.
+                bør du opprette en sak slik at dokumentasjonen blir lagret og
+                kan brukes videre i rapport, PFU-klage, politianmeldelse eller
+                utredning.
               </p>
             </div>
           </div>
