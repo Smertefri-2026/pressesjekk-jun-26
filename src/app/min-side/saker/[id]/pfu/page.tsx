@@ -234,7 +234,7 @@ export default function PfuDraftPage() {
   const draftText = useMemo(() => {
     if (!caseItem) return "";
 
-    return `PFU-KLAGEUTKAST
+    return `PFU-KLAGE
 
 Dette er et foreløpig utkast basert på opplysninger registrert i PresseSjekk. Utkastet må kontrolleres og tilpasses før eventuell innsending.
 
@@ -339,7 +339,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
   async function handleDownloadPfuDraftPdf() {
     if (!activePfuDraft) {
-      setErrorMessage("Du må velge et lagret PFU-utkast før du kan laste ned PDF.");
+      setErrorMessage("Du må velge en lagret PFU-klage før du kan laste ned PDF.");
       return;
     }
 
@@ -396,7 +396,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
     try {
       await navigator.clipboard.writeText(activePfuDraftText);
-      setCopyMessage("PFU-utkastet er kopiert.");
+      setCopyMessage("PFU-klageet er kopiert.");
     } catch {
       setErrorMessage(
         "Kunne ikke kopiere automatisk. Marker teksten og kopier manuelt."
@@ -449,7 +449,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
     setPfuDrafts((current) => [generatedDraft, ...current]);
     setReports((current) => [generatedDraft, ...current]);
     setSelectedPfuDraftId(generatedDraft.id);
-    setSuccessMessage(`PFU-klageutkast v${generatedDraft.version} er generert og lagret.`);
+    setSuccessMessage(`PFU-klage v${generatedDraft.version} er generert og lagret.`);
     setIsGeneratingAiDraft(false);
   }
 
@@ -465,13 +465,17 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
     const nextVersion =
       allKnownVersions.length > 0 ? Math.max(...allKnownVersions) + 1 : 1;
 
-    const { error } = await supabase.from("case_reports").insert({
-      case_id: caseItem.id,
-      version: nextVersion,
-      report_type: "pfu_draft",
-      pfu_draft: draftText,
-      status: "ready",
-    });
+    const { data: savedDraft, error } = await supabase
+      .from("case_reports")
+      .insert({
+        case_id: caseItem.id,
+        version: nextVersion,
+        report_type: "pfu_draft",
+        pfu_draft: draftText,
+        status: "ready",
+      })
+      .select("id,version,report_type,pfu_draft,status,created_at")
+      .single();
 
     if (error) {
       setErrorMessage(error.message);
@@ -479,23 +483,20 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
       return;
     }
 
-    setSuccessMessage(`PFU-utkast v${nextVersion} er lagret.`);
+    if (!savedDraft?.id) {
+      setErrorMessage("PFU-klagen ble lagret, men vi fant ikke dokument-ID.");
+      setIsSaving(false);
+      return;
+    }
 
-    const newPfuDraftId = crypto.randomUUID();
+    setSuccessMessage(`PFU-klage v${nextVersion} er lagret.`);
 
-    setPfuDrafts((current) => [
-      {
-        id: newPfuDraftId,
-        version: nextVersion,
-        report_type: "pfu_draft",
-        pfu_draft: draftText,
-        status: "ready",
-        created_at: new Date().toISOString(),
-      },
-      ...current,
-    ]);
+    const newPfuDraft = savedDraft as CaseReportRow;
 
-    setSelectedPfuDraftId(newPfuDraftId);
+    setPfuDrafts((current) => [newPfuDraft, ...current]);
+    setReports((current) => [newPfuDraft, ...current]);
+
+    setSelectedPfuDraftId(newPfuDraft.id);
     setIsSaving(false);
   }
 
@@ -506,7 +507,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
             <p className="text-lg font-bold text-slate-700">
-              Laster PFU-utkast...
+              Laster PFU-klage...
             </p>
           </div>
         </section>
@@ -529,15 +530,15 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
-              PFU-utkast
+              PFU-klage
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              PFU-klageutkast
+              PFU-klage
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              PFU-klageutkastet bygger på saken, saksopplysninger,
+              PFU-klageet bygger på saken, saksopplysninger,
               dokumentasjon og relevante punkter i Vær Varsom-plakaten.
               Utkastet er et arbeidsgrunnlag før eventuell innsending eller
               videre kvalitetssikring.
@@ -550,14 +551,14 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
               <h2 className="mt-3 text-4xl font-black text-slate-950">
                 {activePfuDraft
-                  ? `PFU-klageutkast v${activePfuDraft.version}`
-                  : "PFU-klageutkast"}
+                  ? `PFU-klage v${activePfuDraft.version}`
+                  : "PFU-klage"}
               </h2>
 
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
                 {activePfuDraft
-                  ? "Dette er valgt lagret PFU-klageutkast. Du kan laste ned PDF, laste ned tekst eller lage et nytt KI-utkast."
-                  : "Bruk KI-knappen for å lage et gjennomarbeidet PFU-klageutkast basert på saken og relevante presseetiske punkter."}
+                  ? "Dette er valgt lagret PFU-klage. Du kan laste ned PDF, laste ned tekst eller lage et nytt KI-utkast."
+                  : "Bruk KI-knappen for å lage et gjennomarbeidet PFU-klage basert på saken og relevante presseetiske punkter."}
               </p>
 
               <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
@@ -666,7 +667,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               <div className="mt-5 grid gap-3">
                 {pfuDrafts.length === 0 ? (
                   <p className="leading-8 text-slate-700">
-                    Ingen PFU-utkast er lagret ennå. Lagre utkastet når du
+                    Ingen PFU-klage er lagret ennå. Lagre utkastet når du
                     ønsker å bevare denne versjonen.
                   </p>
                 ) : (
@@ -685,7 +686,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                         }`}
                       >
                         <p className="font-black text-slate-950">
-                          PFU-klageutkast v{draft.version}
+                          PFU-klage v{draft.version}
                         </p>
                         <p className="mt-1 text-sm font-semibold text-slate-600">
                           {formatDate(draft.created_at)}
