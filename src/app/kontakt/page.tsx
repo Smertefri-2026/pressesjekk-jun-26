@@ -13,13 +13,13 @@ const contactOptions = [
   {
     title: "Jeg ønsker profftilgang",
     text: "For advokater, PR-rådgivere, organisasjoner eller bedrifter som ønsker klientmapper, flere saker og credits.",
-    href: "/advokater",
+    href: "/proff",
     label: "Les om proffløsning",
   },
   {
     title: "Jeg er journalist eller redaksjon",
     text: "For spørsmål om bruk av PresseSjekk før publisering, redaksjonell kontroll eller presseetisk kvalitetssikring.",
-    href: "/journalister",
+    href: "/proff",
     label: "For journalister",
   },
 ];
@@ -196,7 +196,7 @@ export default function KontaktPage() {
                 rapportoversikt.
               </p>
               <Link
-                href="/advokater"
+                href="/proff"
                 className="mt-6 inline-block rounded-xl bg-cyan-400 px-5 py-3 font-black text-slate-950 hover:bg-cyan-300"
               >
                 Les om proffløsning

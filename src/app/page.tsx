@@ -122,21 +122,33 @@ export default function HomePage() {
               PFU-klage, politianmeldelse og utredning i samme saksgang.
             </p>
 
-            <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
-              <label className="text-sm font-semibold text-slate-600">
+            <form
+              action="/pressesjekk"
+              method="get"
+              className="mt-6 rounded-2xl bg-white p-5 shadow-sm"
+            >
+              <label
+                htmlFor="frontpage-article-url"
+                className="text-sm font-semibold text-slate-600"
+              >
                 Artikkel-URL
               </label>
-              <div className="mt-3 rounded-xl border border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-500">
-                https://avis.no/artikkel/...
-              </div>
 
-              <Link
-                href="/pressesjekk"
-                className="mt-4 block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
+              <input
+                id="frontpage-article-url"
+                name="url"
+                type="url"
+                placeholder="https://avis.no/artikkel/..."
+                className="mt-3 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-950 outline-none focus:border-cyan-500"
+              />
+
+              <button
+                type="submit"
+                className="mt-4 block w-full rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
               >
                 Start sjekk
-              </Link>
-            </div>
+              </button>
+            </form>
 
             <p className="mt-5 text-xs leading-6 text-slate-600">
               PresseSjekk gir veiledende dokumenthjelp. Tjenesten erstatter ikke
