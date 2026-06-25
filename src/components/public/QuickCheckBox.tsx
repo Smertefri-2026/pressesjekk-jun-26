@@ -220,8 +220,7 @@ export function QuickCheckBox() {
 
           <p className="mt-3 text-sm leading-7 text-slate-700">
             Dette er en enkel offentlig forhåndsvisning uten innlogging. Den
-            vurderer ikke saken ferdig, men viser presseetiske og rettslige
-            temaer som ofte bør sjekkes videre.
+            viser hva som bør sjekkes videre, men konkluderer ikke.
           </p>
 
           <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -264,63 +263,15 @@ export function QuickCheckBox() {
             </div>
           ) : null}
 
-          <div className="mt-4 grid gap-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="font-black text-slate-950">
-                1. Foreløpig presseetisk sjekk
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-700">
-                En rask lesersjekk kan særlig peke på om artikkelen bør ses
-                nærmere på med tanke på tittel, ingress, identifisering, sterke
-                beskyldninger, tilsvar og oppdateringsbehov.
-              </p>
-
-              <ul className="mt-3 space-y-2 text-xs font-semibold leading-5 text-slate-700">
-                {quickEthicsPoints.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="font-black text-slate-950">
-                2. Mulige rettslige rammer
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-700">
-                Ytringsfriheten står sterkt, men den må vurderes mot privatliv,
-                dokumentasjon, identifisering og mulig skadevirkning. Dette er
-                bare en foreløpig oversikt.
-              </p>
-
-              <ul className="mt-3 space-y-2 text-xs font-semibold leading-5 text-slate-700">
-                {quickLegalPoints.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
-              <p className="font-black text-slate-950">
-                3. Hva hurtigsjekken ikke vet ennå
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-700">
-                Den kjenner ikke din versjon, e-post fra journalist, svarfrist,
-                hva du svarte, dokumentasjon, PFU-historikk eller senere
-                utvikling. Derfor kan den ikke konkludere.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-              <p className="font-black text-slate-950">
-                4. Anbefalt neste steg
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-700">
-                Er du selv omtalt, pårørende eller representerer en virksomhet,
-                bør du opprette en sak slik at dokumentasjonen blir lagret og
-                kan brukes videre i rapport, PFU-klage, politianmeldelse eller
-                utredning.
-              </p>
-            </div>
+          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <p className="font-black text-slate-950">
+              Anbefalt neste steg
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              Er du selv omtalt, pårørende eller representerer en virksomhet,
+              bør du opprette en lagret sak. Da kan dokumentasjon, tilsvar og
+              videre vurderinger samles på Min Side.
+            </p>
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -337,6 +288,55 @@ export function QuickCheckBox() {
             >
               Se pakker
             </Link>
+          </div>
+
+          <div className="mt-5 grid gap-3">
+            <details className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <summary className="cursor-pointer font-black text-slate-950">
+                Presseetiske sjekkpunkter
+              </summary>
+
+              <p className="mt-3 text-sm leading-6 text-slate-700">
+                En rask lesersjekk kan særlig peke på om artikkelen bør ses
+                nærmere på med tanke på tittel, ingress, identifisering, sterke
+                beskyldninger, tilsvar og oppdateringsbehov.
+              </p>
+
+              <ul className="mt-3 space-y-2 text-xs font-semibold leading-5 text-slate-700">
+                {quickEthicsPoints.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </details>
+
+            <details className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <summary className="cursor-pointer font-black text-slate-950">
+                Mulige rettslige rammer
+              </summary>
+
+              <p className="mt-3 text-sm leading-6 text-slate-700">
+                Ytringsfriheten står sterkt, men den må vurderes mot privatliv,
+                dokumentasjon, identifisering og mulig skadevirkning.
+              </p>
+
+              <ul className="mt-3 space-y-2 text-xs font-semibold leading-5 text-slate-700">
+                {quickLegalPoints.map((item) => (
+                  <li key={item}>• {item}</li>
+                ))}
+              </ul>
+            </details>
+
+            <details className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
+              <summary className="cursor-pointer font-black text-slate-950">
+                Hva hurtigsjekken ikke vet ennå
+              </summary>
+
+              <p className="mt-3 text-sm leading-6 text-slate-700">
+                Den kjenner ikke din versjon, e-post fra journalist, svarfrist,
+                hva du svarte, dokumentasjon, PFU-historikk eller senere
+                utvikling. Derfor kan den ikke konkludere.
+              </p>
+            </details>
           </div>
 
           <p className="mt-5 text-xs leading-6 text-slate-500">

@@ -80,44 +80,75 @@ export default function PresseSjekkPage() {
               kan du bygge rapport, PFU-klage, politianmeldelse og utredning
               etter behov.
             </p>
+          </section>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+          <aside className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              Kom i gang
+            </p>
+
+            <h2 className="mt-4 text-3xl font-black text-slate-950">
+              Velg rask sjekk eller lagret sak
+            </h2>
+
+            <p className="mt-4 leading-8 text-slate-700">
+              Lesere kan bruke rask sjekk uten innlogging. Er du omtalt,
+              pårørende eller representerer en virksomhet, bør du opprette en
+              lagret sak på Min Side.
+            </p>
+
+            <div className="mt-6 grid gap-3">
               <Link
                 href="/min-side/saker/ny"
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
+                className="rounded-xl bg-slate-950 px-6 py-4 text-center font-black text-white hover:bg-slate-800"
               >
                 Start ny sak
               </Link>
+
               <Link
                 href="/priser"
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+                className="rounded-xl border border-slate-300 bg-white px-6 py-4 text-center font-black text-slate-950 hover:bg-slate-100"
               >
                 Se pakker og priser
               </Link>
             </div>
-          </section>
-
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-7 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Rask sjekk eller egen sak
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Start med URL og rolle
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Lesere kan starte med en rask offentlig sjekk. Er du omtalt,
-              pårørende eller representerer en virksomhet, bør du opprette en
-              sak slik at dokumentasjonen blir lagret.
-            </p>
-
-            <QuickCheckBox />
-
-            <p className="mt-5 text-xs leading-6 text-slate-600">
-              Rask lesersjekk kan brukes uten innlogging. Full saksgang krever
-              innlogging slik at saken kan lagres og bygges videre.
-            </p>
           </aside>
         </div>
+
+        <section className="mt-12 rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-8">
+          <div className="grid gap-8 lg:grid-cols-[360px_1fr] lg:items-start">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                Rask sjekk eller egen sak
+              </p>
+
+              <h2 className="mt-4 text-4xl font-black text-slate-950">
+                Start med URL og rolle
+              </h2>
+
+              <p className="mt-4 leading-8 text-slate-700">
+                Velg om du bare vil gjøre en rask lesersjekk, eller om du er
+                omtalt i saken og bør opprette en lagret sak. Hurtigsjekken kan
+                brukes uten innlogging, mens full saksgang krever Min Side.
+              </p>
+
+              <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
+                <p className="text-sm font-black text-slate-950">
+                  To måter å starte på
+                </p>
+                <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
+                  <li>• Leser: rask offentlig sjekk uten innlogging.</li>
+                  <li>• Omtalt/pårørende/bedrift: opprett lagret sak.</li>
+                  <li>• Proffbruker: gå videre til proffløsningen.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div>
+              <QuickCheckBox />
+            </div>
+          </div>
+        </section>
 
         <section className="mt-16 grid gap-6 md:grid-cols-3">
           {startOptions.map((item) => (
