@@ -1,55 +1,197 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 
-const reportFindings = [
+type ExampleKey = "rapport" | "pfu" | "politianmeldelse" | "utredning";
+
+const tabs: {
+  key: ExampleKey;
+  label: string;
+  step: string;
+  packageName: string;
+}[] = [
   {
-    title: "Samtidig imøtegåelse",
-    level: "Høy relevans",
-    text: "Artikkelen inneholder sterke faktiske beskyldninger. Brukeren oppgir at henvendelsen før publisering var kort, og at alle konkrete påstander ikke ble forelagt tydelig nok før publisering.",
+    key: "rapport",
+    label: "Rapport",
+    step: "Steg 3",
+    packageName: "Rapportpakke",
   },
   {
-    title: "Kildebruk og dokumentasjon",
-    level: "Middels relevans",
-    text: "Flere påstander fremstår belastende. Rapporten bør undersøke om artikkelen tydelig viser hvilket faktisk grunnlag redaksjonen bygger på.",
+    key: "pfu",
+    label: "PFU-klage",
+    step: "Steg 4",
+    packageName: "PFU-pakke",
   },
   {
-    title: "Identifisering",
-    level: "Middels/høy relevans",
-    text: "Dersom personen er navngitt, avbildet eller indirekte identifiserbar, bør det vurderes om identifiseringen er nødvendig og forholdsmessig.",
+    key: "politianmeldelse",
+    label: "Politianmeldelse",
+    step: "Steg 6",
+    packageName: "Full dokumentpakke",
   },
   {
-    title: "Rettsstatus og oppdateringsbehov",
-    level: "Middels relevans",
-    text: "Hvis saken senere er henlagt, endret, frifunnet eller rettskraftig avgjort, kan det være relevant å vurdere om artikkelen bør oppdateres.",
+    key: "utredning",
+    label: "Utredning",
+    step: "Steg 7",
+    packageName: "Utredningspakke",
   },
 ];
 
-const evidenceItems = [
-  "Kopi eller lenke til publisert artikkel",
-  "E-post eller SMS fra journalist før publisering",
-  "Brukerens svar til journalist eller redaksjon",
-  "Skjermbilde av tittel, ingress, bildebruk og publiseringstidspunkt",
-  "Eventuell dokumentasjon på rettsstatus, dom, henleggelse eller frifinnelse",
-];
+const exampleData = {
+  rapport: {
+    eyebrow: "PresseSjekk rapport",
+    title: "Vurderingsrapport",
+    subtitle:
+      "Strukturert vurdering av artikkel, tilsvar, dokumentasjon og mulige presseetiske problemstillinger.",
+    summary:
+      "Ola Nordmann er omtalt i en lokalavis i forbindelse med en konflikt om et kommunalt prosjekt. Artikkelen inneholder sterke karakteristikker og viser til flere påstander om Olas rolle. Basert på opplysningene i saken kan det være relevant å vurdere samtidig imøtegåelse, tittelbruk, kildegrunnlag og identifisering.",
+    sections: [
+      {
+        title: "Foreløpig sammendrag",
+        text: "Saken gjelder en publisering der Ola Nordmann mener artikkelen gir et skjevt og belastende bilde av hans rolle. Han opplyser at han ble kontaktet kort tid før publisering, men at alle konkrete beskyldninger ikke ble forelagt tydelig.",
+      },
+      {
+        title: "Mulige presseetiske problemstillinger",
+        text: "Rapporten peker særlig på VVP 4.1 om saklighet og omtanke, VVP 4.4 om dekning for tittel og ingress, VVP 4.7 om identifisering og VVP 4.14 om samtidig imøtegåelse.",
+      },
+      {
+        title: "Dokumentasjon som bør legges til",
+        text: "E-post fra journalist, Olas svar, skjermbilder av artikkelen, eventuell redaktørdialog og dokumentasjon som viser sakens faktiske bakgrunn.",
+      },
+      {
+        title: "Anbefalt neste steg",
+        text: "Saken bør kompletteres med dokumentasjon før eventuell PFU-klage. Rapporten er ikke en konklusjon, men et strukturert arbeidsgrunnlag.",
+      },
+    ],
+    bullets: [
+      "Vurder om sterke faktiske beskyldninger ble forelagt tydelig nok.",
+      "Vurder om tittel og ingress har dekning i artikkelens innhold.",
+      "Vurder om Ola Nordmann er identifisert på en nødvendig og forholdsmessig måte.",
+      "Samle dokumentasjon før saken eventuelt sendes videre.",
+    ],
+  },
+  pfu: {
+    eyebrow: "PFU-klageutkast",
+    title: "Utkast til PFU-klage",
+    subtitle:
+      "Et strukturert klageutkast basert på sak, rapport og dokumentasjon.",
+    summary:
+      "Ola Nordmann ønsker å klage inn en artikkel han mener er ubalansert og belastende. Klageutkastet samler sakens bakgrunn, hva Ola mener er problematisk, relevante VVP-punkter og forslag til vedlegg.",
+    sections: [
+      {
+        title: "1. Innledning",
+        text: "Klager er Ola Nordmann. Klagen gjelder en artikkel publisert av Eksempelavisen om en lokal konflikt. Klager mener artikkelen inneholder sterke og belastende påstander som ikke ble forelagt tydelig nok før publisering.",
+      },
+      {
+        title: "2. Sakens bakgrunn",
+        text: "Artikkelen omtaler et lokalt prosjekt og knytter Ola Nordmann til påstander om kritikkverdig opptreden. Ola mener artikkelen gir et uriktig helhetsinntrykk og at hans tilsvar bare delvis ble gjengitt.",
+      },
+      {
+        title: "3. Mulige brudd på Vær Varsom-plakaten",
+        text: "Klagen kan særlig knyttes til VVP 4.1, 4.4, 4.7, 4.13 og 4.14. Punktene må vurderes konkret opp mot artikkeltekst, dokumentasjon og kontakt med redaksjonen.",
+      },
+      {
+        title: "4. Vedlegg",
+        text: "Artikkelutskrift, e-post fra journalist, Olas svar, skjermbilder, eventuell redaktørdialog og dokumentasjon som viser senere utvikling.",
+      },
+    ],
+    bullets: [
+      "PFU-klagen bør være saklig, konkret og dokumentert.",
+      "Klagen bør vise nøyaktig hva som oppleves feil eller ubalansert.",
+      "Vedlegg bør nummereres og vises til i teksten.",
+      "Klagen må kontrolleres før innsending.",
+    ],
+  },
+  politianmeldelse: {
+    eyebrow: "Politianmeldelse",
+    title: "Foreløpig utkast til politianmeldelse",
+    subtitle:
+      "Et nøkternt vurderingsgrunnlag for alvorlige saker der politianmeldelse kan vurderes.",
+    summary:
+      "Dette eksempelet viser hvordan en politianmeldelse kan struktureres dersom en mediesak oppleves som svært belastende. Teksten er forsiktig formulert og ber politiet eller juridisk rådgiver vurdere om det finnes grunnlag for videre oppfølging.",
+    sections: [
+      {
+        title: "1. Anmelder / klager",
+        text: "Navn: Ola Nordmann. Rolle: Privatperson. Saken gjelder medieomtale der Ola mener han er fremstilt på en uriktig og belastende måte.",
+      },
+      {
+        title: "2. Kort sammendrag",
+        text: "Eksempelavisen publiserte en artikkel der Ola Nordmann ble omtalt i en konflikt. Ola mener omtalen kan gi et uriktig og skadelig inntrykk, og at redaksjonen ikke har håndtert hans tilsvar på en tilfredsstillende måte.",
+      },
+      {
+        title: "3. Hva som bes vurdert",
+        text: "Det bes vurdert om omtalen, presentasjonen og eventuell manglende oppdatering kan gi grunnlag for videre undersøkelse. Saken fremstår likevel primært som presseetisk og eventuelt sivilrettslig.",
+      },
+      {
+        title: "4. Forbehold",
+        text: "Dette er et foreløpig utkast. Det er ikke juridisk rådgivning, ikke en konklusjon om straffbart forhold og må kvalitetssikres før eventuell innsending.",
+      },
+    ],
+    bullets: [
+      "Politianmeldelse bør bare brukes i alvorlige saker.",
+      "Teksten bør være nøktern og dokumentert.",
+      "Det bør skilles mellom presseetikk, sivile krav og mulig straffespor.",
+      "Advokat bør vurdere teksten før bruk.",
+    ],
+  },
+  utredning: {
+    eyebrow: "PresseSjekk utredning",
+    title: "Komplett utredningsgrunnlag",
+    subtitle:
+      "Samlet dokumentpakke med sak, tidslinje, rapport, PFU-spor, politianmeldelse og vedleggsliste.",
+    summary:
+      "Utredningen samler hele saken om Ola Nordmann i én strukturert fremstilling. Målet er å gi en ryddig oversikt over publisering, dokumentasjon, kronologi, presseetiske spørsmål, mulige rettslige spor og videre anbefalt arbeid.",
+    sections: [
+      {
+        title: "1. Saksforside / hovedopplysninger",
+        text: "Sakstittel: Omtale av Ola Nordmann i lokal konflikt. Mediehus: Eksempelavisen. Dokumenttype: PresseSjekk utredning. Formål: Samle saken i ett strukturert grunnlag.",
+      },
+      {
+        title: "2. Kronologisk gjennomgang",
+        text: "Artikkel publiseres. Ola kontakter redaksjonen. Tilsvar sendes. Redaksjonen svarer. Dokumentasjon samles. Rapport og PFU-klage vurderes.",
+      },
+      {
+        title: "3. Dokumentasjon og vedlegg",
+        text: "Vedlegg 01: Artikkelutskrift. Vedlegg 02: E-post fra journalist. Vedlegg 03: Olas tilsvar. Vedlegg 04: Redaktørsvar. Vedlegg 05: Skjermbilder og senere oppdateringer.",
+      },
+      {
+        title: "4. Videre anbefalt arbeid",
+        text: "Sorter dokumentasjonen, kvalitetssikre tidslinjen, vurder PFU-spor, vurder behov for juridisk bistand og oppdater saken dersom nye opplysninger kommer til.",
+      },
+    ],
+    bullets: [
+      "Egnet for større eller mer alvorlige saker.",
+      "Samler rapport, klageutkast og dokumentasjon.",
+      "Gir bedre oversikt før advokat, PFU eller videre oppfølging.",
+      "Bør kvalitetssikres manuelt før formell bruk.",
+    ],
+  },
+};
 
-const reportSections = [
-  "Sammendrag av artikkelen",
-  "Mulige presseetiske problemstillinger",
-  "Vurdering av tilsvar og kontakt før publisering",
-  "Vurdering av identifisering og skadevirkning",
-  "Dokumentasjon og vedleggsliste",
-  "Anbefalt neste steg",
-  "Utkast til PFU-klage",
+const timeline = [
+  "Artikkel publiseres",
+  "Ola Nordmann kontakter redaksjonen",
+  "Tilsvar og dokumentasjon samles",
+  "Rapport genereres",
+  "PFU-klage, politianmeldelse eller utredning vurderes",
 ];
 
 export default function EksempelrapportPage() {
+  const [activeTab, setActiveTab] = useState<ExampleKey>("rapport");
+  const active = exampleData[activeTab];
+  const activeMeta = tabs.find((item) => item.key === activeTab) ?? tabs[0];
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <LightPublicHeader />
 
-      <section className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
-        <Link href="/" className="text-sm font-semibold text-cyan-700 hover:text-cyan-900">
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <Link
+          href="/"
+          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+        >
           ← Tilbake til forsiden
         </Link>
 
@@ -60,14 +202,14 @@ export default function EksempelrapportPage() {
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Slik kan en full rapport se ut.
+              Se eksempel på dokumentene PresseSjekk kan lage.
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              En PresseSjekk-rapport skal samle artikkel, tilsvar,
-              rettsstatus, dokumentasjon og mulige presseetiske
-              problemstillinger i én strukturert vurdering. Her ser du et
-              forenklet og anonymisert eksempel.
+              Her bruker vi en anonym testperson, Ola Nordmann, for å vise
+              hvordan saken kan bygges fra rapport til PFU-klage,
+              politianmeldelse og utredning. Tekstene er forenklede eksempler,
+              ikke ekte juridiske vurderinger.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -75,343 +217,215 @@ export default function EksempelrapportPage() {
                 href="/pressesjekk"
                 className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
               >
-                Start egen sjekk
+                Start sjekk
               </Link>
               <Link
                 href="/priser"
                 className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
               >
-                Se priser
+                Se pakker og priser
               </Link>
             </div>
           </section>
 
           <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-7 shadow-sm">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Hva får kunden?
+              Demo
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Rapport + klagegrunnlag
+              Fire dokumenttyper
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
-              Målet er å gi brukeren et bedre grunnlag før videre oppfølging:
-              redaktørklage, PFU-klage, dialog med advokat eller intern
-              dokumentasjon.
+              Velg fanene under for å se hvordan samme sak kan brukes til ulike
+              dokumentpakker.
             </p>
 
-            <div className="mt-6 space-y-3">
-              {reportSections.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl bg-white p-4 text-sm font-semibold text-slate-700 shadow-sm"
+            <div className="mt-6 grid gap-3">
+              {tabs.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setActiveTab(item.key)}
+                  className={`rounded-2xl p-4 text-left text-sm font-black shadow-sm transition ${
+                    activeTab === item.key
+                      ? "bg-slate-950 text-white"
+                      : "bg-white text-slate-950 hover:bg-cyan-50"
+                  }`}
                 >
-                  <span className="mr-2 text-cyan-700">✓</span>
-                  {item}
-                </div>
+                  <span className="block text-xs font-black uppercase tracking-[0.18em] opacity-70">
+                    {item.step}
+                  </span>
+                  <span className="mt-1 block">{item.label}</span>
+                </button>
               ))}
             </div>
           </aside>
         </div>
 
-        <section className="mt-16 rounded-3xl border border-cyan-200 bg-cyan-50 p-8 shadow-sm">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-            Sammendrag
-          </p>
-          <h2 className="mt-3 text-4xl font-black text-slate-950">
-            Foreløpig vurdering av saken
-          </h2>
-          <p className="mt-5 max-w-4xl leading-8 text-slate-700">
-            Artikkelen omtaler en person i en belastende sammenheng. Basert på
-            opplysningene i denne eksempelrapporten kan saken reise spørsmål om
-            samtidig imøtegåelse, kildebruk, identifisering og om artikkelen gir
-            et balansert bilde av hendelsesforløpet.
-          </p>
-
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <p className="text-sm font-semibold text-slate-500">
-                Risikonivå
-              </p>
-              <p className="mt-2 text-3xl font-black text-amber-600">
-                Middels/høy
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <p className="text-sm font-semibold text-slate-500">
-                Mulige funn
-              </p>
-              <p className="mt-2 text-3xl font-black text-cyan-700">4</p>
-            </div>
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <p className="text-sm font-semibold text-slate-500">
-                Anbefalt neste steg
-              </p>
-              <p className="mt-2 text-xl font-black text-slate-950">
-                PFU-vurdering
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Artikkeldata
-            </p>
-            <h2 className="mt-3 text-4xl font-black text-slate-950">
-              Grunnlaget rapporten bygger på
-            </h2>
-
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-500">Medium</p>
-                <p className="mt-2 font-black text-slate-950">
-                  Eksempelavisen
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-500">
-                  Publisert
-                </p>
-                <p className="mt-2 font-black text-slate-950">18.06.2026</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-500">
-                  Artikkeltype
-                </p>
-                <p className="mt-2 font-black text-slate-950">
-                  Nyhetsartikkel
-                </p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-500">
-                  Sjekket før
-                </p>
-                <p className="mt-2 font-black text-cyan-700">47 ganger</p>
-              </div>
-            </div>
-          </div>
-
-          <aside className="rounded-3xl border border-amber-200 bg-amber-50 p-8 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
-              Viktig
-            </p>
-            <h2 className="mt-3 text-3xl font-black text-slate-950">
-              Eksempelet er forenklet
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              En ekte rapport vil avhenge av artikkeltekst, dokumentasjon,
-              brukerens egne opplysninger og eventuell rettslig utvikling.
-              Rapporten må alltid kontrolleres før bruk.
-            </p>
-          </aside>
-        </section>
-
-        <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-            Mulige funn
-          </p>
-          <h2 className="mt-3 text-4xl font-black text-slate-950">
-            Presseetiske problemstillinger som bør vurderes
-          </h2>
-
-          <div className="mt-8 space-y-4">
-            {reportFindings.map((finding) => (
-              <article
-                key={finding.title}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+        <section className="mt-12 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="grid gap-3 md:grid-cols-4">
+            {tabs.map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setActiveTab(item.key)}
+                className={`rounded-2xl border px-4 py-4 text-left transition ${
+                  activeTab === item.key
+                    ? "border-cyan-400 bg-cyan-50"
+                    : "border-slate-200 bg-slate-50 hover:bg-white"
+                }`}
               >
-                <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
-                  <h3 className="text-xl font-black text-slate-950">
-                    {finding.title}
-                  </h3>
-                  <span className="w-fit rounded-full bg-amber-100 px-3 py-1 text-sm font-bold text-amber-800">
-                    {finding.level}
-                  </span>
-                </div>
-                <p className="mt-3 leading-7 text-slate-700">
-                  {finding.text}
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                  {item.step}
                 </p>
-              </article>
+                <p className="mt-1 text-lg font-black text-slate-950">
+                  {item.label}
+                </p>
+                <p className="mt-1 text-xs font-semibold text-slate-500">
+                  {item.packageName}
+                </p>
+              </button>
             ))}
           </div>
         </section>
 
-        <section className="mt-16 grid gap-8 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+        <section className="mt-8 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
+          <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Tilsvar
-            </p>
-            <h2 className="mt-3 text-3xl font-black text-slate-950">
-              Kontakt før publisering
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Brukeren oppgir at journalist tok kontakt samme dag som
-              artikkelen ble publisert. Henvendelsen skal ha inneholdt noen
-              spørsmål, men ikke alle konkrete beskyldninger som senere kom frem
-              i artikkelen. Brukeren oppgir også at svaret bare delvis ble tatt
-              med.
+              {active.eyebrow}
             </p>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-500">Kontakt</p>
-                <p className="mt-2 font-black">Ja, e-post</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-500">
-                  Svarfrist
-                </p>
-                <p className="mt-2 font-black">1–3 timer</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-                <p className="text-sm font-semibold text-slate-500">
-                  Svar tatt med
-                </p>
-                <p className="mt-2 font-black">Delvis</p>
-              </div>
+            <h2 className="mt-3 text-4xl font-black text-slate-950">
+              {active.title}
+            </h2>
+
+            <p className="mt-2 text-sm font-bold text-slate-500">
+              {activeMeta.step} · {activeMeta.packageName}
+            </p>
+
+            <p className="mt-5 text-lg leading-9 text-slate-700">
+              {active.subtitle}
+            </p>
+
+            <div className="mt-8 rounded-3xl border border-cyan-200 bg-cyan-50 p-5">
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-800">
+                Eksempel / sammendrag
+              </p>
+              <p className="mt-3 leading-8 text-slate-700">{active.summary}</p>
             </div>
-          </div>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Vedlegg
-            </p>
-            <h2 className="mt-3 text-3xl font-black text-slate-950">
-              Dokumentasjon som bør samles
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              En sterk klage bør bygge på dokumentasjon. PresseSjekk bør derfor
-              samle vedleggene i en strukturert liste som kan brukes videre.
-            </p>
-
-            <ul className="mt-6 space-y-3 text-sm font-medium text-slate-700">
-              {evidenceItems.map((item) => (
-                <li key={item}>
-                  <span className="mr-2 text-cyan-700">✓</span>
-                  {item}
-                </li>
+            <div className="mt-8 grid gap-5">
+              {active.sections.map((section) => (
+                <section
+                  key={section.title}
+                  className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
+                >
+                  <h3 className="text-xl font-black text-slate-950">
+                    {section.title}
+                  </h3>
+                  <p className="mt-3 leading-8 text-slate-700">
+                    {section.text}
+                  </p>
+                </section>
               ))}
-            </ul>
-          </div>
+            </div>
+          </article>
+
+          <aside className="grid content-start gap-6">
+            <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-700">
+                Viktig forbehold
+              </p>
+              <h2 className="mt-3 text-3xl font-black text-slate-950">
+                Kun demo
+              </h2>
+              <p className="mt-4 leading-8 text-slate-700">
+                Dette er et anonymisert og forenklet eksempel med Ola Nordmann.
+                En ekte rapport må bygge på faktiske opplysninger, dokumentasjon
+                og brukerens egen versjon.
+              </p>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                Innhold
+              </p>
+              <h2 className="mt-3 text-2xl font-black text-slate-950">
+                Dette kan dokumentet inneholde
+              </h2>
+
+              <ul className="mt-5 space-y-3 text-sm leading-7 text-slate-700">
+                {active.bullets.map((item) => (
+                  <li key={item}>
+                    <span className="mr-2 text-cyan-700">✓</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                Test selv
+              </p>
+              <h2 className="mt-3 text-3xl font-black">
+                Start med én sak
+              </h2>
+              <p className="mt-4 leading-8 text-slate-300">
+                Bruk rask sjekk først, eller opprett en lagret sak dersom du er
+                omtalt og trenger dokumentasjon.
+              </p>
+              <Link
+                href="/pressesjekk"
+                className="mt-6 block rounded-xl bg-cyan-400 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-300"
+              >
+                Start sjekk
+              </Link>
+            </div>
+          </aside>
         </section>
 
         <section className="mt-16 rounded-3xl bg-slate-950 p-8 text-white shadow-sm">
           <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                PFU-klageutkast
+                Eksempel på tidslinje
               </p>
               <h2 className="mt-3 text-4xl font-black">
-                Fra rapport til strukturert klage
+                Samme sak kan bygges videre
               </h2>
               <p className="mt-5 max-w-3xl leading-8 text-slate-300">
-                Rapporten kan danne grunnlag for et klageutkast. Brukeren må
-                alltid kontrollere teksten, legge til egne opplysninger og selv
-                godkjenne innholdet før eventuell innsending.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-              <p className="font-black text-white">Eksempel på klagepunkt:</p>
-              <p className="mt-3 text-sm leading-7 text-slate-300">
-                Klager mener at artikkelen kan reise spørsmål om manglende reell
-                samtidig imøtegåelse. Klager oppgir at redaksjonen ikke forela
-                alle konkrete beskyldninger før publisering, og at klagers svar
-                bare delvis ble gjengitt i artikkelen.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-16 rounded-3xl border border-cyan-200 bg-cyan-50 p-8 shadow-sm">
-          <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                Rapportversjoner
-              </p>
-              <h2 className="mt-3 text-4xl font-black text-slate-950">
-                Rapporten kan oppdateres
-              </h2>
-              <p className="mt-5 max-w-3xl leading-8 text-slate-700">
-                En mediesak kan endre seg etter publisering. Brukeren kan ha
-                valgt feil i skjemaet, finne nye e-poster, få svar fra
-                redaksjonen, motta ny dokumentasjon eller få oppdatert
-                rettsstatus. Derfor bør PresseSjekk bygges slik at saken kan
-                redigeres og rapporten kan genereres på nytt.
+                En mediesak endrer seg ofte etter publisering. Derfor bør
+                dokumentasjon, tilsvar, rapporter og videre oppfølging samles i
+                én saksgang.
               </p>
             </div>
 
             <div className="grid gap-3">
-              <div className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 shadow-sm">
-                <span className="mr-2 text-cyan-700">✓</span>
-                Endre artikkeldata, tilsvar og svarfrist
-              </div>
-              <div className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 shadow-sm">
-                <span className="mr-2 text-cyan-700">✓</span>
-                Legg til nye e-poster, SMS-er og vedlegg
-              </div>
-              <div className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 shadow-sm">
-                <span className="mr-2 text-cyan-700">✓</span>
-                Oppdater rettsstatus, dom, henleggelse eller frifinnelse
-              </div>
-              <div className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 shadow-sm">
-                <span className="mr-2 text-cyan-700">✓</span>
-                Lag ny rapportversjon og oppdatert PFU-klageutkast
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-16 rounded-3xl border border-cyan-200 bg-cyan-50 p-8 shadow-sm">
-          <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                Rapportversjoner
-              </p>
-              <h2 className="mt-3 text-4xl font-black text-slate-950">
-                Rapporten kan oppdateres
-              </h2>
-              <p className="mt-5 max-w-3xl leading-8 text-slate-700">
-                En mediesak kan endre seg etter publisering. Brukeren kan ha
-                valgt feil i skjemaet, finne nye e-poster, få svar fra
-                redaksjonen, motta ny dokumentasjon eller få oppdatert
-                rettsstatus. Derfor bør PresseSjekk bygges slik at saken kan
-                redigeres og rapporten kan genereres på nytt.
-              </p>
-            </div>
-
-            <div className="grid gap-3">
-              <div className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 shadow-sm">
-                <span className="mr-2 text-cyan-700">✓</span>
-                Endre artikkeldata, tilsvar og svarfrist
-              </div>
-              <div className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 shadow-sm">
-                <span className="mr-2 text-cyan-700">✓</span>
-                Legg til nye e-poster, SMS-er og vedlegg
-              </div>
-              <div className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 shadow-sm">
-                <span className="mr-2 text-cyan-700">✓</span>
-                Oppdater rettsstatus, dom, henleggelse eller frifinnelse
-              </div>
-              <div className="rounded-2xl bg-white p-5 text-sm font-semibold text-slate-700 shadow-sm">
-                <span className="mr-2 text-cyan-700">✓</span>
-                Lag ny rapportversjon og oppdatert PFU-klageutkast
-              </div>
+              {timeline.map((item, index) => (
+                <div
+                  key={item}
+                  className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200"
+                >
+                  <span className="mr-2 text-cyan-300">{index + 1}.</span>
+                  {item}
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-            Se hvordan din sak vurderes
+            Klar til å teste?
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
             Start med én artikkel
           </h2>
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-700">
-            Du kan starte med en gratis forhåndssjekk og senere låse opp full
-            rapport hvis saken bør følges opp.
+            Du kan starte med rask sjekk uten innlogging, eller opprette en
+            lagret sak dersom du er omtalt og trenger rapport, PFU-klage eller
+            videre dokumentasjon.
           </p>
 
           <div className="mt-7 flex flex-wrap justify-center gap-3">
@@ -419,13 +433,13 @@ export default function EksempelrapportPage() {
               href="/pressesjekk"
               className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950 hover:bg-cyan-400"
             >
-              Start gratis sjekk
+              Start sjekk
             </Link>
             <Link
               href="/priser"
-              className="rounded-xl border border-slate-300 px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
+              className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
             >
-              Se priser
+              Se pakker og priser
             </Link>
           </div>
         </section>
