@@ -157,7 +157,7 @@ export function CaseWorkflowCard({
   const effectivePackageId =
     workflowType === "journalist"
       ? "report_pack"
-      : currentPackageId ?? "investigation_pack";
+      : currentPackageId ?? inferPackageFromActiveStep(activeStep);
 
   const accessSteps = packageAccessSteps[effectivePackageId] ?? [1, 2, 3];
   const upgradePackage = getUpgradePackage(effectivePackageId);

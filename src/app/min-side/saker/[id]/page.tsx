@@ -8,6 +8,7 @@ import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
+import type { PackagePlanId } from "@/data/packagePlans";
 
 type CaseRow = {
   id: string;
@@ -42,6 +43,11 @@ type CaseReportRow = {
   report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft";
   status: "draft" | "ready" | "archived";
   created_at: string;
+};
+
+type CaseAccessRow = {
+  package_id: PackagePlanId;
+  status: "active" | "pending" | "cancelled" | "expired";
 };
 
 type PfuDecisionRow = {
@@ -122,6 +128,8 @@ export default function CaseDetailPage() {
 
   const [user, setUser] = useState<User | null>(null);
   const [workflowType, setWorkflowType] = useState<"standard" | "journalist">("standard");
+  const [caseAccessPackageId, setCaseAccessPackageId] =
+    useState<PackagePlanId | null>(null);
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
@@ -164,6 +172,18 @@ export default function CaseDetailPage() {
 
       setWorkflowType(
         profileData?.role_type === "journalist" ? "journalist" : "standard"
+      );
+
+      const { data: accessData } = await supabase
+        .from("case_access")
+        .select("package_id,status")
+        .eq("case_id", params.id)
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      setCaseAccessPackageId(
+        accessData ? (accessData as CaseAccessRow).package_id : null
       );
 
       const { data, error } = await supabase
@@ -607,6 +627,7 @@ export default function CaseDetailPage() {
             statusLabel={statusLabel(caseItem.status)}
             activeStep="case"
             workflowType={workflowType}
+            currentPackageId={caseAccessPackageId ?? undefined}
             stepsDone={{
               caseRegistered: true,
               caseInputs: Boolean(caseInput),
