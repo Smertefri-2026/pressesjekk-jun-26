@@ -8,8 +8,14 @@ import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
+import type { PackagePlanId } from "@/data/packagePlans";
 
 type CaseStatus = "draft" | "in_progress" | "report_ready" | "closed";
+
+type CaseAccessRow = {
+  package_id: PackagePlanId;
+  status: "active" | "pending" | "cancelled" | "expired";
+};
 
 type CaseRow = {
   id: string;
@@ -49,6 +55,8 @@ export default function EditCasePage() {
   const params = useParams<{ id: string }>();
 
   const [user, setUser] = useState<User | null>(null);
+  const [caseAccessPackageId, setCaseAccessPackageId] =
+    useState<PackagePlanId | null>(null);
   const [workflowType, setWorkflowType] = useState<"standard" | "journalist">("standard");
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
@@ -81,6 +89,17 @@ export default function EditCasePage() {
       }
 
       setUser(user);
+
+      const { data: accessData } = await supabase
+        .from("case_access")
+        .select("package_id,status")
+        .eq("case_id", params.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      const caseAccess = accessData as CaseAccessRow | null;
+
+      setCaseAccessPackageId(caseAccess?.package_id ?? null);
 
       const { data: profileData } = await supabase
         .from("profiles")
@@ -270,6 +289,7 @@ export default function EditCasePage() {
             statusLabel={statusLabel(status)}
             activeStep="case"
             workflowType={workflowType}
+              currentPackageId={caseAccessPackageId ?? undefined}
             stepsDone={{
               caseRegistered: true,
               caseInputs: Boolean(caseInput),

@@ -8,6 +8,12 @@ import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
+import type { PackagePlanId } from "@/data/packagePlans";
+
+type CaseAccessRow = {
+  package_id: PackagePlanId;
+  status: "active" | "pending" | "cancelled" | "expired";
+};
 
 type CaseRow = {
   id: string;
@@ -100,6 +106,8 @@ export default function PfuDraftPage() {
   const params = useParams<{ id: string }>();
 
   const [user, setUser] = useState<User | null>(null);
+  const [caseAccessPackageId, setCaseAccessPackageId] =
+    useState<PackagePlanId | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
@@ -131,6 +139,17 @@ export default function PfuDraftPage() {
       }
 
       setUser(user);
+
+      const { data: accessData } = await supabase
+        .from("case_access")
+        .select("package_id,status")
+        .eq("case_id", params.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      const caseAccess = accessData as CaseAccessRow | null;
+
+      setCaseAccessPackageId(caseAccess?.package_id ?? null);
 
       const { data: profileData } = await supabase
         .from("profiles")
@@ -619,6 +638,8 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
               activeStep="pfu"
               workflowType={profile?.role_type === "journalist" ? "journalist" : "standard"}
+              currentPackageId={caseAccessPackageId ?? undefined}
+              currentPackageId={caseAccessPackageId ?? undefined}
               stepsDone={{
                 caseRegistered: true,
                 caseInputs: Boolean(caseInput),
