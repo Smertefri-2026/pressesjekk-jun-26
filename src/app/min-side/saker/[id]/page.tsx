@@ -300,6 +300,23 @@ export default function CaseDetailPage() {
     setIsEditingBasicInfo(false);
   }
 
+  const reportDrafts = reports.filter(
+    (report) =>
+      report.report_type === "free_check" || report.report_type === "full_report"
+  );
+
+  const pfuDrafts = reports.filter(
+    (report) => report.report_type === "pfu_draft"
+  );
+
+  const policeDrafts = reports.filter(
+    (report) => report.report_type === "police_draft"
+  );
+
+  const investigationDrafts = reports.filter(
+    (report) => report.report_type === "investigation_draft"
+  );
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -396,7 +413,7 @@ export default function CaseDetailPage() {
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
                 Sjekk at mediehus, publiseringsdato, artikkeloverskrift, lenke
                 og kort beskrivelse stemmer. Dette er grunnlaget som brukes
-                videre i saksopplysninger, rapport og PFU-spor.
+                videre i saksopplysninger, rapport og PFU-klage og PFU-avgjørelse.
               </p>
 
               {isEditingBasicInfo ? (
@@ -649,24 +666,64 @@ export default function CaseDetailPage() {
                 Rapport
               </p>
               <h2 className="mt-3 text-3xl font-black">
-                {reports.length > 1
-                  ? `${reports.length} rapporter lagret`
-                  : reports.length === 1
+                {reportDrafts.length > 1
+                  ? `${reportDrafts.length} rapporter lagret`
+                  : reportDrafts.length === 1
                     ? "1 rapport lagret"
                     : "Ingen rapport lagret"}
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                {reports.length > 0
-                  ? `Siste rapportversjon er v${reports[0]?.version}. Du kan åpne rapportutkastet eller lage en ny versjon.`
-                  : "Når saksopplysninger er lagt inn, kan du lage første rapportutkast."}
+                {reportDrafts.length > 0
+                  ? `Siste rapportversjon er v${reportDrafts[0]?.version}. Du kan åpne rapporten eller lage en ny versjon.`
+                  : "Når saksopplysninger er lagt inn, kan du lage første rapport."}
               </p>
 
               <Link
                 href={`/min-side/saker/${params.id}/rapport`}
                 className="mt-6 inline-flex rounded-xl bg-cyan-400 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-300"
               >
-                {reports.length > 0 ? "Åpne rapportutkast" : "Lag rapportutkast"}
+                {reportDrafts.length > 0 ? "Åpne rapport" : "Lag rapport"}
               </Link>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                Videre dokumenter
+              </p>
+              <h2 className="mt-3 text-3xl font-black text-slate-950">
+                PFU, politianmeldelse og utredning
+              </h2>
+              <p className="mt-4 leading-8 text-slate-700">
+                Når rapporten er klar, kan saken bygges videre med PFU-klage,
+                politianmeldelse eller utredningspakke ved behov.
+              </p>
+
+              <div className="mt-5 grid gap-3">
+                <Link
+                  href={`/min-side/saker/${params.id}/pfu`}
+                  className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  {pfuDrafts.length > 0 ? "Åpne PFU-klage" : "Lag PFU-klage"}
+                </Link>
+
+                <Link
+                  href={`/min-side/saker/${params.id}/politianmeldelse`}
+                  className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  {policeDrafts.length > 0
+                    ? "Åpne politianmeldelse"
+                    : "Lag politianmeldelse"}
+                </Link>
+
+                <Link
+                  href={`/min-side/saker/${params.id}/utredning`}
+                  className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  {investigationDrafts.length > 0
+                    ? "Åpne utredning"
+                    : "Lag utredning"}
+                </Link>
+              </div>
             </div>
 
             <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
