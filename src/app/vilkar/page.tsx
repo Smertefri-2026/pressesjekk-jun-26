@@ -5,7 +5,7 @@ import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 const sections = [
   {
     title: "1. Om tjenesten",
-    text: "PresseSjekk er en digital tjeneste som hjelper brukere med å strukturere og vurdere medieomtale, tilsvar, dokumentasjon, rettsstatus og mulige presseetiske problemstillinger. Tjenesten kan brukes til forhåndssjekk, rapporter, rapportversjoner, utkast til PFU-klage, politianmeldelse og annen videre oppfølging.",
+    text: "PresseSjekk er en digital tjeneste som hjelper brukere med å strukturere og vurdere medieomtale, tilsvar, dokumentasjon, rettsstatus og mulige presseetiske problemstillinger. Tjenesten kan brukes til rask sjekk, raskrapport, lagrede saker, rapporter, rapportversjoner, utkast til PFU-klage, politianmeldelse, utredning og annen videre oppfølging.",
   },
   {
     title: "2. Hvem kan bruke PresseSjekk?",
@@ -32,12 +32,12 @@ const sections = [
     text: "PresseSjekk kan bruke kunstig intelligens til å analysere artikkeltekst, tilsvar, dokumentasjon og rettsstatus. AI-resultater kan inneholde feil, mangler eller vurderinger som må kontrolleres. AI-analyser skal alltid forstås som veiledende.",
   },
   {
-    title: "8. Gratis forhåndssjekk",
-    text: "Gratis forhåndssjekk kan gi en kort og foreløpig vurdering av mulige problemområder. Gratisversjonen er ikke en full rapport og kan ha begrensninger i dybde, dokumentasjon, lagring og videre oppfølging.",
+    title: "8. Rask sjekk og raskrapport",
+    text: "Rask sjekk kan gi en kort og foreløpig vurdering av mulige problemområder uten innlogging. Raskrapporten er ikke en full rapport, og den bygger normalt på begrenset informasjon. Den kan vise søketeller, foreløpige temaer, mulige VVP-punkter, juridiske rammer og anbefalt neste steg.",
   },
   {
-    title: "9. Betalte dokumentpakker og utredningspakker",
-    text: "Betalte funksjoner kan omfatte full rapport, rapportversjoner, PFU-klageutkast, politianmeldelse, dokumentasjonsliste, dokumentpakker, rapportpakker, utredningspakker og eventuell profftilgang. Priser, innhold og vilkår vil fremgå tydelig før kjøp.",
+    title: "9. Betalte rapportpakker og dokumentpakker",
+    text: "Betalte funksjoner kan omfatte rapportpakke, PFU-pakke, full dokumentpakke, politianmeldelse, dokumentasjonsliste, utredningspakke og eventuell profftilgang. Priser, innhold og vilkår skal fremgå tydelig før kjøp. Betaling kan senere håndteres gjennom Stripe eller annen betalingsleverandør.",
   },
   {
     title: "10. Rapportversjoner",
@@ -45,7 +45,7 @@ const sections = [
   },
   {
     title: "11. Profftilgang",
-    text: "Profftilgang kan senere tilbys advokater, rådgivere, organisasjoner og virksomheter. Proffbrukere kan få tilgang til flere saker, klientmapper, flere brukere, rapportoversikt, dokumentpakker og utvidede funksjoner.",
+    text: "Profftilgang kan tilbys advokater, PR-rådgivere, redaksjoner, organisasjoner og virksomheter. Proffbrukere kan få tilgang til flere saker per måned, flere brukere, rapportoversikt, dokumentpakker og utvidede funksjoner.",
   },
   {
     title: "12. Tilgjengelighet og tekniske feil",
@@ -92,7 +92,8 @@ export default function VilkarPage() {
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Disse vilkårene beskriver hvordan PresseSjekk kan brukes, hva
               tjenesten leverer, hvilke forbehold som gjelder, og hvilket ansvar
-              brukeren selv har ved bruk av rapporter, klageutkast, politianmeldelser og andre dokumenter.
+              brukeren selv har ved bruk av raskrapporter, rapporter,
+              klageutkast, politianmeldelser, utredninger og andre dokumenter.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
