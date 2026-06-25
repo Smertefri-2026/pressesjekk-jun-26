@@ -685,7 +685,7 @@ export default function CaseInputsPage() {
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               {isJournalist
                 ? "Samle publiseringsgrunnlag, kilder, dokumentasjon, tilsvar og redaksjonelle vurderinger på ett sted. Dette brukes som grunnlag for redaksjonell kvalitetssikring før publisering eller videre arbeid."
-                : "Samle det viktigste om saken på ett sted. Opplysningene brukes som grunnlag for rapport, dokumentasjonsliste og eventuelt PFU-klage."}
+                : "Samle det viktigste om saken på ett sted. Opplysningene brukes som grunnlag for rapport, dokumentasjonsliste, eventuell PFU-klage, politianmeldelse og utredning."}
             </p>
 
             {isEditingInputs ? (
@@ -922,6 +922,13 @@ export default function CaseInputsPage() {
                 </button>
 
                 <Link
+                  href={`/min-side/saker/${params.id}/rapport`}
+                  className="rounded-2xl border border-cyan-300 bg-cyan-50 px-6 py-4 font-black text-cyan-900 hover:bg-cyan-100"
+                >
+                  Gå til rapport
+                </Link>
+
+                <Link
                   href={`/min-side/saker/${params.id}`}
                   className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
                 >
@@ -987,16 +994,16 @@ export default function CaseInputsPage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                     <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
-                      Din rolle
+                      {isJournalist ? "Sjekkpunkt" : "Din rolle"}
                     </p>
                     <p className="mt-3 text-lg font-black text-slate-950">
-                      {yourRole || "Ikke satt"}
+                      {isJournalist ? "Redaksjonell vurdering" : yourRole || "Ikke satt"}
                     </p>
                   </div>
 
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                     <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
-                      Tilsvar sendt
+                      {isJournalist ? "Berørt part kontaktet" : "Tilsvar sendt"}
                     </p>
                     <p className="mt-3 text-lg font-black text-slate-950">
                       {replySent ? "Ja" : "Nei / ikke registrert"}
@@ -1006,7 +1013,7 @@ export default function CaseInputsPage() {
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
-                    Tilsvar eller henvendelse
+                    {isJournalist ? "Kontakt med kilde eller berørt part" : "Tilsvar eller henvendelse"}
                   </p>
                   <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
                     {replyText || "Ikke lagt inn ennå."}
@@ -1015,7 +1022,7 @@ export default function CaseInputsPage() {
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
-                    Svar fra redaksjonen
+                    {isJournalist ? "Svar fra kilde eller berørt part" : "Svar fra redaksjonen"}
                   </p>
                   <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
                     {editorResponse || "Ikke lagt inn ennå."}
@@ -1025,7 +1032,7 @@ export default function CaseInputsPage() {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                     <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
-                      Rettsstatus
+                      {isJournalist ? "Risiko/status" : "Rettsstatus"}
                     </p>
                     <p className="mt-3 text-lg font-black text-slate-950">
                       {legalStatusLabel(legalStatus)}
@@ -1044,7 +1051,7 @@ export default function CaseInputsPage() {
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                   <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
-                    Detaljer om rettsstatus
+                    {isJournalist ? "Detaljer om risiko/status" : "Detaljer om rettsstatus"}
                   </p>
                   <p className="mt-3 whitespace-pre-line leading-8 text-slate-700">
                     {legalStatusDetails || "Ikke lagt inn ennå."}
@@ -1475,7 +1482,7 @@ export default function CaseInputsPage() {
             statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
             activeStep="opplysninger"
             workflowType={workflowType}
-              currentPackageId={caseAccessPackageId ?? undefined}
+            currentPackageId={caseAccessPackageId ?? undefined}
             stepsDone={{
               caseRegistered: true,
               caseInputs: Boolean(caseInputId),
@@ -1503,7 +1510,7 @@ export default function CaseInputsPage() {
               <p className="mt-4 leading-8 text-slate-300">
                 {isJournalist
                   ? "Når publiseringsgrunnlaget er lagret, kan du gå videre til redaksjonell sjekk og bruke rapporten som dokumentasjon i det videre arbeidet."
-                  : "Når opplysninger er lagret, kan du gå tilbake til saken og jobbe videre med rapportutkast, PFU-klage og PFU-avgjørelse eller redigering."}
+                  : "Når opplysninger er lagret, kan du gå videre til rapport. Derfra kan saken bygges videre med PFU-klage, PFU-avgjørelse, politianmeldelse eller utredning."}
               </p>
             </div>
           </aside>
