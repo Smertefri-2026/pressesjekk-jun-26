@@ -34,7 +34,12 @@ type CaseInputRow = {
 
 type CaseReportRow = {
   id: string;
-  report_type: "free_check" | "full_report" | "pfu_draft";
+  report_type:
+    | "free_check"
+    | "full_report"
+    | "pfu_draft"
+    | "police_draft"
+    | "investigation_draft";
 };
 
 type PfuDecisionRow = {
@@ -272,8 +277,9 @@ export default function EditCasePage() {
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Oppdater grunninformasjon, status, mediehus, artikkellenke og
-              kort beskrivelse. Saksopplysninger, rapport, PFU-klage og PFU-avgjørelse og videre
-              vurdering håndteres i saksgangen.
+              kort beskrivelse. Saksopplysninger, rapport, PFU-klage,
+              PFU-avgjørelse, politianmeldelse og utredning håndteres i
+              saksgangen.
             </p>
 
             {user?.email ? (
@@ -289,16 +295,25 @@ export default function EditCasePage() {
             statusLabel={statusLabel(status)}
             activeStep="case"
             workflowType={workflowType}
-              currentPackageId={caseAccessPackageId ?? undefined}
+            currentPackageId={caseAccessPackageId ?? undefined}
             stepsDone={{
               caseRegistered: true,
               caseInputs: Boolean(caseInput),
-              report: reports.some((report) => report.report_type !== "pfu_draft"),
+              report: reports.some(
+                (report) =>
+                  report.report_type === "free_check" ||
+                  report.report_type === "full_report"
+              ),
               pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
               pfuDecision: Boolean(
                 pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
               ),
-              policeReport: false,
+              policeReport: reports.some(
+                (report) => report.report_type === "police_draft"
+              ),
+              investigation: reports.some(
+                (report) => report.report_type === "investigation_draft"
+              ),
             }}
           />
         </div>
@@ -471,7 +486,8 @@ export default function EditCasePage() {
               </h2>
               <p className="mt-4 leading-8 text-slate-700">
                 Hvis du endrer artikkeldata, status eller beskrivelse, kan det
-                være lurt å gå gjennom rapport og PFU-klage på nytt.
+                være lurt å gå gjennom rapport, PFU-klage, politianmeldelse og
+                utredning på nytt.
               </p>
             </div>
 
@@ -484,8 +500,8 @@ export default function EditCasePage() {
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
                 Etter at grunninformasjonen er lagret, kan du gå videre til
-                saksopplysninger, rapport, PFU-klage eller annen oppfølging i
-                saksgangen.
+                saksopplysninger, rapport, PFU-klage, politianmeldelse eller
+                utredning i saksgangen.
               </p>
             </div>
           </aside>
