@@ -27,7 +27,7 @@ type CaseRow = {
 type CaseReportRow = {
   id: string;
   version: number;
-  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft";
+  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft" | "investigation_draft";
   police_draft: string | null;
   status: "draft" | "ready" | "archived";
   created_at: string;
@@ -509,6 +509,7 @@ export default function PoliceReportPage() {
                   pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
                 ),
                 policeReport: policeDrafts.length > 0,
+                investigation: reports.some((report) => report.report_type === "investigation_draft"),
               }}
             />
 

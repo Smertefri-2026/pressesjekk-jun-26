@@ -43,7 +43,7 @@ type CaseInputRow = {
 type CaseReportRow = {
   id: string;
   version: number;
-  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft";
+  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft" | "investigation_draft";
   summary: string | null;
   findings: string[] | null;
   recommendations: string[] | null;

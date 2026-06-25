@@ -29,7 +29,7 @@ type CaseInputRow = {
 
 type CaseReportRow = {
   id: string;
-  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft";
+  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft" | "investigation_draft";
 };
 
 type PfuDecisionRow = {
@@ -672,6 +672,7 @@ export default function PfuDecisionPage() {
                 pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
                 pfuDecision: Boolean(decisionReceived || uploadedFileName),
                 policeReport: reports.some((report) => report.report_type === "police_draft"),
+              investigation: reports.some((report) => report.report_type === "investigation_draft"),
               }}
             />
 

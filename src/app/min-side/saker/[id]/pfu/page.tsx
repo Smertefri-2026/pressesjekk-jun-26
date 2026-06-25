@@ -50,7 +50,7 @@ type ProfileRow = {
 type CaseReportRow = {
   id: string;
   version: number;
-  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft";
+  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft" | "investigation_draft";
   pfu_draft: string | null;
   status: "draft" | "ready" | "archived";
   created_at: string;
@@ -648,6 +648,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                   pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
                 ),
                 policeReport: reports.some((report) => report.report_type === "police_draft"),
+              investigation: reports.some((report) => report.report_type === "investigation_draft"),
               }}
             />
 
