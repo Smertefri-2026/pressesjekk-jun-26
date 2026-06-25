@@ -269,7 +269,7 @@ export default function PoliceReportPage() {
 
   async function handleDownloadPoliceDraftPdf() {
     if (!activePoliceDraft) {
-      setErrorMessage("Du må velge et lagret politianmeldelse før du kan laste ned PDF.");
+      setErrorMessage("Du må velge en lagret politianmeldelse før du kan laste ned PDF.");
       return;
     }
 
@@ -383,7 +383,7 @@ export default function PoliceReportPage() {
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Dette steget bruker informasjonen fra saken, rapporten,
-              PFU-klagen og eventuell PFU-avgjørelse til å lage et nøkternt
+              PFU-klagen og eventuell PFU-avgjørelse til å lage en nøktern
               politianmeldelse. Utkastet er ikke juridisk rådgivning og må
               kvalitetssikres før eventuell innsending.
             </p>
@@ -402,7 +402,7 @@ export default function PoliceReportPage() {
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
                 {activePoliceDraft
                   ? "Dette er valgt lagret politianmeldelse. Du kan laste ned PDF, laste ned tekst eller generere en ny versjon."
-                  : "Generer et KI-basert politianmeldelse som kan brukes som arbeidsgrunnlag før eventuell politianmeldelse eller videre vurdering."}
+                  : "Generer en KI-basert politianmeldelse som kan brukes som arbeidsgrunnlag før eventuell politianmeldelse eller videre vurdering."}
               </p>
 
               <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
@@ -453,6 +453,13 @@ export default function PoliceReportPage() {
 
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
+                  href={`/min-side/saker/${params.id}/utredning`}
+                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+                >
+                  Gå til utredning
+                </Link>
+
+                <Link
                   href={`/min-side/saker/${params.id}`}
                   className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
                 >
@@ -463,7 +470,7 @@ export default function PoliceReportPage() {
 
             <div className="mt-8 rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-8">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                7. Bestill utredningspakke
+                7. Gå til utredningspakke
               </p>
 
               <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -479,16 +486,16 @@ export default function PoliceReportPage() {
 
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
                 En utredningspakke kan gjennomgå publisering, tidslinje,
-                dokumentasjon, mulig tap, PFU-spor, rettslige spørsmål og
+                dokumentasjon, mulig tap, PFU-klage, PFU-avgjørelse, rettslige spørsmål og
                 grunnlag for videre oppfølging. Pris fra kr 100 000 eks. mva.
                 for større saker.
               </p>
 
               <Link
-                href="/kontakt"
+                href={`/min-side/saker/${params.id}/utredning`}
                 className="mt-8 inline-flex rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
               >
-                Bestill utredningspakke
+                Gå til utredningspakke
               </Link>
             </div>
           </section>
@@ -498,18 +505,24 @@ export default function PoliceReportPage() {
               caseId={params.id}
               statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
               activeStep="politianmeldelse"
-            workflowType={workflowType}
+              workflowType={workflowType}
               currentPackageId={caseAccessPackageId ?? undefined}
               stepsDone={{
                 caseRegistered: true,
                 caseInputs: Boolean(caseInput),
-                report: reports.some((report) => report.report_type !== "pfu_draft"),
+                report: reports.some(
+                  (report) =>
+                    report.report_type === "free_check" ||
+                    report.report_type === "full_report"
+                ),
                 pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
                 pfuDecision: Boolean(
                   pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
                 ),
                 policeReport: policeDrafts.length > 0,
-                investigation: reports.some((report) => report.report_type === "investigation_draft"),
+                investigation: reports.some(
+                  (report) => report.report_type === "investigation_draft"
+                ),
               }}
             />
 
@@ -528,7 +541,7 @@ export default function PoliceReportPage() {
               <div className="mt-5 grid gap-3">
                 {policeDrafts.length === 0 ? (
                   <p className="leading-8 text-slate-700">
-                    Ingen politianmeldelseer er lagret ennå. Generer et KI-utkast
+                    Ingen politianmeldelser er lagret ennå. Generer et KI-utkast
                     når saken er klar for videre vurdering.
                   </p>
                 ) : (
