@@ -194,6 +194,10 @@ export default function InvestigationPage() {
       (draft) => draft.id === selectedInvestigationDraftId
     ) ?? investigationDrafts[0] ?? null;
 
+  const activeInvestigationDraftText =
+    activeInvestigationDraft?.investigation_draft ||
+    "Ingen utredning er generert ennå. Trykk på «Generer utredning med KI» for å lage et samlet utredningsutkast basert på saken, saksopplysningene, rapportene, PFU-sporet, politianmeldelsen og dokumentene som allerede er lagt inn.";
+
   async function handleGenerateInvestigationDraft() {
     setIsGeneratingInvestigation(true);
     setErrorMessage("");
@@ -343,29 +347,30 @@ export default function InvestigationPage() {
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                Utredningsutkast
+                Utredningspakke
               </p>
 
               <h2 className="mt-3 text-4xl font-black text-slate-950">
-                Generer samlet utredning
+                {activeInvestigationDraft
+                  ? `Utredning v${activeInvestigationDraft.version ?? ""}`
+                  : "Utredning"}
               </h2>
 
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-                Utredningen bygges på opplysningene, dokumentene, rapportene,
-                PFU-sporet og politianmeldelsen som allerede ligger i saken.
-                Vedlegg hentes fra Saksopplysninger. For best sortering kan
-                vedlegg navngis med nummer først, for eksempel 01, 02 og 03.
+                {activeInvestigationDraft
+                  ? "Dette er valgt lagret utredning. Du kan laste ned PDF, laste ned tekst eller generere en ny versjon."
+                  : "Generer et samlet KI-basert utredningsutkast basert på saken, dokumentasjonen, rapporten, PFU-sporet og politianmeldelsen."}
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
                 <button
                   type="button"
                   onClick={handleGenerateInvestigationDraft}
                   disabled={isGeneratingInvestigation}
-                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  className="col-span-2 w-full rounded-2xl bg-cyan-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
                 >
                   {isGeneratingInvestigation
-                    ? "Genererer utredning..."
+                    ? "Genererer..."
                     : "Generer utredning med KI"}
                 </button>
 
@@ -373,7 +378,7 @@ export default function InvestigationPage() {
                   type="button"
                   onClick={handleDownloadPdf}
                   disabled={!activeInvestigationDraft?.investigation_draft}
-                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-3 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
                 >
                   Last ned PDF
                 </button>
@@ -382,18 +387,15 @@ export default function InvestigationPage() {
                   type="button"
                   onClick={handleDownloadText}
                   disabled={!activeInvestigationDraft?.investigation_draft}
-                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="col-span-1 w-full rounded-2xl border border-slate-300 bg-white px-3 py-4 text-center text-base font-black text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
                 >
                   Last ned tekst
                 </button>
-
-                <Link
-                  href={`/min-side/saker/${params.id}`}
-                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
-                >
-                  Til saken
-                </Link>
               </div>
+
+              <pre className="mt-8 max-h-[900px] overflow-auto whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800 sm:p-7">
+                {activeInvestigationDraftText}
+              </pre>
 
               {successMessage ? (
                 <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
@@ -404,20 +406,6 @@ export default function InvestigationPage() {
               {errorMessage ? (
                 <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
                   {errorMessage}
-                </div>
-              ) : null}
-
-              {activeInvestigationDraft?.investigation_draft ? (
-                <div className="mt-8">
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                    Utredningsutkast
-                  </p>
-                  <h2 className="mt-3 text-3xl font-black text-slate-950">
-                    Utredning v{activeInvestigationDraft.version ?? ""}
-                  </h2>
-                  <pre className="mt-5 max-h-[900px] overflow-auto whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800">
-                    {activeInvestigationDraft.investigation_draft}
-                  </pre>
                 </div>
               ) : null}
             </div>
@@ -480,6 +468,11 @@ export default function InvestigationPage() {
                           ? new Date(draft.created_at).toLocaleDateString("nb-NO")
                           : "Ukjent dato"}
                       </p>
+                      {selectedInvestigationDraftId === draft.id ? (
+                        <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                          Vises nå
+                        </p>
+                      ) : null}
                     </button>
                   ))
                 ) : (
