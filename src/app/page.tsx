@@ -29,15 +29,15 @@ const audiences = [
     label: "Start sjekk",
   },
   {
-    title: "For journalister",
-    text: "Bruk PresseSjekk før publisering som et ekstra kontrollpunkt i krevende saker.",
-    href: "/journalister",
-    label: "Les mer",
+    title: "For bedrifter og organisasjoner",
+    text: "Dokumenter omtale, tilsvar, redaktørsvar, rapporter og videre oppfølging i én strukturert sak.",
+    href: "/pressesjekk",
+    label: "Start sak",
   },
   {
-    title: "For advokater og rådgivere",
-    text: "Strukturer klientmapper, artikler, dokumentasjon, rapporter og klageutkast.",
-    href: "/advokater",
+    title: "For proffbrukere",
+    text: "For redaksjoner, journalister, advokater, PR-rådgivere og organisasjoner som jobber med flere mediesaker.",
+    href: "/proff",
     label: "Se proffløsning",
   },
 ];
@@ -72,8 +72,9 @@ export default function HomePage() {
             <p className="mt-7 max-w-3xl text-xl leading-9 text-slate-700">
               PresseSjekk hjelper deg å vurdere medieomtale, tilsvar,
               dokumentasjon og mulige presseetiske problemstillinger på ett
-              sted. Start med en gratis forhåndssjekk, og gå videre til rapport
-              eller klageutkast hvis saken bør følges opp.
+              sted. Start med én sak, og gå videre til rapportpakke,
+              PFU-pakke, full dokumentpakke eller utredningspakke dersom saken
+              bør følges opp.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -81,7 +82,7 @@ export default function HomePage() {
                 href="/pressesjekk"
                 className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
               >
-                Start gratis sjekk
+                Start sjekk
               </Link>
               <Link
                 href="/eksempelrapport"
@@ -117,9 +118,8 @@ export default function HomePage() {
             </h2>
 
             <p className="mt-4 leading-8 text-slate-700">
-              I første steg får du en foreløpig oversikt over mulige
-              problemområder. Senere kan du låse opp full rapport,
-              dokumentasjonsliste og PFU-klageutkast.
+              Første steg er å samle saken. Deretter kan du bygge rapport,
+              PFU-klage, politianmeldelse og utredning i samme saksgang.
             </p>
 
             <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
@@ -145,7 +145,7 @@ export default function HomePage() {
           </aside>
         </div>
 
-        <section className="mt-18 mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <section className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {mainBenefits.map((item) => (
             <article
               key={item.title}
@@ -220,12 +220,13 @@ export default function HomePage() {
                 Bygget som saksflyt
               </p>
               <h2 className="mt-3 text-4xl font-black">
-                Fra artikkel til rapport og klageutkast
+                Fra artikkel til komplett dokumentpakke
               </h2>
               <p className="mt-5 max-w-3xl leading-8 text-slate-300">
-                PresseSjekk bør ikke bare være en enkel URL-sjekk. Den bør være
-                en trygg saksflyt der artikkel, tilsvar, rettsstatus,
-                dokumentasjon og vedlegg kobles sammen før rapporten lages.
+                PresseSjekk er ikke bare en enkel URL-sjekk. Tjenesten er en
+                trygg saksflyt der artikkel, tilsvar, rettsstatus,
+                dokumentasjon, rapport, PFU-spor, politianmeldelse og
+                utredningspakke kan bygges i samme sak.
               </p>
             </div>
 
@@ -240,7 +241,7 @@ export default function HomePage() {
                 3. Legg til dokumentasjon
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
-                4. Få rapport og videre forslag
+                4. Generer rapport, PFU, politianmeldelse eller utredning
               </div>
             </div>
           </div>
