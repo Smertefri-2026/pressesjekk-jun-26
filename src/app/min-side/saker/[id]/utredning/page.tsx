@@ -196,7 +196,7 @@ export default function InvestigationPage() {
 
   const activeInvestigationDraftText =
     activeInvestigationDraft?.investigation_draft ||
-    "Ingen utredning er generert ennå. Trykk på «Generer utredning med KI» for å lage et samlet utredningsutkast basert på saken, saksopplysningene, rapportene, PFU-sporet, politianmeldelsen og dokumentene som allerede er lagt inn.";
+    "Ingen utredning er generert ennå. Trykk på «Generer utredning med KI» for å lage et samlet utredningsutkast basert på saken, saksopplysningene, rapportene, PFU-klagen, PFU-avgjørelsen, politianmeldelsen og dokumentene som allerede er lagt inn.";
 
   async function handleGenerateInvestigationDraft() {
     setIsGeneratingInvestigation(true);
@@ -359,7 +359,7 @@ export default function InvestigationPage() {
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
                 {activeInvestigationDraft
                   ? "Dette er valgt lagret utredning. Du kan laste ned PDF, laste ned tekst eller generere en ny versjon."
-                  : "Generer et samlet KI-basert utredningsutkast basert på saken, dokumentasjonen, rapporten, PFU-sporet og politianmeldelsen."}
+                  : "Generer et samlet KI-basert utredningsutkast basert på saken, dokumentasjonen, rapporten, PFU-klagen, PFU-avgjørelsen og politianmeldelsen."}
               </p>
 
               <div className="mt-6 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
@@ -414,7 +414,9 @@ export default function InvestigationPage() {
           <aside className="grid gap-6">
             <CaseWorkflowCard
               caseId={params.id}
-              statusLabel={caseItem.status === "ready" ? "Rapport klar" : "Utkast"}
+              statusLabel={
+                caseItem.status === "report_ready" ? "Rapport klar" : "Utkast"
+              }
               activeStep="utredning"
               workflowType={workflowType}
               currentPackageId={caseAccessPackageId ?? undefined}
@@ -433,7 +435,7 @@ export default function InvestigationPage() {
                 policeReport: reports.some(
                   (report) => report.report_type === "police_draft"
                 ),
-                investigation: false,
+                investigation: investigationDrafts.length > 0,
               }}
             />
 
@@ -485,7 +487,7 @@ export default function InvestigationPage() {
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Din sak
+                Komplett dokumentpakke
               </p>
               <h2 className="mt-3 text-3xl font-black">
                 Din mest komplette oversikt
