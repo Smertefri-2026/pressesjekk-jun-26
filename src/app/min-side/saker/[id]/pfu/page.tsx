@@ -639,7 +639,6 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               activeStep="pfu"
               workflowType={profile?.role_type === "journalist" ? "journalist" : "standard"}
               currentPackageId={caseAccessPackageId ?? undefined}
-              currentPackageId={caseAccessPackageId ?? undefined}
               stepsDone={{
                 caseRegistered: true,
                 caseInputs: Boolean(caseInput),

@@ -320,7 +320,7 @@ export default function InvestigationPage() {
                   href="/kontakt"
                   className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
                 >
-                  Be om utredningspakke
+                  Generer utredning med KI
                 </Link>
                 <Link
                   href={`/min-side/saker/${params.id}`}
@@ -338,7 +338,6 @@ export default function InvestigationPage() {
               statusLabel={caseItem.status === "ready" ? "Rapport klar" : "Utkast"}
               activeStep="utredning"
               workflowType={workflowType}
-              currentPackageId={caseAccessPackageId ?? undefined}
               currentPackageId={caseAccessPackageId ?? undefined}
               stepsDone={{
                 caseRegistered: true,
