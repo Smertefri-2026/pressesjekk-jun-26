@@ -85,6 +85,17 @@ function packageLabel(packageId: string) {
   return packageId;
 }
 
+const packageOptions = [
+  { id: "report_pack", label: "Rapportpakke" },
+  { id: "pfu_pack", label: "PFU-pakke" },
+  { id: "full_pack", label: "Full dokumentpakke" },
+  { id: "investigation_pack", label: "Utredningspakke" },
+  { id: "monthly_start", label: "Månedsavtale Start" },
+  { id: "monthly_pro", label: "Månedsavtale Pro" },
+  { id: "monthly_agency", label: "Månedsavtale Byrå" },
+  { id: "monthly_enterprise", label: "Enterprise" },
+];
+
 export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -101,6 +112,9 @@ export default function AdminPage() {
   const [latestReports, setLatestReports] = useState<AdminReport[]>([]);
   const [latestQuickChecks, setLatestQuickChecks] = useState<AdminQuickCheck[]>([]);
   const [latestAccess, setLatestAccess] = useState<AdminCaseAccess[]>([]);
+  const [packageSelections, setPackageSelections] = useState<Record<string, string>>({});
+  const [savingAccessCaseId, setSavingAccessCaseId] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     async function loadAdminData() {
@@ -178,7 +192,7 @@ export default function AdminPage() {
           .from("case_access")
           .select("id,case_id,package_id,status,created_at")
           .order("created_at", { ascending: false })
-          .limit(10),
+          .limit(100),
       ]);
 
       const firstError =
@@ -208,14 +222,75 @@ export default function AdminPage() {
       setLatestProfiles((profilesResult.data ?? []) as AdminProfile[]);
       setLatestCases((casesResult.data ?? []) as AdminCase[]);
       setLatestReports((reportsResult.data ?? []) as AdminReport[]);
+      const accessRows = (accessResult.data ?? []) as AdminCaseAccess[];
+
       setLatestQuickChecks((quickChecksResult.data ?? []) as AdminQuickCheck[]);
-      setLatestAccess((accessResult.data ?? []) as AdminCaseAccess[]);
+      setLatestAccess(accessRows);
+      setPackageSelections(
+        accessRows.reduce<Record<string, string>>((current, access) => {
+          current[access.case_id] = access.package_id;
+          return current;
+        }, {})
+      );
 
       setIsLoading(false);
     }
 
     loadAdminData();
   }, []);
+
+  function accessForCase(caseId: string) {
+    return latestAccess.find((access) => access.case_id === caseId) ?? null;
+  }
+
+  async function handleSaveCaseAccess(caseItem: AdminCase) {
+    if (!caseItem.user_id) {
+      setErrorMessage("Saken mangler bruker-ID og kan ikke få pakke.");
+      return;
+    }
+
+    const packageId = packageSelections[caseItem.id] || "report_pack";
+
+    setSavingAccessCaseId(caseItem.id);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const { data, error } = await supabase
+      .from("case_access")
+      .upsert(
+        {
+          case_id: caseItem.id,
+          user_id: caseItem.user_id,
+          package_id: packageId,
+          status: "active",
+          source: "manual",
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "case_id" }
+      )
+      .select("id,case_id,package_id,status,created_at")
+      .single();
+
+    if (error) {
+      setErrorMessage(error.message);
+      setSavingAccessCaseId(null);
+      return;
+    }
+
+    const savedAccess = data as AdminCaseAccess;
+
+    setLatestAccess((current) => {
+      const withoutCurrent = current.filter(
+        (access) => access.case_id !== savedAccess.case_id
+      );
+      return [savedAccess, ...withoutCurrent];
+    });
+
+    setSuccessMessage(
+      `Tilgang lagret: ${caseItem.title} – ${packageLabel(packageId)}.`
+    );
+    setSavingAccessCaseId(null);
+  }
 
   if (isLoading) {
     return (
@@ -296,6 +371,12 @@ export default function AdminPage() {
             </div>
           ) : null}
 
+          {successMessage ? (
+            <div className="mt-8 rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-5 text-emerald-100">
+              {successMessage}
+            </div>
+          ) : null}
+
           <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
             {[
               ["Brukere", userCount],
@@ -318,24 +399,81 @@ export default function AdminPage() {
             <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
               <h2 className="text-2xl font-bold">Siste saker</h2>
               <div className="mt-5 grid gap-3">
-                {latestCases.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={`/min-side/saker/${item.id}`}
-                    className="rounded-2xl border border-white/10 bg-slate-900 p-5 hover:bg-slate-800"
-                  >
-                    <p className="font-bold">{item.title}</p>
-                    <p className="mt-2 text-sm text-slate-400">
-                      {item.media_name || "Ukjent medium"} · {item.status || "Ukjent status"} ·{" "}
-                      {formatDateTime(item.created_at)}
-                    </p>
-                    {item.article_title ? (
-                      <p className="mt-2 text-sm text-slate-300">
-                        {item.article_title}
-                      </p>
-                    ) : null}
-                  </Link>
-                ))}
+                {latestCases.map((item) => {
+                  const currentAccess = accessForCase(item.id);
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="rounded-2xl border border-white/10 bg-slate-900 p-5"
+                    >
+                      <Link
+                        href={`/min-side/saker/${item.id}`}
+                        className="block hover:text-cyan-200"
+                      >
+                        <p className="font-bold">{item.title}</p>
+                        <p className="mt-2 text-sm text-slate-400">
+                          {item.media_name || "Ukjent medium"} ·{" "}
+                          {item.status || "Ukjent status"} ·{" "}
+                          {formatDateTime(item.created_at)}
+                        </p>
+                        {item.article_title ? (
+                          <p className="mt-2 text-sm text-slate-300">
+                            {item.article_title}
+                          </p>
+                        ) : null}
+                      </Link>
+
+                      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-300">
+                          Pakke
+                        </p>
+                        <p className="mt-2 text-sm text-slate-400">
+                          Nåværende:{" "}
+                          <span className="font-bold text-slate-200">
+                            {currentAccess
+                              ? packageLabel(currentAccess.package_id)
+                              : "Ingen aktiv pakke"}
+                          </span>
+                        </p>
+
+                        <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
+                          <select
+                            value={
+                              packageSelections[item.id] ||
+                              currentAccess?.package_id ||
+                              "report_pack"
+                            }
+                            onChange={(event) =>
+                              setPackageSelections((current) => ({
+                                ...current,
+                                [item.id]: event.target.value,
+                              }))
+                            }
+                            className="rounded-xl border border-white/10 bg-slate-950 px-3 py-3 text-sm font-semibold text-white outline-none"
+                          >
+                            {packageOptions.map((option) => (
+                              <option key={option.id} value={option.id}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+
+                          <button
+                            type="button"
+                            onClick={() => handleSaveCaseAccess(item)}
+                            disabled={savingAccessCaseId === item.id}
+                            className="rounded-xl bg-cyan-300 px-4 py-3 text-sm font-black text-slate-950 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {savingAccessCaseId === item.id
+                              ? "Lagrer..."
+                              : "Lagre pakke"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
 
                 {latestCases.length === 0 ? (
                   <p className="text-slate-400">Ingen saker ennå.</p>
@@ -395,7 +533,7 @@ export default function AdminPage() {
             <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
               <h2 className="text-2xl font-bold">Siste pakker</h2>
               <div className="mt-5 grid gap-3">
-                {latestAccess.map((item) => (
+                {latestAccess.slice(0, 10).map((item) => (
                   <Link
                     key={item.id}
                     href={`/min-side/saker/${item.case_id}`}
