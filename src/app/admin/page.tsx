@@ -184,22 +184,22 @@ export default function AdminPage() {
           .from("cases")
           .select("id,user_id,title,status,media_name,article_title,created_at")
           .order("created_at", { ascending: false })
-          .limit(10),
+          .limit(5),
         supabase
           .from("case_reports")
           .select("id,case_id,version,report_type,status,created_at")
           .order("created_at", { ascending: false })
-          .limit(10),
+          .limit(5),
         supabase
           .from("quick_checks")
           .select("id,url,role,check_count,ai_status,created_at,last_checked_at")
           .order("last_checked_at", { ascending: false })
-          .limit(10),
+          .limit(5),
         supabase
           .from("case_access")
           .select("id,case_id,package_id,status,created_at")
           .order("created_at", { ascending: false })
-          .limit(100),
+          .limit(5),
       ]);
 
       const firstError =
@@ -423,7 +423,7 @@ export default function AdminPage() {
             </div>
           ) : null}
 
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+          <section className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
             {[
               ["Brukere", userCount],
               ["Saker", caseCount],
@@ -439,11 +439,65 @@ export default function AdminPage() {
                 <p className="mt-3 text-4xl font-bold">{value}</p>
               </div>
             ))}
-          </div>
+          </section>
+
+          <section className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+            {[
+              {
+                title: "Brukere",
+                text: "Søk etter kunder, roller og adminbrukere.",
+                href: "/admin/brukere",
+              },
+              {
+                title: "Saker",
+                text: "Finn saker, status, mediehus og kunde.",
+                href: "/admin/saker",
+              },
+              {
+                title: "Rapporter",
+                text: "Se genererte rapporter og dokumenter.",
+                href: "/admin/rapporter",
+              },
+              {
+                title: "Pakker",
+                text: "Gi eller endre tilgang manuelt.",
+                href: "/admin/pakker",
+              },
+              {
+                title: "Raske sjekker",
+                text: "Se URL-sjekker, roller og AI-status.",
+                href: "/admin/raske-sjekker",
+              },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm transition hover:-translate-y-1 hover:bg-cyan-100 hover:shadow-md"
+              >
+                <p className="text-lg font-black text-slate-950">{item.title}</p>
+                <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
+                  {item.text}
+                </p>
+              </Link>
+            ))}
+          </section>
 
           <div className="mt-12 grid gap-8 xl:grid-cols-2">
             <section className="rounded-3xl border border-slate-200 bg-white p-6">
-              <h2 className="text-2xl font-bold">Siste saker</h2>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                    Siste 5
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold">Siste saker</h2>
+                </div>
+                <Link
+                  href="/admin/saker"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Se alle
+                </Link>
+              </div>
               <div className="mt-5 grid gap-3">
                 {latestCases.map((item) => {
                   const currentAccess = accessForCase(item.id);
@@ -528,7 +582,20 @@ export default function AdminPage() {
             </section>
 
             <section className="rounded-3xl border border-slate-200 bg-white p-6">
-              <h2 className="text-2xl font-bold">Siste rapporter</h2>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                    Siste 5
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold">Siste rapporter</h2>
+                </div>
+                <Link
+                  href="/admin/rapporter"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Se alle
+                </Link>
+              </div>
               <div className="mt-5 grid gap-3">
                 {latestReports.map((item) => (
                   <Link
@@ -552,7 +619,20 @@ export default function AdminPage() {
             </section>
 
             <section className="rounded-3xl border border-slate-200 bg-white p-6">
-              <h2 className="text-2xl font-bold">Raske sjekker</h2>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                    Siste 5
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold">Raske sjekker</h2>
+                </div>
+                <Link
+                  href="/admin/raske-sjekker"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Se alle
+                </Link>
+              </div>
               <div className="mt-5 grid gap-3">
                 {latestQuickChecks.map((item) => (
                   <div
@@ -577,7 +657,20 @@ export default function AdminPage() {
             </section>
 
             <section className="rounded-3xl border border-slate-200 bg-white p-6">
-              <h2 className="text-2xl font-bold">Siste pakker</h2>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                    Siste 5
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold">Siste pakker</h2>
+                </div>
+                <Link
+                  href="/admin/pakker"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Endre
+                </Link>
+              </div>
               <div className="mt-5 grid gap-3">
                 {latestAccess.slice(0, 10).map((item) => (
                   <Link
@@ -599,7 +692,20 @@ export default function AdminPage() {
             </section>
 
             <section className="rounded-3xl border border-slate-200 bg-white p-6 xl:col-span-2">
-              <h2 className="text-2xl font-bold">Siste brukere</h2>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                    Siste 5
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold">Siste brukere</h2>
+                </div>
+                <Link
+                  href="/admin/brukere"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Se alle
+                </Link>
+              </div>
               <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200">
                 <div className="hidden grid-cols-4 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 md:grid">
                   <span>Navn</span>
