@@ -46,6 +46,7 @@ type ReportRow = {
 type ProfileRow = {
   full_name: string | null;
   role_type: string | null;
+  is_admin: boolean | null;
 };
 
 type ActivityItem = {
@@ -174,6 +175,7 @@ export default function MinSidePage() {
               "id,folder_id,title,status,media_name,article_title,published_date,created_at,deleted_at",
               { count: "exact" }
             )
+            .eq("user_id", user.id)
             .order("created_at", { ascending: false })
             .limit(100),
 
@@ -182,6 +184,7 @@ export default function MinSidePage() {
             .select("id,parent_folder_id,title,folder_type,status,created_at,deleted_at", {
               count: "exact",
             })
+            .eq("user_id", user.id)
             .order("created_at", { ascending: false })
             .limit(100),
 
@@ -200,7 +203,7 @@ export default function MinSidePage() {
 
           supabase
             .from("profiles")
-            .select("full_name,role_type")
+            .select("full_name,role_type,is_admin")
             .eq("id", user.id)
             .maybeSingle(),
         ]);
@@ -225,7 +228,10 @@ export default function MinSidePage() {
 
       const caseRows = (casesResult.data ?? []) as CaseRow[];
       const folderRows = (foldersResult.data ?? []) as CaseFolderRow[];
-      const reportRows = (reportsResult.data ?? []) as ReportRow[];
+      const caseIds = new Set(caseRows.map((caseItem) => caseItem.id));
+      const reportRows = ((reportsResult.data ?? []) as ReportRow[]).filter(
+        (report) => caseIds.has(report.case_id)
+      );
 
       setCases(caseRows);
       setFolders(folderRows);
@@ -236,8 +242,10 @@ export default function MinSidePage() {
       }
       setCaseCount(caseRows.filter((caseItem) => !caseItem.deleted_at).length);
       setFolderCount(folderRows.filter((folder) => !folder.deleted_at).length);
-      setReportCount(reportsResult.count ?? reportRows.length);
-      setPfuDraftCount(pfuDraftCountResult.count ?? 0);
+      setReportCount(reportRows.length);
+      setPfuDraftCount(
+        reportRows.filter((report) => report.report_type === "pfu_draft").length
+      );
 
       setIsLoading(false);
     }
@@ -763,6 +771,15 @@ export default function MinSidePage() {
               >
                 Profil
               </Link>
+
+              {profile?.is_admin ? (
+                <Link
+                  href="/admin"
+                  className="rounded-xl border border-cyan-300 bg-cyan-100 px-5 py-3 text-center text-sm font-black text-cyan-950 hover:bg-cyan-200"
+                >
+                  Admin
+                </Link>
+              ) : null}
 
               <SignOutButton />
             </div>
