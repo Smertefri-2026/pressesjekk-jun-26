@@ -353,7 +353,7 @@ export default function AdminCasesPage() {
       <main className="min-h-screen bg-slate-50 text-slate-950">
         <LightPublicHeader />
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <Link href="/" className="text-sm font-semibold text-indigo-700">
+          <Link href="/" className="text-sm font-semibold text-violet-700">
             ← Tilbake til forsiden
           </Link>
 
@@ -376,13 +376,13 @@ export default function AdminCasesPage() {
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link href="/admin" className="text-sm font-semibold text-indigo-700">
+        <Link href="/admin" className="text-sm font-semibold text-violet-700">
           ← Tilbake til admin
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-indigo-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-700">
               Admin / saker
             </p>
 
@@ -396,8 +396,8 @@ export default function AdminCasesPage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-800">
+          <aside className="rounded-3xl border border-violet-200 bg-violet-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-800">
               Konto
             </p>
 
@@ -444,7 +444,7 @@ export default function AdminCasesPage() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Skriv f.eks. NRK, Bane Nor eller kundens e-post"
-                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-indigo-500 focus:bg-white"
+                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-violet-500 focus:bg-white"
               />
             </div>
 
@@ -459,7 +459,7 @@ export default function AdminCasesPage() {
                 id="statusFilter"
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-indigo-500 focus:bg-white"
+                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-violet-500 focus:bg-white"
               >
                 {statusOptions.map((option) => (
                   <option key={option.id || "all"} value={option.id}>
@@ -512,7 +512,7 @@ export default function AdminCasesPage() {
                 <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-indigo-700">
+                      <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-violet-700">
                         {statusLabel(caseItem.status)}
                       </span>
 
@@ -572,7 +572,7 @@ export default function AdminCasesPage() {
 
                     <Link
                       href={`/admin/pakker?search=${encodeURIComponent(caseItem.title)}`}
-                      className="rounded-2xl border border-indigo-200 bg-indigo-50 px-5 py-4 text-center text-sm font-black text-indigo-900 hover:bg-indigo-100"
+                      className="rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4 text-center text-sm font-black text-violet-900 hover:bg-violet-100"
                     >
                       Endre pakke
                     </Link>

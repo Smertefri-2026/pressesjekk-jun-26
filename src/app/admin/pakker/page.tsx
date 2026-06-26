@@ -359,7 +359,7 @@ export default function AdminPackagesPage() {
       <main className="min-h-screen bg-slate-50 text-slate-950">
         <LightPublicHeader />
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <Link href="/" className="text-sm font-semibold text-indigo-700">
+          <Link href="/" className="text-sm font-semibold text-violet-700">
             ← Tilbake til forsiden
           </Link>
 
@@ -382,13 +382,13 @@ export default function AdminPackagesPage() {
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link href="/admin" className="text-sm font-semibold text-indigo-700">
+        <Link href="/admin" className="text-sm font-semibold text-violet-700">
           ← Tilbake til admin
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-indigo-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-violet-700">
               Admin / pakker
             </p>
 
@@ -403,8 +403,8 @@ export default function AdminPackagesPage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-800">
+          <aside className="rounded-3xl border border-violet-200 bg-violet-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-800">
               Konto
             </p>
 
@@ -451,7 +451,7 @@ export default function AdminPackagesPage() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Skriv f.eks. NRK, Bane Nor eller kundens e-post"
-                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-indigo-500 focus:bg-white"
+                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-violet-500 focus:bg-white"
               />
             </div>
 
@@ -502,7 +502,7 @@ export default function AdminPackagesPage() {
                 <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-indigo-700">
+                      <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-violet-700">
                         {statusLabel(caseItem.status)}
                       </span>
 
@@ -540,8 +540,8 @@ export default function AdminPackagesPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-3xl border border-indigo-200 bg-indigo-50 p-5">
-                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-800">
+                  <div className="rounded-3xl border border-violet-200 bg-violet-50 p-5">
+                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-800">
                       Manuell tilgang
                     </p>
 
@@ -568,7 +568,7 @@ export default function AdminPackagesPage() {
                             [caseItem.id]: event.target.value,
                           }))
                         }
-                        className="rounded-2xl border border-indigo-200 bg-white px-4 py-4 text-sm font-bold text-slate-950 outline-none focus:border-indigo-500"
+                        className="rounded-2xl border border-violet-200 bg-white px-4 py-4 text-sm font-bold text-slate-950 outline-none focus:border-violet-500"
                       >
                         {packageOptions.map((option) => (
                           <option key={option.id} value={option.id}>
