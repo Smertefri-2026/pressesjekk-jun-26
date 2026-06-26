@@ -697,7 +697,7 @@ export default function CaseDetailPage() {
 
             <div
               id="betaling"
-              className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7"
+              className="scroll-mt-24 rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm ring-2 ring-cyan-100 sm:p-7"
             >
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
                 Tilgang og betaling
