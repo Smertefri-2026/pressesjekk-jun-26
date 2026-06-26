@@ -321,7 +321,7 @@ export default function AdminPage() {
         <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
           <LightPublicHeader />
           <div className="py-14">
-            <Link href="/" className="text-sm text-cyan-700 hover:text-cyan-800">
+            <Link href="/" className="text-sm text-indigo-700 hover:text-indigo-800">
               ← Tilbake til forsiden
             </Link>
 
@@ -349,15 +349,15 @@ export default function AdminPage() {
         <LightPublicHeader />
 
         <div className="py-14">
-          <Link href="/" className="text-sm text-cyan-700 hover:text-cyan-800">
+          <Link href="/" className="text-sm text-indigo-700 hover:text-indigo-800">
             ← Tilbake til forsiden
           </Link>
 
           <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
-            <section className="rounded-3xl border border-cyan-200 bg-white p-6 shadow-sm md:p-8">
+            <section className="rounded-3xl border border-indigo-200 bg-white p-6 shadow-sm md:p-8">
               <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-cyan-700">
+                  <p className="text-sm uppercase tracking-[0.3em] text-indigo-700">
                     Admin
                   </p>
                   <h1 className="mt-3 text-4xl font-bold tracking-tight md:text-6xl">
@@ -369,14 +369,14 @@ export default function AdminPage() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-cyan-200 bg-cyan-50 px-5 py-4 text-sm font-black text-cyan-900 shadow-sm">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-black text-amber-900 shadow-sm">
                   Admin V1 aktiv
                 </div>
               </div>
             </section>
 
-            <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+            <aside className="rounded-3xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-800">
                 Konto
               </p>
 
@@ -472,7 +472,7 @@ export default function AdminPage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm transition hover:-translate-y-1 hover:bg-cyan-100 hover:shadow-md"
+                className="rounded-3xl border border-indigo-200 bg-indigo-50 p-6 shadow-sm transition hover:-translate-y-1 hover:bg-indigo-100 hover:shadow-md"
               >
                 <p className="text-lg font-black text-slate-950">{item.title}</p>
                 <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
@@ -486,7 +486,7 @@ export default function AdminPage() {
             <section className="rounded-3xl border border-slate-200 bg-white p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-700">
                     Siste 5
                   </p>
                   <h2 className="mt-2 text-2xl font-bold">Siste saker</h2>
@@ -509,7 +509,7 @@ export default function AdminPage() {
                     >
                       <Link
                         href={`/min-side/saker/${item.id}`}
-                        className="block hover:text-cyan-800"
+                        className="block hover:text-indigo-800"
                       >
                         <p className="font-bold">{item.title}</p>
                         <p className="mt-2 text-sm text-slate-500">
@@ -525,7 +525,7 @@ export default function AdminPage() {
                       </Link>
 
                       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-700">
                           Pakke
                         </p>
                         <p className="mt-2 text-sm text-slate-500">
@@ -550,7 +550,7 @@ export default function AdminPage() {
                                 [item.id]: event.target.value,
                               }))
                             }
-                            className="rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-cyan-500"
+                            className="rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-indigo-500"
                           >
                             {packageOptions.map((option) => (
                               <option key={option.id} value={option.id}>
@@ -563,7 +563,7 @@ export default function AdminPage() {
                             type="button"
                             onClick={() => handleSaveCaseAccess(item)}
                             disabled={savingAccessCaseId === item.id}
-                            className="rounded-xl bg-cyan-600 px-4 py-3 text-sm font-black text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-black text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             {savingAccessCaseId === item.id
                               ? "Lagrer..."
@@ -584,7 +584,7 @@ export default function AdminPage() {
             <section className="rounded-3xl border border-slate-200 bg-white p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-700">
                     Siste 5
                   </p>
                   <h2 className="mt-2 text-2xl font-bold">Siste rapporter</h2>
@@ -601,7 +601,7 @@ export default function AdminPage() {
                   <Link
                     key={item.id}
                     href={`/min-side/saker/${item.case_id}`}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5 hover:bg-cyan-50"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5 hover:bg-indigo-50"
                   >
                     <p className="font-bold">
                       {reportTypeLabel(item.report_type)} v{item.version ?? "1"}
@@ -621,7 +621,7 @@ export default function AdminPage() {
             <section className="rounded-3xl border border-slate-200 bg-white p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-700">
                     Siste 5
                   </p>
                   <h2 className="mt-2 text-2xl font-bold">Raske sjekker</h2>
@@ -659,7 +659,7 @@ export default function AdminPage() {
             <section className="rounded-3xl border border-slate-200 bg-white p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-700">
                     Siste 5
                   </p>
                   <h2 className="mt-2 text-2xl font-bold">Siste pakker</h2>
@@ -676,7 +676,7 @@ export default function AdminPage() {
                   <Link
                     key={item.id}
                     href={`/min-side/saker/${item.case_id}`}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5 hover:bg-cyan-50"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5 hover:bg-indigo-50"
                   >
                     <p className="font-bold">{packageLabel(item.package_id)}</p>
                     <p className="mt-2 text-sm text-slate-500">
@@ -694,7 +694,7 @@ export default function AdminPage() {
             <section className="rounded-3xl border border-slate-200 bg-white p-6 xl:col-span-2">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-indigo-700">
                     Siste 5
                   </p>
                   <h2 className="mt-2 text-2xl font-bold">Siste brukere</h2>
@@ -723,7 +723,7 @@ export default function AdminPage() {
                       {item.full_name || "Navn ikke satt"}
                     </span>
                     <span className="break-words text-slate-700">{item.email}</span>
-                    <span className="text-cyan-700">
+                    <span className="text-indigo-700">
                       {item.is_admin ? "Admin" : item.role_type || "Privatperson"}
                     </span>
                     <span className="text-slate-500">
