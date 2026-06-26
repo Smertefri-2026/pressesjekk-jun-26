@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { PublicFooter } from "@/components/layout/PublicFooter";
-import { PublicHeader } from "@/components/layout/PublicHeader";
+import type { User } from "@supabase/supabase-js";
+import { SignOutButton } from "@/components/auth/SignOutButton";
+import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
+import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 
 type AdminProfile = {
@@ -97,6 +99,8 @@ const packageOptions = [
 ];
 
 export default function AdminPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -131,9 +135,11 @@ export default function AdminPage() {
         return;
       }
 
+      setUser(user);
+
       const { data: ownProfile, error: ownProfileError } = await supabase
         .from("profiles")
-        .select("id,email,is_admin")
+        .select("id,full_name,email,role_type,is_admin,created_at")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -149,6 +155,7 @@ export default function AdminPage() {
         return;
       }
 
+      setAdminProfile(ownProfile as AdminProfile);
       setIsAdmin(true);
 
       const [
@@ -294,85 +301,124 @@ export default function AdminPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-slate-950 text-white">
+      <main className="min-h-screen bg-slate-50 text-slate-950">
         <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-          <PublicHeader />
+          <LightPublicHeader />
           <div className="py-14">
-            <p className="text-lg font-semibold text-slate-300">
+            <p className="text-lg font-semibold text-slate-700">
               Laster adminpanel...
             </p>
           </div>
         </section>
-        <PublicFooter />
+        <LightPublicFooter />
       </main>
     );
   }
 
   if (!isAdmin) {
     return (
-      <main className="min-h-screen bg-slate-950 text-white">
+      <main className="min-h-screen bg-slate-50 text-slate-950">
         <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-          <PublicHeader />
+          <LightPublicHeader />
           <div className="py-14">
-            <Link href="/" className="text-sm text-cyan-300 hover:text-cyan-200">
+            <Link href="/" className="text-sm text-cyan-700 hover:text-cyan-800">
               ← Tilbake til forsiden
             </Link>
 
-            <div className="mt-8 max-w-3xl rounded-3xl border border-red-300/30 bg-red-300/10 p-8">
-              <p className="text-sm uppercase tracking-[0.25em] text-red-200">
+            <div className="mt-8 max-w-3xl rounded-3xl border border-red-200 bg-red-50 p-8">
+              <p className="text-sm uppercase tracking-[0.25em] text-red-700">
                 Ingen tilgang
               </p>
               <h1 className="mt-3 text-4xl font-bold">
                 Admin er kun for interne brukere
               </h1>
-              <p className="mt-5 leading-8 text-red-100">
+              <p className="mt-5 leading-8 text-red-800">
                 Denne siden krever admin-tilgang.
               </p>
             </div>
           </div>
         </section>
-        <PublicFooter />
+        <LightPublicFooter />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <main className="min-h-screen bg-slate-50 text-slate-950">
       <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-        <PublicHeader />
+        <LightPublicHeader />
 
         <div className="py-14">
-          <Link href="/" className="text-sm text-cyan-300 hover:text-cyan-200">
+          <Link href="/" className="text-sm text-cyan-700 hover:text-cyan-800">
             ← Tilbake til forsiden
           </Link>
 
-          <div className="mt-8 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">
-                Admin
-              </p>
-              <h1 className="mt-3 text-4xl font-bold tracking-tight md:text-6xl">
-                Drift og oversikt
-              </h1>
-              <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
-                Ekte adminoversikt for brukere, saker, rapporter, raske
-                sjekker og aktive pakker.
-              </p>
-            </div>
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
+            <section className="rounded-3xl border border-cyan-200 bg-white p-6 shadow-sm md:p-8">
+              <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.3em] text-cyan-700">
+                    Admin
+                  </p>
+                  <h1 className="mt-3 text-4xl font-bold tracking-tight md:text-6xl">
+                    Drift og oversikt
+                  </h1>
+                  <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-700">
+                    Ekte adminoversikt for brukere, saker, rapporter, raske
+                    sjekker og aktive pakker.
+                  </p>
+                </div>
 
-            <div className="rounded-2xl border border-emerald-300/30 bg-emerald-300/10 px-5 py-4 text-sm font-semibold text-emerald-100">
-              Admin V1 aktiv
-            </div>
+                <div className="rounded-2xl border border-cyan-200 bg-cyan-50 px-5 py-4 text-sm font-black text-cyan-900 shadow-sm">
+                  Admin V1 aktiv
+                </div>
+              </div>
+            </section>
+
+            <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                Konto
+              </p>
+
+              <h2 className="mt-4 text-3xl font-black text-slate-950">
+                {adminProfile?.full_name?.trim() || "Admin"}
+              </h2>
+
+              {user?.email ? (
+                <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
+                  Innlogget som:{" "}
+                  <span className="text-slate-950">{user.email}</span>
+                </p>
+              ) : null}
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <Link
+                  href="/min-side"
+                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Min Side
+                </Link>
+
+                <Link
+                  href="/min-side/profil"
+                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Profil
+                </Link>
+
+                <SignOutButton />
+              </div>
+            </aside>
           </div>
 
           {errorMessage ? (
-            <div className="mt-8 rounded-2xl border border-red-300/30 bg-red-300/10 p-5 text-red-100">
+            <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800">
               {errorMessage}
             </div>
           ) : null}
 
           {successMessage ? (
-            <div className="mt-8 rounded-2xl border border-emerald-300/30 bg-emerald-300/10 p-5 text-emerald-100">
+            <div className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800">
               {successMessage}
             </div>
           ) : null}
@@ -387,16 +433,16 @@ export default function AdminPage() {
             ].map(([label, value]) => (
               <div
                 key={label}
-                className="rounded-3xl border border-white/10 bg-white/[0.03] p-6"
+                className="rounded-3xl border border-slate-200 bg-white p-6"
               >
-                <p className="text-sm text-slate-400">{label}</p>
+                <p className="text-sm text-slate-500">{label}</p>
                 <p className="mt-3 text-4xl font-bold">{value}</p>
               </div>
             ))}
           </div>
 
           <div className="mt-12 grid gap-8 xl:grid-cols-2">
-            <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <section className="rounded-3xl border border-slate-200 bg-white p-6">
               <h2 className="text-2xl font-bold">Siste saker</h2>
               <div className="mt-5 grid gap-3">
                 {latestCases.map((item) => {
@@ -405,30 +451,30 @@ export default function AdminPage() {
                   return (
                     <div
                       key={item.id}
-                      className="rounded-2xl border border-white/10 bg-slate-900 p-5"
+                      className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
                     >
                       <Link
                         href={`/min-side/saker/${item.id}`}
-                        className="block hover:text-cyan-200"
+                        className="block hover:text-cyan-800"
                       >
                         <p className="font-bold">{item.title}</p>
-                        <p className="mt-2 text-sm text-slate-400">
+                        <p className="mt-2 text-sm text-slate-500">
                           {item.media_name || "Ukjent medium"} ·{" "}
                           {item.status || "Ukjent status"} ·{" "}
                           {formatDateTime(item.created_at)}
                         </p>
                         {item.article_title ? (
-                          <p className="mt-2 text-sm text-slate-300">
+                          <p className="mt-2 text-sm text-slate-700">
                             {item.article_title}
                           </p>
                         ) : null}
                       </Link>
 
-                      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-300">
+                      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-700">
                           Pakke
                         </p>
-                        <p className="mt-2 text-sm text-slate-400">
+                        <p className="mt-2 text-sm text-slate-500">
                           Nåværende:{" "}
                           <span className="font-bold text-slate-200">
                             {currentAccess
@@ -450,7 +496,7 @@ export default function AdminPage() {
                                 [item.id]: event.target.value,
                               }))
                             }
-                            className="rounded-xl border border-white/10 bg-slate-950 px-3 py-3 text-sm font-semibold text-white outline-none"
+                            className="rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-cyan-500"
                           >
                             {packageOptions.map((option) => (
                               <option key={option.id} value={option.id}>
@@ -463,7 +509,7 @@ export default function AdminPage() {
                             type="button"
                             onClick={() => handleSaveCaseAccess(item)}
                             disabled={savingAccessCaseId === item.id}
-                            className="rounded-xl bg-cyan-300 px-4 py-3 text-sm font-black text-slate-950 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="rounded-xl bg-cyan-600 px-4 py-3 text-sm font-black text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             {savingAccessCaseId === item.id
                               ? "Lagrer..."
@@ -476,45 +522,45 @@ export default function AdminPage() {
                 })}
 
                 {latestCases.length === 0 ? (
-                  <p className="text-slate-400">Ingen saker ennå.</p>
+                  <p className="text-slate-500">Ingen saker ennå.</p>
                 ) : null}
               </div>
             </section>
 
-            <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <section className="rounded-3xl border border-slate-200 bg-white p-6">
               <h2 className="text-2xl font-bold">Siste rapporter</h2>
               <div className="mt-5 grid gap-3">
                 {latestReports.map((item) => (
                   <Link
                     key={item.id}
                     href={`/min-side/saker/${item.case_id}`}
-                    className="rounded-2xl border border-white/10 bg-slate-900 p-5 hover:bg-slate-800"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5 hover:bg-cyan-50"
                   >
                     <p className="font-bold">
                       {reportTypeLabel(item.report_type)} v{item.version ?? "1"}
                     </p>
-                    <p className="mt-2 text-sm text-slate-400">
+                    <p className="mt-2 text-sm text-slate-500">
                       {item.status || "Ukjent status"} · {formatDateTime(item.created_at)}
                     </p>
                   </Link>
                 ))}
 
                 {latestReports.length === 0 ? (
-                  <p className="text-slate-400">Ingen rapporter ennå.</p>
+                  <p className="text-slate-500">Ingen rapporter ennå.</p>
                 ) : null}
               </div>
             </section>
 
-            <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <section className="rounded-3xl border border-slate-200 bg-white p-6">
               <h2 className="text-2xl font-bold">Raske sjekker</h2>
               <div className="mt-5 grid gap-3">
                 {latestQuickChecks.map((item) => (
                   <div
                     key={item.id}
-                    className="rounded-2xl border border-white/10 bg-slate-900 p-5"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
                   >
                     <p className="break-words font-bold">{item.url}</p>
-                    <p className="mt-2 text-sm text-slate-400">
+                    <p className="mt-2 text-sm text-slate-500">
                       {item.role || "Ukjent rolle"} · {item.check_count ?? 1} sjekk ·{" "}
                       {item.ai_status || "Ingen AI-status"}
                     </p>
@@ -525,37 +571,37 @@ export default function AdminPage() {
                 ))}
 
                 {latestQuickChecks.length === 0 ? (
-                  <p className="text-slate-400">Ingen raske sjekker ennå.</p>
+                  <p className="text-slate-500">Ingen raske sjekker ennå.</p>
                 ) : null}
               </div>
             </section>
 
-            <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <section className="rounded-3xl border border-slate-200 bg-white p-6">
               <h2 className="text-2xl font-bold">Siste pakker</h2>
               <div className="mt-5 grid gap-3">
                 {latestAccess.slice(0, 10).map((item) => (
                   <Link
                     key={item.id}
                     href={`/min-side/saker/${item.case_id}`}
-                    className="rounded-2xl border border-white/10 bg-slate-900 p-5 hover:bg-slate-800"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5 hover:bg-cyan-50"
                   >
                     <p className="font-bold">{packageLabel(item.package_id)}</p>
-                    <p className="mt-2 text-sm text-slate-400">
+                    <p className="mt-2 text-sm text-slate-500">
                       {item.status} · {formatDateTime(item.created_at)}
                     </p>
                   </Link>
                 ))}
 
                 {latestAccess.length === 0 ? (
-                  <p className="text-slate-400">Ingen pakker ennå.</p>
+                  <p className="text-slate-500">Ingen pakker ennå.</p>
                 ) : null}
               </div>
             </section>
 
-            <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 xl:col-span-2">
+            <section className="rounded-3xl border border-slate-200 bg-white p-6 xl:col-span-2">
               <h2 className="text-2xl font-bold">Siste brukere</h2>
-              <div className="mt-5 overflow-hidden rounded-2xl border border-white/10">
-                <div className="hidden grid-cols-4 bg-slate-900 px-5 py-3 text-sm font-semibold text-slate-300 md:grid">
+              <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+                <div className="hidden grid-cols-4 bg-slate-50 px-5 py-3 text-sm font-semibold text-slate-700 md:grid">
                   <span>Navn</span>
                   <span>E-post</span>
                   <span>Rolle</span>
@@ -565,16 +611,16 @@ export default function AdminPage() {
                 {latestProfiles.map((item) => (
                   <div
                     key={item.id}
-                    className="grid gap-2 border-t border-white/10 px-5 py-4 text-sm md:grid-cols-4"
+                    className="grid gap-2 border-t border-slate-200 px-5 py-4 text-sm md:grid-cols-4"
                   >
                     <span className="font-semibold">
                       {item.full_name || "Navn ikke satt"}
                     </span>
-                    <span className="break-words text-slate-300">{item.email}</span>
-                    <span className="text-cyan-300">
+                    <span className="break-words text-slate-700">{item.email}</span>
+                    <span className="text-cyan-700">
                       {item.is_admin ? "Admin" : item.role_type || "Privatperson"}
                     </span>
-                    <span className="text-slate-400">
+                    <span className="text-slate-500">
                       {formatDateTime(item.created_at)}
                     </span>
                   </div>
@@ -585,7 +631,7 @@ export default function AdminPage() {
         </div>
       </section>
 
-      <PublicFooter />
+      <LightPublicFooter />
     </main>
   );
 }
