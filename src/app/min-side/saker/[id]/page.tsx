@@ -748,59 +748,6 @@ export default function CaseDetailPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                Tilgang og betaling
-              </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                {packageLabel(caseAccessPackageId)}
-              </h2>
-              <p className="mt-4 leading-8 text-slate-700">
-                Kjøp eller oppgrader pakken for denne saken. Betaling åpnes i
-                Stripe testmodus nå, og tilgang kobles automatisk når webhook er
-                på plass.
-              </p>
-
-              <div className="mt-5 grid gap-3">
-                {!hasPackageAccess(caseAccessPackageId, "report_pack") ? (
-                  <StripeCheckoutButton
-                    packageId="report_pack"
-                    caseId={params.id}
-                    className="w-full rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Kjøp rapportpakke – 490 kr
-                  </StripeCheckoutButton>
-                ) : null}
-
-                {!hasPackageAccess(caseAccessPackageId, "pfu_pack") ? (
-                  <StripeCheckoutButton
-                    packageId="pfu_pack"
-                    caseId={params.id}
-                    className="w-full rounded-xl bg-cyan-600 px-5 py-4 text-sm font-black text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Oppgrader til PFU-pakke – 1 490 kr
-                  </StripeCheckoutButton>
-                ) : null}
-
-                {!hasPackageAccess(caseAccessPackageId, "full_pack") ? (
-                  <StripeCheckoutButton
-                    packageId="full_pack"
-                    caseId={params.id}
-                    className="w-full rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Oppgrader til full dokumentpakke – 2 990 kr
-                  </StripeCheckoutButton>
-                ) : null}
-
-                <Link
-                  href="/kontakt"
-                  className="rounded-xl border border-cyan-200 bg-white px-5 py-4 text-center text-sm font-black text-cyan-900 hover:bg-cyan-100"
-                >
-                  Spør om utredningspakke
-                </Link>
-              </div>
-            </div>
-
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
                 Rapport
