@@ -290,7 +290,7 @@ export function CaseWorkflowCard({
 
                 {showUpgradeButton ? (
                   <Link
-                    href="/priser"
+                    href={`/min-side/saker/${caseId}#betaling`}
                     className="mt-3 inline-flex rounded-xl bg-cyan-500 px-4 py-2 text-xs font-black text-slate-950 hover:bg-cyan-400"
                   >
                     Oppgrader til {upgradePackage.name}

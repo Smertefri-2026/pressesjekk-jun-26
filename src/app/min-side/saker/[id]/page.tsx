@@ -695,7 +695,10 @@ export default function CaseDetailPage() {
             }}
           />
 
-            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+            <div
+              id="betaling"
+              className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7"
+            >
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
                 Tilgang og betaling
               </p>
