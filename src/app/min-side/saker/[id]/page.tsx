@@ -7,6 +7,7 @@ import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { StripeCheckoutButton } from "@/components/stripe/StripeCheckoutButton";
 import { supabase } from "@/lib/supabase/client";
 import type { PackagePlanId } from "@/data/packagePlans";
 
@@ -102,6 +103,39 @@ function formatDate(date: string | null) {
     month: "2-digit",
     year: "numeric",
   }).format(new Date(date));
+}
+
+function packageLabel(packageId: PackagePlanId | null) {
+  if (packageId === "report_pack") return "Rapportpakke";
+  if (packageId === "pfu_pack") return "PFU-pakke";
+  if (packageId === "full_pack") return "Full dokumentpakke";
+  if (packageId === "investigation_pack") return "Utredningspakke";
+  if (packageId === "monthly_start") return "Månedsavtale Start";
+  if (packageId === "monthly_pro") return "Månedsavtale Pro";
+  if (packageId === "monthly_agency") return "Månedsavtale Byrå";
+  if (packageId === "monthly_enterprise") return "Enterprise";
+  return "Ingen aktiv pakke";
+}
+
+function hasPackageAccess(
+  currentPackageId: PackagePlanId | null,
+  requiredPackageId: PackagePlanId
+) {
+  const accessRank: Record<PackagePlanId, number> = {
+    report_pack: 1,
+    monthly_start: 1,
+    monthly_pro: 1,
+    monthly_agency: 1,
+    monthly_enterprise: 1,
+    pfu_pack: 2,
+    full_pack: 3,
+    investigation_pack: 4,
+  };
+
+  return (
+    Boolean(currentPackageId) &&
+    accessRank[currentPackageId as PackagePlanId] >= accessRank[requiredPackageId]
+  );
 }
 
 function InfoBlock({
@@ -660,6 +694,112 @@ export default function CaseDetailPage() {
               investigation: reports.some((report) => report.report_type === "investigation_draft"),
             }}
           />
+
+            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                Tilgang og betaling
+              </p>
+              <h2 className="mt-3 text-3xl font-black text-slate-950">
+                {packageLabel(caseAccessPackageId)}
+              </h2>
+              <p className="mt-4 leading-8 text-slate-700">
+                Kjøp eller oppgrader pakken for denne saken. Betaling åpnes i
+                Stripe testmodus nå, og tilgang kobles automatisk når webhook er
+                på plass.
+              </p>
+
+              <div className="mt-5 grid gap-3">
+                {!hasPackageAccess(caseAccessPackageId, "report_pack") ? (
+                  <StripeCheckoutButton
+                    packageId="report_pack"
+                    caseId={params.id}
+                    className="w-full rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Kjøp rapportpakke – 490 kr
+                  </StripeCheckoutButton>
+                ) : null}
+
+                {!hasPackageAccess(caseAccessPackageId, "pfu_pack") ? (
+                  <StripeCheckoutButton
+                    packageId="pfu_pack"
+                    caseId={params.id}
+                    className="w-full rounded-xl bg-cyan-600 px-5 py-4 text-sm font-black text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Oppgrader til PFU-pakke – 1 490 kr
+                  </StripeCheckoutButton>
+                ) : null}
+
+                {!hasPackageAccess(caseAccessPackageId, "full_pack") ? (
+                  <StripeCheckoutButton
+                    packageId="full_pack"
+                    caseId={params.id}
+                    className="w-full rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Oppgrader til full dokumentpakke – 2 990 kr
+                  </StripeCheckoutButton>
+                ) : null}
+
+                <Link
+                  href="/kontakt"
+                  className="rounded-xl border border-cyan-200 bg-white px-5 py-4 text-center text-sm font-black text-cyan-900 hover:bg-cyan-100"
+                >
+                  Spør om utredningspakke
+                </Link>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                Tilgang og betaling
+              </p>
+              <h2 className="mt-3 text-3xl font-black text-slate-950">
+                {packageLabel(caseAccessPackageId)}
+              </h2>
+              <p className="mt-4 leading-8 text-slate-700">
+                Kjøp eller oppgrader pakken for denne saken. Betaling åpnes i
+                Stripe testmodus nå, og tilgang kobles automatisk når webhook er
+                på plass.
+              </p>
+
+              <div className="mt-5 grid gap-3">
+                {!hasPackageAccess(caseAccessPackageId, "report_pack") ? (
+                  <StripeCheckoutButton
+                    packageId="report_pack"
+                    caseId={params.id}
+                    className="w-full rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Kjøp rapportpakke – 490 kr
+                  </StripeCheckoutButton>
+                ) : null}
+
+                {!hasPackageAccess(caseAccessPackageId, "pfu_pack") ? (
+                  <StripeCheckoutButton
+                    packageId="pfu_pack"
+                    caseId={params.id}
+                    className="w-full rounded-xl bg-cyan-600 px-5 py-4 text-sm font-black text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Oppgrader til PFU-pakke – 1 490 kr
+                  </StripeCheckoutButton>
+                ) : null}
+
+                {!hasPackageAccess(caseAccessPackageId, "full_pack") ? (
+                  <StripeCheckoutButton
+                    packageId="full_pack"
+                    caseId={params.id}
+                    className="w-full rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Oppgrader til full dokumentpakke – 2 990 kr
+                  </StripeCheckoutButton>
+                ) : null}
+
+                <Link
+                  href="/kontakt"
+                  className="rounded-xl border border-cyan-200 bg-white px-5 py-4 text-center text-sm font-black text-cyan-900 hover:bg-cyan-100"
+                >
+                  Spør om utredningspakke
+                </Link>
+              </div>
+            </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
