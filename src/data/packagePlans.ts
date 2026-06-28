@@ -178,6 +178,35 @@ export const monthlyPackages: PackagePlan[] = [
 
 export const allPackagePlans = [...singlePackages, ...monthlyPackages];
 
+// --- v1 checkout-scope (B4) ---------------------------------------------
+// Kun disse tre pakkene er kjøpbare i v1 sin offentlige checkout.
+export const v1PurchasablePackageIds: PackagePlanId[] = [
+  "report_pack",
+  "pfu_pack",
+  "full_pack",
+];
+
+// De tre v1-pakkene som skal vises som kjøpbare (brukes i /priser i C3).
+export const v1PurchasablePackages: PackagePlan[] = singlePackages.filter(
+  (plan) => (v1PurchasablePackageIds as string[]).includes(plan.id)
+);
+
+// Utsatt til etter v1 – skal IKKE være del av offentlig checkout.
+// Vises eventuelt som "Kontakt oss" i stedet for kjøpsknapp.
+export const deferredPackageIds: PackagePlanId[] = [
+  "investigation_pack",
+  "monthly_start",
+  "monthly_pro",
+  "monthly_agency",
+  "monthly_enterprise",
+];
+
+// True hvis pakken kan kjøpes i v1 sin offentlige checkout.
+export function isV1Purchasable(packageId: string): boolean {
+  return (v1PurchasablePackageIds as string[]).includes(packageId);
+}
+// ------------------------------------------------------------------------
+
 export const packageAccessSteps: Record<PackagePlanId, number[]> = {
   report_pack: [1, 2, 3],
   pfu_pack: [1, 2, 3, 4],
