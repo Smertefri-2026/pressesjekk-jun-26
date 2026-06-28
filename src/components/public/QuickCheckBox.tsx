@@ -11,20 +11,22 @@ const roleOptions = [
   { value: "pro", label: "Advokat / PR / redaksjon" },
 ];
 
-const quickEthicsPoints = [
-  "VVP 4.1 – saklighet og omtanke i innhold og presentasjon",
-  "VVP 4.4 – tittel, ingress og henvisninger må ha dekning",
-  "VVP 4.7 – varsomhet med identifisering",
-  "VVP 4.13 – retting av feilaktige opplysninger",
-  "VVP 4.14 – samtidig imøtegåelse ved sterke beskyldninger",
-];
-
-const quickLegalPoints = [
-  "Grunnloven § 100 – ytringsfrihet og informasjonsfrihet",
-  "Grunnloven § 102 – privatliv og personvern",
-  "Skadeserstatningsloven § 3-6 a – mulig oppreisning ved ærekrenkelser",
-  "Straffeloven kan være relevant i helt særskilte og alvorlige tilfeller",
-];
+type QuickCheck = {
+  id: string;
+  url: string;
+  normalized_url: string;
+  role: string;
+  check_count: number | null;
+  last_checked_at: string | null;
+  created_at: string | null;
+  ai_status: string | null;
+  ai_summary: string | null;
+  ai_ethics_points: string[] | null;
+  ai_legal_points: string[] | null;
+  ai_missing_context: string[] | null;
+  ai_recommendation: string | null;
+  ai_generated_at: string | null;
+};
 
 function getSearchParam(name: string) {
   if (typeof window === "undefined") return "";
@@ -45,13 +47,15 @@ function getDomain(value: string) {
   }
 }
 
+function toPointList(value: string[] | null | undefined) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => String(item)).filter((item) => item.trim().length > 0);
+}
+
 export function QuickCheckBox() {
   const [url, setUrl] = useState("");
   const [role, setRole] = useState("reader");
-  const [quickResultUrl, setQuickResultUrl] = useState("");
-  const [quickRole, setQuickRole] = useState("");
-  const [checkCount, setCheckCount] = useState<number | null>(null);
-  const [lastCheckedAt, setLastCheckedAt] = useState<string | null>(null);
+  const [quickCheck, setQuickCheck] = useState<QuickCheck | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [quickError, setQuickError] = useState("");
 
@@ -66,20 +70,28 @@ export function QuickCheckBox() {
 
     if (incomingRole) {
       setRole(incomingRole);
-      setQuickRole(incomingRole);
     }
 
     if (quick === "1" && incomingUrl) {
-      setQuickResultUrl(incomingUrl);
+      const startRole =
+        incomingRole === "reader" || !incomingRole ? "reader" : incomingRole;
 
-      if (incomingRole === "reader" || !incomingRole) {
+      if (startRole === "reader") {
         registerQuickCheck(incomingUrl, "reader");
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const quickDomain = useMemo(() => getDomain(quickResultUrl), [quickResultUrl]);
-  const encodedQuickUrl = encodeURIComponent(quickResultUrl);
+  const quickDomain = useMemo(
+    () => getDomain(quickCheck?.url ?? ""),
+    [quickCheck?.url]
+  );
+  const encodedQuickUrl = encodeURIComponent(quickCheck?.url ?? "");
+
+  const ethicsPoints = toPointList(quickCheck?.ai_ethics_points);
+  const legalPoints = toPointList(quickCheck?.ai_legal_points);
+  const missingPoints = toPointList(quickCheck?.ai_missing_context);
 
   async function registerQuickCheck(targetUrl: string, targetRole: string) {
     setIsChecking(true);
@@ -100,16 +112,25 @@ export function QuickCheckBox() {
       const payload = await response.json();
 
       if (!response.ok) {
-        setQuickError(payload?.error ?? "Kunne ikke kjøre rask sjekk.");
+        setQuickError(
+          payload?.error ??
+            "Kunne ikke kjøre rask sjekk akkurat nå. Prøv igjen om litt."
+        );
         return false;
       }
 
-      setCheckCount(payload.quickCheck?.check_count ?? null);
-      setLastCheckedAt(payload.quickCheck?.last_checked_at ?? null);
+      if (!payload?.quickCheck) {
+        setQuickError("Fikk uventet svar fra rask sjekk. Prøv igjen om litt.");
+        return false;
+      }
+
+      setQuickCheck(payload.quickCheck as QuickCheck);
       return true;
     } catch (error) {
       setQuickError(
-        error instanceof Error ? error.message : "Kunne ikke kjøre rask sjekk."
+        error instanceof Error
+          ? error.message
+          : "Kunne ikke kjøre rask sjekk akkurat nå. Prøv igjen om litt."
       );
       return false;
     } finally {
@@ -127,15 +148,7 @@ export function QuickCheckBox() {
     const encodedUrl = encodeURIComponent(trimmedUrl);
 
     if (role === "reader") {
-      const ok = await registerQuickCheck(trimmedUrl, role);
-
-      if (!ok) return;
-
-      setQuickResultUrl(trimmedUrl);
-      setQuickRole("reader");
-
-      window.location.href = `/pressesjekk/raskrapport?url=${encodedUrl}`;
-
+      await registerQuickCheck(trimmedUrl, "reader");
       return;
     }
 
@@ -212,7 +225,23 @@ export function QuickCheckBox() {
         ) : null}
       </form>
 
-      {false && quickResultUrl && quickRole === "reader" ? (
+      {quickError ? (
+        <div
+          role="alert"
+          className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-semibold leading-6 text-red-800"
+        >
+          {quickError}
+        </div>
+      ) : null}
+
+      {isChecking ? (
+        <div className="mt-5 rounded-2xl border border-cyan-200 bg-cyan-50 p-5 text-sm font-semibold leading-6 text-cyan-900">
+          Kjører rask sjekk... Dette kan ta opptil 2 minutter. Ikke oppdater
+          siden mens raskrapporten lages.
+        </div>
+      ) : null}
+
+      {!isChecking && quickCheck ? (
         <section className="mt-5 rounded-3xl border border-cyan-200 bg-white p-5 shadow-sm">
           <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-800">
             Raskrapport
@@ -232,7 +261,7 @@ export function QuickCheckBox() {
               Artikkel
             </p>
             <p className="mt-2 break-words text-sm font-bold text-slate-950">
-              {quickResultUrl}
+              {quickCheck.url}
             </p>
             <p className="mt-2 text-sm font-semibold text-cyan-800">
               Kilde: {quickDomain}
@@ -240,13 +269,13 @@ export function QuickCheckBox() {
 
             <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
               <p className="text-sm font-black text-slate-950">
-                {checkCount === null
+                {quickCheck.check_count === null
                   ? "Søketeller lastes..."
-                  : `Denne artikkelen er sjekket ${checkCount} ${
-                      checkCount === 1 ? "gang" : "ganger"
+                  : `Denne artikkelen er sjekket ${quickCheck.check_count} ${
+                      quickCheck.check_count === 1 ? "gang" : "ganger"
                     }.`}
               </p>
-              {lastCheckedAt ? (
+              {quickCheck.last_checked_at ? (
                 <p className="mt-1 text-xs font-semibold text-slate-600">
                   Sist sjekket:{" "}
                   {new Intl.DateTimeFormat("nb-NO", {
@@ -255,28 +284,78 @@ export function QuickCheckBox() {
                     year: "numeric",
                     hour: "2-digit",
                     minute: "2-digit",
-                  }).format(new Date(String(lastCheckedAt)))}
+                  }).format(new Date(String(quickCheck.last_checked_at)))}
                 </p>
               ) : null}
             </div>
           </div>
 
-          {quickError ? (
-            <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
-              {quickError}
+          {quickCheck.ai_status === "failed" ? (
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-900">
+              KI-raskrapporten kunne ikke genereres akkurat nå, men søket er
+              registrert. Du kan prøve igjen senere eller opprette en lagret
+              sak.
             </div>
           ) : null}
 
-          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-            <p className="font-black text-slate-950">
-              Anbefalt neste steg
-            </p>
-            <p className="mt-2 text-sm leading-6 text-slate-700">
-              Er du selv omtalt, pårørende eller representerer en virksomhet,
-              bør du opprette en lagret sak. Da kan dokumentasjon, tilsvar og
-              videre vurderinger samles på Min Side.
-            </p>
-          </div>
+          {quickCheck.ai_summary ? (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                Kort vurdering
+              </p>
+              <p className="mt-2 text-sm leading-7 text-slate-800">
+                {quickCheck.ai_summary}
+              </p>
+            </div>
+          ) : null}
+
+          {ethicsPoints.length > 0 ? (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="font-black text-slate-950">
+                Mulige presseetiske sjekkpunkter
+              </p>
+              <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                {ethicsPoints.map((item, index) => (
+                  <li key={`ethics-${index}`}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {legalPoints.length > 0 ? (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="font-black text-slate-950">
+                Mulige rettslige rammer
+              </p>
+              <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                {legalPoints.map((item, index) => (
+                  <li key={`legal-${index}`}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {missingPoints.length > 0 ? (
+            <div className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
+              <p className="font-black text-slate-950">
+                Dette mangler før en reell vurdering
+              </p>
+              <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
+                {missingPoints.map((item, index) => (
+                  <li key={`missing-${index}`}>• {item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {quickCheck.ai_recommendation ? (
+            <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <p className="font-black text-slate-950">Anbefalt neste steg</p>
+              <p className="mt-2 text-sm leading-6 text-slate-700">
+                {quickCheck.ai_recommendation}
+              </p>
+            </div>
+          ) : null}
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <Link
@@ -294,58 +373,9 @@ export function QuickCheckBox() {
             </Link>
           </div>
 
-          <div className="mt-5 grid gap-3">
-            <details className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <summary className="cursor-pointer font-black text-slate-950">
-                Presseetiske sjekkpunkter
-              </summary>
-
-              <p className="mt-3 text-sm leading-6 text-slate-700">
-                En rask lesersjekk kan særlig peke på om artikkelen bør ses
-                nærmere på med tanke på tittel, ingress, identifisering, sterke
-                beskyldninger, tilsvar og oppdateringsbehov.
-              </p>
-
-              <ul className="mt-3 space-y-2 text-xs font-semibold leading-5 text-slate-700">
-                {quickEthicsPoints.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </details>
-
-            <details className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <summary className="cursor-pointer font-black text-slate-950">
-                Mulige rettslige rammer
-              </summary>
-
-              <p className="mt-3 text-sm leading-6 text-slate-700">
-                Ytringsfriheten står sterkt, men den må vurderes mot privatliv,
-                dokumentasjon, identifisering og mulig skadevirkning.
-              </p>
-
-              <ul className="mt-3 space-y-2 text-xs font-semibold leading-5 text-slate-700">
-                {quickLegalPoints.map((item) => (
-                  <li key={item}>• {item}</li>
-                ))}
-              </ul>
-            </details>
-
-            <details className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
-              <summary className="cursor-pointer font-black text-slate-950">
-                Hva hurtigsjekken ikke vet ennå
-              </summary>
-
-              <p className="mt-3 text-sm leading-6 text-slate-700">
-                Den kjenner ikke din versjon, e-post fra journalist, svarfrist,
-                hva du svarte, dokumentasjon, PFU-historikk eller senere
-                utvikling. Derfor kan den ikke konkludere.
-              </p>
-            </details>
-          </div>
-
           <p className="mt-5 text-xs leading-6 text-slate-500">
-            Dette er en enkel offentlig raskrapport. Neste versjon kan kobles
-            til en kort KI-basert vurdering uten innlogging.
+            Dette er en enkel offentlig raskrapport. Den konkluderer ikke og
+            erstatter ikke advokat, PFU eller redaktøransvar.
           </p>
         </section>
       ) : null}
