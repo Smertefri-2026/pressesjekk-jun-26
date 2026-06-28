@@ -90,7 +90,9 @@ to authenticated
 using (user_id = auth.uid());
 
 -- 8. Lås ned grants: kun SELECT for authenticated, ingen tilgang for anon.
---    Service role omgår RLS (Stripe-webhook nå, B3 admin-server senere).
+--    Service role får full tilgang eksplisitt (Stripe-webhook nå,
+--    B3 admin-server senere) og omgår i tillegg RLS.
 revoke all on table public.case_access from anon;
 revoke insert, update, delete on table public.case_access from authenticated;
 grant select on table public.case_access to authenticated;
+grant all on table public.case_access to service_role;
