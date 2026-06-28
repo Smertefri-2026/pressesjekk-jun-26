@@ -1,12 +1,7 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
-import { monthlyPackages, singlePackages } from "@/data/packagePlans";
-
-type PricingTab = "single" | "monthly";
+import { v1PurchasablePackages } from "@/data/packagePlans";
 
 const stepExplanations = [
   {
@@ -47,11 +42,6 @@ const upgrades = [
 ];
 
 export default function PriserPage() {
-  const [activeTab, setActiveTab] = useState<PricingTab>("single");
-
-  const visiblePackages =
-    activeTab === "single" ? singlePackages : monthlyPackages;
-
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <LightPublicHeader />
@@ -75,16 +65,17 @@ export default function PriserPage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Start med enkeltkjøp per sak, eller velg månedlig profftilgang hvis
-              du jobber med flere saker, klienter eller redaksjonelle vurderinger.
+              Du betaler per sak og kan oppgradere underveis. Jobber du med
+              flere saker, klienter eller redaksjonelle vurderinger, kan du ta
+              kontakt for profftilgang.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/pressesjekk"
+                href="/min-side/saker/ny"
                 className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
               >
-                Start sjekk
+                Start sak
               </Link>
               <Link
                 href="/eksempelrapport"
@@ -124,42 +115,22 @@ export default function PriserPage() {
         </div>
 
         <section className="mt-16">
-          <div className="inline-flex rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
-            <button
-              type="button"
-              onClick={() => setActiveTab("single")}
-              className={`rounded-xl px-5 py-3 text-sm font-black transition ${
-                activeTab === "single"
-                  ? "bg-slate-950 text-white"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-              }`}
-            >
-              Enkeltkjøp
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("monthly")}
-              className={`rounded-xl px-5 py-3 text-sm font-black transition ${
-                activeTab === "monthly"
-                  ? "bg-slate-950 text-white"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-              }`}
-            >
-              Månedlig profftilgang
-            </button>
-          </div>
-
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            Enkeltkjøp per sak
+          </p>
+          <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
+            Velg riktig nivå for saken
+          </h2>
           <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-            {activeTab === "single"
-              ? "Enkeltkjøp er best når du vil vurdere én konkret sak og eventuelt oppgradere underveis."
-              : "Månedlig profftilgang er best for brukere som jobber med flere saker hver måned."}
+            Du velger pakke, oppretter eller knytter den til en sak, og betaler
+            trygt. Du kan oppgradere senere hvis saken bør følges opp videre.
           </p>
         </section>
 
-        <section className="mt-8 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {visiblePackages.map((plan) => (
+        <section className="mt-8 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {v1PurchasablePackages.map((plan) => (
             <article
-              key={plan.name}
+              key={plan.id}
               className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
             >
               <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
@@ -188,13 +159,40 @@ export default function PriserPage() {
               </ul>
 
               <Link
-                href={plan.href}
+                href={`/min-side/saker/ny?package=${plan.id}`}
                 className="mt-auto block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
               >
                 {plan.button}
               </Link>
             </article>
           ))}
+        </section>
+
+        <section className="mt-8">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+            <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                  Profftilgang og utredning
+                </p>
+                <h2 className="mt-3 text-3xl font-black text-slate-950">
+                  Flere saker, månedsavtale eller full utredning?
+                </h2>
+                <p className="mt-4 max-w-2xl leading-8 text-slate-700">
+                  Månedlig profftilgang for advokater, rådgivere, redaksjoner og
+                  organisasjoner, samt utredningspakke for større saker, avtales
+                  direkte med oss.
+                </p>
+              </div>
+
+              <Link
+                href="/kontakt"
+                className="inline-flex justify-center rounded-xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
+              >
+                Kontakt oss
+              </Link>
+            </div>
+          </div>
         </section>
 
         <section className="mt-12">
@@ -229,8 +227,6 @@ export default function PriserPage() {
               ))}
             </div>
           </div>
-
-
         </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
@@ -281,10 +277,10 @@ export default function PriserPage() {
 
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
-              href="/pressesjekk"
+              href="/min-side/saker/ny"
               className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950 hover:bg-cyan-400"
             >
-              Start sjekk
+              Start sak
             </Link>
             <Link
               href="/kontakt"
