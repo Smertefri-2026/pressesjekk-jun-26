@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseServiceClient } from "@/lib/supabase/service";
 import {
   formatRulesForPrompt,
   getPfuRelevantRules,
@@ -143,13 +143,6 @@ Lag JSON med disse feltene:
 }
 
 export async function POST(request: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return jsonError("Supabase miljøvariabler mangler.", 500);
-  }
-
   const body = await request.json().catch(() => null);
   const url = String(body?.url ?? "").trim();
   const role = String(body?.role ?? "reader").trim() || "reader";
@@ -161,11 +154,17 @@ export async function POST(request: NextRequest) {
 
   const normalizedUrl = normalizeUrl(url);
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-    },
-  });
+  let supabase;
+  try {
+    supabase = getSupabaseServiceClient();
+  } catch (error) {
+    return jsonError(
+      error instanceof Error
+        ? error.message
+        : "Supabase service-klient mangler.",
+      500
+    );
+  }
 
   const selectFields =
     "id,url,normalized_url,role,check_count,last_checked_at,created_at,ai_status,ai_summary,ai_ethics_points,ai_legal_points,ai_missing_context,ai_recommendation,ai_generated_at";
