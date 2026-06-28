@@ -6,9 +6,11 @@ import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
+import { isV1Purchasable } from "@/data/packagePlans";
 
 export default function NewCasePage() {
   const [folderId, setFolderId] = useState<string | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
   const [user, setUser] = useState<User | null>(null);
   const [isCheckingUser, setIsCheckingUser] = useState(true);
@@ -27,8 +29,13 @@ export default function NewCasePage() {
     const nextFolderId = params.get("folderId");
     const urlFromQuickCheck = params.get("url");
     const roleFromQuickCheck = params.get("role");
+    const packageFromQuery = params.get("package");
 
     setFolderId(nextFolderId);
+
+    if (packageFromQuery && isV1Purchasable(packageFromQuery)) {
+      setSelectedPackage(packageFromQuery);
+    }
 
     if (urlFromQuickCheck) {
       setArticleUrl(urlFromQuickCheck);
@@ -118,7 +125,9 @@ export default function NewCasePage() {
       sessionStorage.setItem("pressesjekkSelectedFolderId", folderId);
     }
 
-    window.location.href = `/min-side/saker/${data.id}`;
+    window.location.href = selectedPackage
+      ? `/min-side/saker/${data.id}?package=${selectedPackage}`
+      : `/min-side/saker/${data.id}`;
   }
 
   if (isCheckingUser) {
