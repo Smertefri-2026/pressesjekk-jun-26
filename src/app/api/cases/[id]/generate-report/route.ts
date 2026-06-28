@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { assertCaseAccess } from "@/lib/access/assertCaseAccess";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -65,6 +66,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
           caseError?.message ?? "Ingen data returnert"
         }`,
         404
+      );
+    }
+
+    const access = await assertCaseAccess({
+      userId: caseItem.user_id,
+      caseId,
+      capability: "report",
+    });
+
+    if (!access.ok) {
+      return NextResponse.json(
+        { error: access.error, requiredPackage: access.requiredPackage },
+        { status: access.status }
       );
     }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
+import { assertCaseAccess } from "@/lib/access/assertCaseAccess";
 import {
   editorResponsibilityRules,
   formatRulesForPrompt,
@@ -91,6 +92,19 @@ export async function POST(
     return NextResponse.json(
       { error: caseError?.message ?? "Fant ikke saken." },
       { status: 404 }
+    );
+  }
+
+  const access = await assertCaseAccess({
+    userId: user.id,
+    caseId: id,
+    capability: "investigation",
+  });
+
+  if (!access.ok) {
+    return NextResponse.json(
+      { error: access.error, requiredPackage: access.requiredPackage },
+      { status: access.status }
     );
   }
 
