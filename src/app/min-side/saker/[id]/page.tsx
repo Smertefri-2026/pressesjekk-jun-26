@@ -10,6 +10,7 @@ import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { StripeCheckoutButton } from "@/components/stripe/StripeCheckoutButton";
 import { supabase } from "@/lib/supabase/client";
 import type { PackagePlanId } from "@/data/packagePlans";
+import { isV1Purchasable, upgradePaths } from "@/data/packagePlans";
 
 type CaseRow = {
   id: string;
@@ -164,6 +165,8 @@ export default function CaseDetailPage() {
   const [workflowType, setWorkflowType] = useState<"standard" | "journalist">("standard");
   const [caseAccessPackageId, setCaseAccessPackageId] =
     useState<PackagePlanId | null>(null);
+  const [selectedPackage, setSelectedPackage] =
+    useState<PackagePlanId | null>(null);
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
@@ -288,6 +291,21 @@ export default function CaseDetailPage() {
     }
   }, [params.id]);
 
+  useEffect(() => {
+    const pkg = new URLSearchParams(window.location.search).get("package");
+    if (pkg && isV1Purchasable(pkg)) {
+      setSelectedPackage(pkg as PackagePlanId);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedPackage && !isLoading) {
+      document
+        .getElementById("betaling")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [selectedPackage, isLoading]);
+
   async function handleBasicInfoSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -350,6 +368,70 @@ export default function CaseDetailPage() {
   const investigationDrafts = reports.filter(
     (report) => report.report_type === "investigation_draft"
   );
+
+  const recommendedNext: PackagePlanId | null = !caseAccessPackageId
+    ? "report_pack"
+    : ((upgradePaths as Record<string, PackagePlanId>)[caseAccessPackageId] ??
+      null);
+
+  const selectedAlreadyCovered =
+    selectedPackage !== null &&
+    hasPackageAccess(caseAccessPackageId, selectedPackage);
+
+  const checkoutOptions: {
+    id: PackagePlanId;
+    name: string;
+    price: string;
+    label: string;
+    buttonClass: string;
+  }[] = [
+    {
+      id: "report_pack",
+      name: "Rapportpakke",
+      price: "490 kr",
+      label: "Kjøp rapportpakke – 490 kr",
+      buttonClass:
+        "w-full rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60",
+    },
+    {
+      id: "pfu_pack",
+      name: "PFU-pakke",
+      price: "1 490 kr",
+      label: "Oppgrader til PFU-pakke – 1 490 kr",
+      buttonClass:
+        "w-full rounded-xl bg-cyan-600 px-5 py-4 text-sm font-black text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60",
+    },
+    {
+      id: "full_pack",
+      name: "Full dokumentpakke",
+      price: "2 990 kr",
+      label: "Oppgrader til full dokumentpakke – 2 990 kr",
+      buttonClass:
+        "w-full rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60",
+    },
+  ];
+
+  const isOwned = (id: PackagePlanId) =>
+    hasPackageAccess(caseAccessPackageId, id);
+
+  const primaryPackage: PackagePlanId | null =
+    selectedPackage && !selectedAlreadyCovered
+      ? selectedPackage
+      : recommendedNext &&
+          checkoutOptions.some((opt) => opt.id === recommendedNext) &&
+          !isOwned(recommendedNext)
+        ? recommendedNext
+        : null;
+
+  const primaryIsSelected =
+    primaryPackage !== null && primaryPackage === selectedPackage;
+
+  const primaryOption = checkoutOptions.find(
+    (opt) => opt.id === primaryPackage
+  );
+
+  const primaryButtonClass =
+    "w-full rounded-xl bg-slate-950 px-5 py-5 text-base font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
 
   if (isLoading) {
     return (
@@ -702,51 +784,140 @@ export default function CaseDetailPage() {
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
                 Tilgang og betaling
               </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                {packageLabel(caseAccessPackageId)}
-              </h2>
-              <p className="mt-4 leading-8 text-slate-700">
-                Kjøp eller oppgrader pakken for denne saken. Betaling åpnes i
-                Stripe testmodus nå, og tilgang kobles automatisk når webhook er
-                på plass.
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span className="text-sm font-bold text-slate-600">
+                  Aktiv pakke:
+                </span>
+                <span
+                  className={`inline-flex rounded-full px-3 py-1 text-sm font-black ${
+                    caseAccessPackageId
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-slate-200 text-slate-600"
+                  }`}
+                >
+                  {caseAccessPackageId
+                    ? packageLabel(caseAccessPackageId)
+                    : "Ingen"}
+                </span>
+              </div>
+
+              {primaryOption ? (
+                <div
+                  className={`mt-5 rounded-2xl border-2 p-5 ${
+                    primaryIsSelected
+                      ? "border-amber-400 bg-amber-50"
+                      : "border-cyan-400 bg-cyan-50"
+                  }`}
+                >
+                  <p
+                    className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.15em] ${
+                      primaryIsSelected
+                        ? "bg-amber-200 text-amber-900"
+                        : "bg-cyan-200 text-cyan-900"
+                    }`}
+                  >
+                    {primaryIsSelected
+                      ? "Valgt fra priser"
+                      : "Anbefalt neste steg"}
+                  </p>
+
+                  <h3 className="mt-3 text-2xl font-black text-slate-950">
+                    {primaryIsSelected
+                      ? `Du valgte ${primaryOption.name} fra priser`
+                      : primaryOption.name}
+                  </h3>
+                  <p className="mt-1 text-3xl font-black text-slate-950">
+                    {primaryOption.price}
+                  </p>
+
+                  <div className="mt-4">
+                    <StripeCheckoutButton
+                      packageId={primaryOption.id}
+                      caseId={params.id}
+                      className={primaryButtonClass}
+                    >
+                      Betal {primaryOption.price} – {primaryOption.name}
+                    </StripeCheckoutButton>
+                  </div>
+                </div>
+              ) : null}
+
+              {selectedAlreadyCovered ? (
+                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold leading-6 text-emerald-800">
+                  Denne saken har allerede {packageLabel(selectedPackage)} eller
+                  bedre. Ingen ny betaling er nødvendig.
+                </div>
+              ) : null}
+
+              <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-slate-500">
+                Hva er låst opp for saken
               </p>
+              <div className="mt-3 grid gap-2">
+                {[
+                  { label: "Rapport", id: "report_pack" as PackagePlanId },
+                  { label: "PFU-klage", id: "pfu_pack" as PackagePlanId },
+                  { label: "Politianmeldelse", id: "full_pack" as PackagePlanId },
+                ].map((cap) => {
+                  const unlocked = hasPackageAccess(caseAccessPackageId, cap.id);
+                  return (
+                    <div
+                      key={cap.id}
+                      className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
+                        unlocked
+                          ? "border-emerald-200 bg-emerald-50"
+                          : "border-slate-200 bg-slate-50"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                        <span aria-hidden>{unlocked ? "✓" : "🔒"}</span>
+                        {cap.label}
+                      </span>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.15em] ${
+                          unlocked
+                            ? "bg-emerald-200 text-emerald-900"
+                            : "bg-slate-200 text-slate-600"
+                        }`}
+                      >
+                        {unlocked ? "Låst opp" : "Låst"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
 
-              <div className="mt-5 grid gap-3">
-                {!hasPackageAccess(caseAccessPackageId, "report_pack") ? (
-                  <StripeCheckoutButton
-                    packageId="report_pack"
-                    caseId={params.id}
-                    className="w-full rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Kjøp rapportpakke – 490 kr
-                  </StripeCheckoutButton>
-                ) : null}
+              {checkoutOptions.filter(
+                (opt) => !isOwned(opt.id) && opt.id !== primaryPackage
+              ).length > 0 ? (
+                <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-slate-500">
+                  Andre pakker
+                </p>
+              ) : null}
 
-                {!hasPackageAccess(caseAccessPackageId, "pfu_pack") ? (
-                  <StripeCheckoutButton
-                    packageId="pfu_pack"
-                    caseId={params.id}
-                    className="w-full rounded-xl bg-cyan-600 px-5 py-4 text-sm font-black text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Oppgrader til PFU-pakke – 1 490 kr
-                  </StripeCheckoutButton>
-                ) : null}
-
-                {!hasPackageAccess(caseAccessPackageId, "full_pack") ? (
-                  <StripeCheckoutButton
-                    packageId="full_pack"
-                    caseId={params.id}
-                    className="w-full rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Oppgrader til full dokumentpakke – 2 990 kr
-                  </StripeCheckoutButton>
-                ) : null}
+              <div className="mt-3 grid gap-3">
+                {checkoutOptions
+                  .filter(
+                    (opt) => !isOwned(opt.id) && opt.id !== primaryPackage
+                  )
+                  .map((opt) => (
+                    <StripeCheckoutButton
+                      key={opt.id}
+                      packageId={opt.id}
+                      caseId={params.id}
+                      className={opt.buttonClass}
+                    >
+                      {opt.label}
+                    </StripeCheckoutButton>
+                  ))}
 
                 <Link
                   href="/kontakt"
                   className="rounded-xl border border-cyan-200 bg-white px-5 py-4 text-center text-sm font-black text-cyan-900 hover:bg-cyan-100"
                 >
-                  Spør om utredningspakke
+                  {caseAccessPackageId === "full_pack"
+                    ? "Neste steg: spør om utredning eller proffhjelp"
+                    : "Spør om utredningspakke"}
                 </Link>
               </div>
             </div>
