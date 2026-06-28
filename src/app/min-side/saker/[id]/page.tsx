@@ -837,7 +837,7 @@ export default function CaseDetailPage() {
                       caseId={params.id}
                       className={primaryButtonClass}
                     >
-                      Betal {primaryOption.price} – {primaryOption.name}
+                      {`Betal ${primaryOption.price} – ${primaryOption.name}`}
                     </StripeCheckoutButton>
                   </div>
                 </div>
