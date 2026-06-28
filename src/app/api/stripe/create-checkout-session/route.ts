@@ -2,12 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe/server";
 import { getStripeCheckoutPlan } from "@/lib/stripe/plans";
+import { isV1Purchasable } from "@/data/packagePlans";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const packageId = String(body.packageId || "");
     const caseId = body.caseId ? String(body.caseId) : "";
+
+    if (!isV1Purchasable(packageId)) {
+      return NextResponse.json(
+        {
+          error:
+            "Denne pakken kan ikke kjøpes på nett. Ta kontakt for proff- eller utredningspakke.",
+        },
+        { status: 400 }
+      );
+    }
+
     const plan = getStripeCheckoutPlan(packageId);
 
     if (!plan) {
