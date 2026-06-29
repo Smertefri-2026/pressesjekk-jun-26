@@ -372,10 +372,15 @@ export default function CaseDetailPage() {
     (report) => report.report_type === "investigation_draft"
   );
 
-  const recommendedNext: PackagePlanId | null = !caseAccessPackageId
-    ? "report_pack"
-    : ((upgradePaths as Record<string, PackagePlanId>)[caseAccessPackageId] ??
-      null);
+  const recommendedNext: PackagePlanId | null =
+    workflowType === "journalist"
+      ? !caseAccessPackageId
+        ? "report_pack"
+        : null
+      : !caseAccessPackageId
+        ? "report_pack"
+        : ((upgradePaths as Record<string, PackagePlanId>)[caseAccessPackageId] ??
+          null);
 
   const selectedAlreadyCovered =
     selectedPackage !== null &&
@@ -414,6 +419,11 @@ export default function CaseDetailPage() {
     },
   ];
 
+  const visibleCheckoutOptions =
+    workflowType === "journalist"
+      ? checkoutOptions.filter((option) => option.id === "report_pack")
+      : checkoutOptions;
+
   const isOwned = (id: PackagePlanId) =>
     hasPackageAccess(caseAccessPackageId, id);
 
@@ -421,7 +431,7 @@ export default function CaseDetailPage() {
     selectedPackage && !selectedAlreadyCovered
       ? selectedPackage
       : recommendedNext &&
-          checkoutOptions.some((opt) => opt.id === recommendedNext) &&
+          visibleCheckoutOptions.some((opt) => opt.id === recommendedNext) &&
           !isOwned(recommendedNext)
         ? recommendedNext
         : null;
@@ -429,7 +439,7 @@ export default function CaseDetailPage() {
   const primaryIsSelected =
     primaryPackage !== null && primaryPackage === selectedPackage;
 
-  const primaryOption = checkoutOptions.find(
+  const primaryOption = visibleCheckoutOptions.find(
     (opt) => opt.id === primaryPackage
   );
 
@@ -530,9 +540,9 @@ export default function CaseDetailPage() {
               </div>
 
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-                Sjekk at mediehus, publiseringsdato, artikkeloverskrift, lenke
-                og kort beskrivelse stemmer. Dette er grunnlaget som brukes
-                videre i saksopplysninger, rapport og PFU-klage og PFU-avgjørelse.
+                {workflowType === "journalist"
+                  ? "Sjekk at mediehus, publiseringsdato, artikkeloverskrift, lenke og kort beskrivelse stemmer. Dette er grunnlaget som brukes videre i saksopplysninger, redaksjonell sjekk og publiseringsgrunnlag."
+                  : "Sjekk at mediehus, publiseringsdato, artikkeloverskrift, lenke og kort beskrivelse stemmer. Dette er grunnlaget som brukes videre i saksopplysninger, rapport og PFU-klage og PFU-avgjørelse."}
               </p>
 
               {isEditingBasicInfo ? (
@@ -857,11 +867,22 @@ export default function CaseDetailPage() {
                 Hva er låst opp for saken
               </p>
               <div className="mt-3 grid gap-2">
-                {[
-                  { label: "Rapport", id: "report_pack" as PackagePlanId },
-                  { label: "PFU-klage", id: "pfu_pack" as PackagePlanId },
-                  { label: "Politianmeldelse", id: "full_pack" as PackagePlanId },
-                ].map((cap) => {
+                {(workflowType === "journalist"
+                  ? [
+                      {
+                        label: "Redaksjonell sjekk",
+                        id: "report_pack" as PackagePlanId,
+                      },
+                    ]
+                  : [
+                      { label: "Rapport", id: "report_pack" as PackagePlanId },
+                      { label: "PFU-klage", id: "pfu_pack" as PackagePlanId },
+                      {
+                        label: "Politianmeldelse",
+                        id: "full_pack" as PackagePlanId,
+                      },
+                    ]
+                ).map((cap) => {
                   const unlocked = hasPackageAccess(caseAccessPackageId, cap.id);
                   return (
                     <div
@@ -890,7 +911,7 @@ export default function CaseDetailPage() {
                 })}
               </div>
 
-              {checkoutOptions.filter(
+              {visibleCheckoutOptions.filter(
                 (opt) => !isOwned(opt.id) && opt.id !== primaryPackage
               ).length > 0 ? (
                 <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-slate-500">
