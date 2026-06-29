@@ -11,6 +11,7 @@ import { isV1Purchasable } from "@/data/packagePlans";
 export default function NewCasePage() {
   const [folderId, setFolderId] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [availableCaseCount, setAvailableCaseCount] = useState(0);
 
   const [user, setUser] = useState<User | null>(null);
   const [isCheckingUser, setIsCheckingUser] = useState(true);
@@ -71,6 +72,31 @@ export default function NewCasePage() {
       }
 
       setUser(user);
+
+      const { data: entitlements, error: entitlementError } = await supabase
+        .from("user_case_entitlements")
+        .select("included_cases, used_cases, expires_at")
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
+      if (!entitlementError && entitlements) {
+        const available = entitlements.reduce((sum, entitlement) => {
+          const includedCases = Number(entitlement.included_cases ?? 0);
+          const usedCases = Number(entitlement.used_cases ?? 0);
+          const expiresAt = entitlement.expires_at
+            ? new Date(entitlement.expires_at).getTime()
+            : null;
+
+          if (expiresAt && expiresAt <= Date.now()) {
+            return sum;
+          }
+
+          return sum + Math.max(0, includedCases - usedCases);
+        }, 0);
+
+        setAvailableCaseCount(available);
+      }
+
       setIsCheckingUser(false);
     }
 
@@ -93,29 +119,45 @@ export default function NewCasePage() {
       articleTitle.trim() ||
       `PresseSjekk-sak${mediaName.trim() ? ` – ${mediaName.trim()}` : ""}`;
 
-    const { data, error } = await supabase
-      .from("cases")
-      .insert({
-        user_id: user.id,
-        title: caseTitle,
-        status: "draft",
-        folder_id: folderId || null,
-        media_name: mediaName.trim() || null,
-        article_title: articleTitle.trim() || null,
-        article_url: articleUrl.trim() || null,
-        published_date: publishedDate || null,
-        short_description: shortDescription.trim() || null,
-      })
-      .select("id")
-      .single();
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
 
-    if (error) {
-      setErrorMessage(error.message);
+    if (sessionError || !session) {
+      setErrorMessage("Du må være innlogget for å opprette en sak.");
       setIsSaving(false);
       return;
     }
 
-    if (!data?.id) {
+    const response = await fetch("/api/cases/create-with-entitlement", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        folderId,
+        title: caseTitle,
+        mediaName,
+        articleTitle,
+        articleUrl,
+        publishedDate,
+        shortDescription,
+      }),
+    });
+
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      setErrorMessage(
+        payload?.error ?? "Kunne ikke opprette saken. Prøv igjen."
+      );
+      setIsSaving(false);
+      return;
+    }
+
+    if (!payload?.caseId) {
       setErrorMessage("Saken ble lagret, men vi fant ikke saks-ID.");
       setIsSaving(false);
       return;
@@ -126,8 +168,8 @@ export default function NewCasePage() {
     }
 
     window.location.href = selectedPackage
-      ? `/min-side/saker/${data.id}?package=${selectedPackage}`
-      : `/min-side/saker/${data.id}`;
+      ? `/min-side/saker/${payload.caseId}?package=${selectedPackage}`
+      : `/min-side/saker/${payload.caseId}`;
   }
 
   if (isCheckingUser) {
@@ -141,6 +183,57 @@ export default function NewCasePage() {
             </p>
           </div>
         </section>
+      </main>
+    );
+  }
+
+  if (availableCaseCount <= 0) {
+    return (
+      <main className="min-h-screen bg-slate-50 text-slate-950">
+        <LightPublicHeader />
+
+        <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+          <Link
+            href="/min-side"
+            className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          >
+            ← Tilbake til Min Side
+          </Link>
+
+          <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+              Kjøp først
+            </p>
+
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+              Du trenger en ledig sak før du kan opprette ny sak.
+            </h1>
+
+            <p className="mt-5 text-lg leading-8 text-slate-700">
+              Kjøp en enkeltpakke, sakspakke eller abonnement først. Etter
+              betaling får du ledige saker på Min Side, og kan opprette saken
+              når du er klar.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/priser"
+                className="rounded-xl bg-cyan-500 px-6 py-4 font-black text-slate-950 hover:bg-cyan-400"
+              >
+                Se priser og kjøp
+              </Link>
+
+              <Link
+                href="/min-side"
+                className="rounded-xl border border-slate-300 px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
+              >
+                Til Min Side
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <LightPublicFooter />
       </main>
     );
   }
@@ -191,8 +284,9 @@ export default function NewCasePage() {
               Start enkelt
             </h2>
             <p className="mt-4 leading-8 text-slate-700">
-              Du trenger ikke fylle inn alt med en gang. Opprett saken først,
-              og fyll heller på med flere opplysninger etter hvert.
+              Du har ledige saker på kontoen. Du trenger ikke fylle inn alt med
+              en gang. Opprett saken først, og fyll heller på med flere
+              opplysninger etter hvert.
             </p>
           </aside>
         </div>
