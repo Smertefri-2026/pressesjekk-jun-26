@@ -22,8 +22,8 @@ const caseBundles = [
       "Hver sak kan oppgraderes ved behov",
       "Passer for privatpersoner og små virksomheter",
     ],
-    button: "Velg 3 saker",
-    href: "/kontakt",
+    button: "Kjøp 3 saker",
+    href: "/min-side/pakker/kjop?plan=case_bundle_3",
   },
   {
     name: "5 saker",
@@ -38,8 +38,8 @@ const caseBundles = [
       "Kan brukes over tid",
       "Oppgradering per sak ved behov",
     ],
-    button: "Velg 5 saker",
-    href: "/kontakt",
+    button: "Kjøp 5 saker",
+    href: "/min-side/pakker/kjop?plan=case_bundle_5",
   },
   {
     name: "10 saker",
@@ -54,8 +54,8 @@ const caseBundles = [
       "Passer for sporadisk proffbruk",
       "Proff-abonnement anbefales ved løpende behov",
     ],
-    button: "Velg 10 saker",
-    href: "/kontakt",
+    button: "Kjøp 10 saker",
+    href: "/min-side/pakker/kjop?plan=case_bundle_10",
   },
 ];
 
@@ -290,10 +290,20 @@ export default function PriserPage() {
                 </ul>
 
                 <Link
-                  href={plan.href}
+                  href={
+                    plan.id === "monthly_enterprise"
+                      ? "/kontakt"
+                      : `/min-side/pakker/kjop?plan=${plan.id}`
+                  }
                   className="mt-auto block rounded-xl bg-slate-950 px-5 py-4 text-center font-black text-white hover:bg-slate-800"
                 >
-                  {plan.button}
+                  {plan.id === "monthly_enterprise"
+                    ? "Be om tilbud"
+                    : plan.id === "monthly_start"
+                      ? "Start abonnement"
+                      : plan.id === "monthly_pro"
+                        ? "Start Pro"
+                        : "Start Byrå"}
                 </Link>
               </article>
             ))}
@@ -311,7 +321,7 @@ export default function PriserPage() {
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-700">
             Du kan begynne med enkeltkjøp per sak, kjøpe en sakspakke eller
-            kontakte oss om proff-abonnement.
+            starte proff-abonnement når løsningen er klar.
           </p>
 
           <div className="mt-7 flex flex-wrap justify-center gap-3">
@@ -325,7 +335,7 @@ export default function PriserPage() {
               href="/kontakt"
               className="rounded-xl border border-slate-300 px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
             >
-              Kontakt oss
+              Kom i gang
             </Link>
           </div>
         </section>
