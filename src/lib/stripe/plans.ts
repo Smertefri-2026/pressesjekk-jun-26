@@ -46,7 +46,7 @@ export const stripeCheckoutPlans: Record<PackagePlanId, StripeCheckoutPlan> = {
     packageId: "monthly_start",
     name: "Månedsavtale Start",
     description: "PresseSjekk profftilgang med 3 saker per måned.",
-    amount: 199000,
+    amount: 129000,
     currency: "nok",
     mode: "subscription",
   },

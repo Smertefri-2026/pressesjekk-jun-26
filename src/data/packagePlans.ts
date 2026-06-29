@@ -49,7 +49,7 @@ export const singlePackages: PackagePlan[] = [
     name: "PFU-pakke",
     price: "Fra 1 490 kr",
     description:
-      "For deg som vil gå videre fra rapport til et strukturert PFU-klage.",
+      "For deg som vil gå videre fra rapport til en strukturert PFU-klage.",
     features: [
       "Alt i Rapportpakke",
       "PFU-klage med KI",
@@ -106,11 +106,11 @@ export const monthlyPackages: PackagePlan[] = [
     type: "monthly",
     tag: "Proff start",
     name: "3 saker",
-    price: "1 990 kr/mnd",
+    price: "1 290 kr/mnd",
     description:
-      "For enkeltpersoner, mindre virksomheter eller rådgivere som jevnlig vurderer mediesaker.",
+      "For enkeltpersoner, mindre virksomheter eller rådgivere som vil jobbe løpende med mediesaker.",
     features: [
-      "Inntil 3 aktive saker per måned",
+      "3 saker inkludert per måned",
       "Rapportpakker inkludert",
       "Mulighet for oppgradering til PFU-pakke",
       "Dokumentasjon og rapportversjoner",
