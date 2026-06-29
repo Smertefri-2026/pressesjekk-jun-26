@@ -831,6 +831,21 @@ export default function MinSidePage() {
           </aside>
         </div>
 
+        <section className="mt-10 md:hidden">
+          <Link
+            href={packageHref}
+            className="block rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-cyan-800">Tilgang / pakker</p>
+            <p className="mt-4 text-4xl font-black text-slate-950">
+              {packageStatusLabel}
+            </p>
+            <p className="mt-3 text-sm font-semibold text-cyan-800">
+              {packageCtaLabel}
+            </p>
+          </Link>
+        </section>
+
         <section
           className="mt-14 hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-5"
           id="oversikt"
