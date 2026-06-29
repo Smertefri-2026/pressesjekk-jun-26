@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/server";
 import { getStripeCheckoutPlan } from "@/lib/stripe/plans";
-import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { getSupabaseServiceClient } from "@/lib/supabase/service";
 import type { PackagePlanId } from "@/data/packagePlans";
 
 function includedCasesForPackage(packageId: PackagePlanId) {
@@ -49,7 +49,7 @@ async function activateCaseAccess(session: Stripe.Checkout.Session) {
     throw new Error(`Ukjent package_id fra Stripe: ${packageId}`);
   }
 
-  const supabase = createSupabaseServiceClient();
+  const supabase = getSupabaseServiceClient();
 
   const { error } = await supabase.from("case_access").upsert(
     {
@@ -90,7 +90,7 @@ async function activateUserEntitlement(session: Stripe.Checkout.Session) {
     throw new Error(`Ukjent entitlement package_id fra Stripe: ${packageId}`);
   }
 
-  const supabase = createSupabaseServiceClient();
+  const supabase = getSupabaseServiceClient();
   const includedCases = includedCasesForPackage(packageId);
 
   const { error } = await supabase.from("user_case_entitlements").insert({
