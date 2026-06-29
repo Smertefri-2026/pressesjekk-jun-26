@@ -110,3 +110,13 @@ create trigger set_user_case_entitlements_updated_at
 before update on public.user_case_entitlements
 for each row
 execute function public.set_user_case_entitlements_updated_at();
+
+grant usage on schema public to service_role;
+
+grant select, insert, update, delete
+on public.user_case_entitlements
+to service_role;
+
+grant usage, select
+on all sequences in schema public
+to service_role;
