@@ -6,8 +6,12 @@ import { useEffect, useState } from "react";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { StripeCheckoutButton } from "@/components/stripe/StripeCheckoutButton";
+import {
+  caseBundles,
+  monthlyPackages,
+  type PackagePlanId,
+} from "@/data/packagePlans";
 import { supabase } from "@/lib/supabase/client";
-import type { PackagePlanId } from "@/data/packagePlans";
 
 type CaseRow = {
   id: string;
@@ -21,6 +25,8 @@ type CaseAccessRow = {
   status: "active" | "pending" | "cancelled" | "expired";
 };
 
+type PackageTab = "upgrade" | "bundles" | "monthly";
+
 type UpgradeOption = {
   id: PackagePlanId;
   name: string;
@@ -28,7 +34,6 @@ type UpgradeOption = {
   tag: string;
   description: string;
   features: string[];
-  manual?: boolean;
 };
 
 const upgradeOptions: UpgradeOption[] = [
@@ -88,11 +93,35 @@ const upgradeOptions: UpgradeOption[] = [
   },
 ];
 
+const tabText = {
+  upgrade: {
+    eyebrow: "Oppgrader saken",
+    title: "Oppgrader denne saken.",
+    description:
+      "Dette gjelder bare saken du står på nå. Ved oppgradering betaler du bare mellomlegget.",
+  },
+  bundles: {
+    eyebrow: "Flere saker",
+    title: "Kjøp flere ledige saker.",
+    description:
+      "Sakspakker legges på kontoen din som ledige saker. Du kan opprette nye saker etter kjøp.",
+  },
+  monthly: {
+    eyebrow: "Abonnement",
+    title: "Start abonnement for løpende arbeid.",
+    description:
+      "For deg som jobber med flere mediesaker hver måned. Abonnement gir inkluderte saker per måned.",
+  },
+} as const;
+
 function packageLabel(packageId: PackagePlanId | null) {
   if (packageId === "report_pack") return "Rapportpakke";
   if (packageId === "pfu_pack") return "PFU-pakke";
   if (packageId === "full_pack") return "Full dokumentpakke";
   if (packageId === "investigation_pack") return "Utredningspakke";
+  if (packageId === "case_bundle_3") return "3 saker";
+  if (packageId === "case_bundle_5") return "5 saker";
+  if (packageId === "case_bundle_10") return "10 saker";
   if (packageId === "monthly_start") return "Månedsavtale Start";
   if (packageId === "monthly_pro") return "Månedsavtale Pro";
   if (packageId === "monthly_agency") return "Månedsavtale Byrå";
@@ -125,6 +154,7 @@ export default function CasePackagePage() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
 
+  const [activeTab, setActiveTab] = useState<PackageTab>("upgrade");
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [currentPackageId, setCurrentPackageId] =
     useState<PackagePlanId | null>(null);
@@ -253,25 +283,24 @@ export default function CasePackagePage() {
           </div>
         ) : null}
 
-        <div className="mt-10">
-          <div className="grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
-            <section>
+        <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
+          <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
               Pakke og betaling
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Velg pakke for saken
+              Pakker og betaling
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Her ser du hva saken har nå, hva som er inkludert og hva det koster
-              å oppgradere videre. Ved oppgradering betaler du bare mellomlegget.
+              Oppgrader denne saken, kjøp flere ledige saker eller start
+              abonnement. Én sak kan inneholde flere artikler eller URL-er om
+              samme mediesituasjon.
             </p>
+          </section>
 
-            </section>
-
-          <aside className="hidden rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7 lg:block">
+          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
               Nåværende pakke
             </p>
@@ -286,7 +315,8 @@ export default function CasePackagePage() {
 
             {caseItem.media_name ? (
               <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
-                Mediehus: <span className="text-slate-950">{caseItem.media_name}</span>
+                Mediehus:{" "}
+                <span className="text-slate-950">{caseItem.media_name}</span>
               </p>
             ) : null}
 
@@ -297,10 +327,45 @@ export default function CasePackagePage() {
               Tilbake til saken
             </Link>
           </aside>
+        </div>
+
+        <section className="sticky top-0 z-20 -mx-4 mt-8 border-y border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-3xl sm:border sm:px-3">
+          <div className="grid gap-2 sm:grid-cols-3">
+            {(["upgrade", "bundles", "monthly"] as PackageTab[]).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`rounded-2xl px-4 py-4 text-sm font-black transition ${
+                  activeTab === tab
+                    ? "bg-slate-950 text-white shadow-sm"
+                    : "bg-white text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                {tab === "upgrade"
+                  ? "Oppgrader saken"
+                  : tab === "bundles"
+                    ? "Kjøp flere saker"
+                    : "Abonnement"}
+              </button>
+            ))}
           </div>
+        </section>
 
+        <section className="mt-8">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            {tabText[activeTab].eyebrow}
+          </p>
+          <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
+            {tabText[activeTab].title}
+          </h2>
+          <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+            {tabText[activeTab].description}
+          </p>
+        </section>
+
+        {activeTab === "upgrade" ? (
           <section className="mt-8">
-
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {upgradeOptions.map((option) => {
                 const optionRank = packageRank(option.id);
@@ -383,11 +448,11 @@ export default function CasePackagePage() {
                 Nedgradering / endring
               </p>
               <h2 className="mt-3 text-2xl font-black text-slate-950">
-                Kontakt oss
+                Endringer vurderes manuelt
               </h2>
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-                Nedgradering eller endring etter at en pakke er brukt må vurderes
-                manuelt, slik at tilgang og dokumenter ikke blir feil.
+                Nedgradering eller endring etter at en pakke er brukt må
+                vurderes manuelt, slik at tilgang og dokumenter ikke blir feil.
               </p>
               <Link
                 href="/kontakt"
@@ -397,36 +462,118 @@ export default function CasePackagePage() {
               </Link>
             </div>
           </section>
-        </div>
+        ) : null}
 
-        <section className="mt-8 lg:hidden">
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Nåværende pakke
-            </p>
+        {activeTab === "bundles" ? (
+          <section className="mt-8 grid gap-5 md:grid-cols-3">
+            {caseBundles.map((bundle) => (
+              <article
+                key={bundle.id}
+                className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
+                  {bundle.tag}
+                </p>
 
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              {packageLabel(currentPackageId)}
-            </h2>
+                <h2 className="mt-5 text-3xl font-black text-slate-950">
+                  {bundle.name}
+                </h2>
 
-            <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
-              Sak: <span className="text-slate-950">{caseItem.title}</span>
-            </p>
+                <p className="mt-3 text-4xl font-black text-slate-950">
+                  {bundle.price}
+                </p>
 
-            {caseItem.media_name ? (
-              <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
-                Mediehus: <span className="text-slate-950">{caseItem.media_name}</span>
+                <p className="mt-4 leading-8 text-slate-700">
+                  {bundle.description}
+                </p>
+
+                <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
+                  {bundle.features.map((feature) => (
+                    <li key={feature} className="flex gap-2">
+                      <span className="text-cyan-700">✓</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href={`/min-side/pakker/kjop?plan=${bundle.id}`}
+                  className="mt-auto block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
+                >
+                  {bundle.button}
+                </Link>
+              </article>
+            ))}
+          </section>
+        ) : null}
+
+        {activeTab === "monthly" ? (
+          <section className="mt-8">
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+              {monthlyPackages.map((plan) => (
+                <article
+                  key={plan.id}
+                  className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
+                    plan.id === "monthly_pro"
+                      ? "border-cyan-300 bg-cyan-50"
+                      : "border-slate-200 bg-white"
+                  }`}
+                >
+                  <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
+                    {plan.tag}
+                  </p>
+
+                  <h2 className="mt-5 text-2xl font-black text-slate-950">
+                    {plan.name}
+                  </h2>
+
+                  <p className="mt-3 text-3xl font-black text-slate-950">
+                    {plan.price}
+                  </p>
+
+                  <p className="mt-4 leading-8 text-slate-700">
+                    {plan.description}
+                  </p>
+
+                  <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex gap-2">
+                        <span className="text-cyan-700">✓</span>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link
+                    href={
+                      plan.id === "monthly_enterprise"
+                        ? "/kontakt"
+                        : `/min-side/pakker/kjop?plan=${plan.id}`
+                    }
+                    className="mt-auto block rounded-xl bg-slate-950 px-5 py-4 text-center font-black text-white hover:bg-slate-800"
+                  >
+                    {plan.id === "monthly_enterprise"
+                      ? "Be om tilbud"
+                      : "Start abonnement"}
+                  </Link>
+                </article>
+              ))}
+            </div>
+
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                Administrer abonnement
               </p>
-            ) : null}
-
-            <Link
-              href={`/min-side/saker/${params.id}`}
-              className="mt-6 inline-flex rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
-            >
-              Tilbake til saken
-            </Link>
-          </aside>
-        </section>
+              <h2 className="mt-3 text-2xl font-black text-slate-950">
+                Pause, stopp og endring
+              </h2>
+              <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+                Neste steg er å koble til Stripe kundeportal, slik at du kan
+                endre, pause eller stoppe abonnement direkte fra Min Side.
+              </p>
+            </div>
+          </section>
+        ) : null}
       </section>
 
       <LightPublicFooter />
