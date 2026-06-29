@@ -75,7 +75,6 @@ async function activateCaseAccess(session: Stripe.Checkout.Session) {
       sessionId: session.id,
       userId,
       packageId,
-      includedCases,
       error,
     });
 
