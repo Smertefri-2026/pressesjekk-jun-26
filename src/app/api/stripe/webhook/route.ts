@@ -71,8 +71,23 @@ async function activateCaseAccess(session: Stripe.Checkout.Session) {
   );
 
   if (error) {
+    console.error("Feil ved lagring av user_case_entitlement", {
+      sessionId: session.id,
+      userId,
+      packageId,
+      includedCases,
+      error,
+    });
+
     throw new Error(error.message);
   }
+
+  console.log("Lagret user_case_entitlement", {
+    sessionId: session.id,
+    userId,
+    packageId,
+    includedCases,
+  });
 
   const creditEntitlementIds = String(
     metadata.credit_entitlement_ids ?? ""
@@ -175,6 +190,17 @@ export async function POST(request: NextRequest) {
       if (caseId) {
         await activateCaseAccess(session);
       } else {
+        const metadata = session.metadata ?? {};
+
+        if (!metadata.user_id || !metadata.package_id) {
+          console.warn("Ignorerer checkout.session.completed uten PresseSjekk-metadata", {
+            sessionId: session.id,
+            metadata,
+          });
+
+          return NextResponse.json({ received: true, ignored: true });
+        }
+
         await activateUserEntitlement(session);
       }
     }
@@ -182,6 +208,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Webhook-feil.";
+    console.error("Stripe webhook feilet", { message, error });
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
