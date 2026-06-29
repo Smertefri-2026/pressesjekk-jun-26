@@ -254,7 +254,8 @@ export default function CasePackagePage() {
         ) : null}
 
         <div className="mt-10">
-          <section>
+          <div className="grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
+            <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
               Pakke og betaling
             </p>
@@ -263,31 +264,44 @@ export default function CasePackagePage() {
               Velg pakke for saken
             </h1>
 
-            <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_340px] xl:items-start">
-              <p className="max-w-3xl text-xl leading-9 text-slate-700">
-                Her ser du hva saken har nå, hva som er inkludert og hva det koster
-                å oppgradere videre. Ved oppgradering betaler du bare mellomlegget.
+            <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
+              Her ser du hva saken har nå, hva som er inkludert og hva det koster
+              å oppgradere videre. Ved oppgradering betaler du bare mellomlegget.
+            </p>
+
+            </section>
+
+          <aside className="hidden rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7 lg:block">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              Nåværende pakke
+            </p>
+
+            <h2 className="mt-4 text-3xl font-black text-slate-950">
+              {packageLabel(currentPackageId)}
+            </h2>
+
+            <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
+              Sak: <span className="text-slate-950">{caseItem.title}</span>
+            </p>
+
+            {caseItem.media_name ? (
+              <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
+                Mediehus: <span className="text-slate-950">{caseItem.media_name}</span>
               </p>
+            ) : null}
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                  Nåværende pakke
-                </p>
-                <h2 className="mt-3 text-3xl font-black text-slate-950">
-                  {packageLabel(currentPackageId)}
-                </h2>
-                <p className="mt-4 leading-8 text-slate-700">
-                  Sak: <span className="font-bold">{caseItem.title}</span>
-                </p>
-                {caseItem.media_name ? (
-                  <p className="mt-2 text-sm font-semibold text-slate-600">
-                    Mediehus: {caseItem.media_name}
-                  </p>
-                ) : null}
-              </div>
-            </div>
+            <Link
+              href={`/min-side/saker/${params.id}`}
+              className="mt-6 inline-flex rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+            >
+              Tilbake til saken
+            </Link>
+          </aside>
+          </div>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <section className="mt-8">
+
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {upgradeOptions.map((option) => {
                 const optionRank = packageRank(option.id);
                 const upgradeAmount = Math.max(option.price - currentPrice, 0);
@@ -383,9 +397,36 @@ export default function CasePackagePage() {
               </Link>
             </div>
           </section>
-
-
         </div>
+
+        <section className="mt-8 lg:hidden">
+          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              Nåværende pakke
+            </p>
+
+            <h2 className="mt-4 text-3xl font-black text-slate-950">
+              {packageLabel(currentPackageId)}
+            </h2>
+
+            <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
+              Sak: <span className="text-slate-950">{caseItem.title}</span>
+            </p>
+
+            {caseItem.media_name ? (
+              <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
+                Mediehus: <span className="text-slate-950">{caseItem.media_name}</span>
+              </p>
+            ) : null}
+
+            <Link
+              href={`/min-side/saker/${params.id}`}
+              className="mt-6 inline-flex rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+            >
+              Tilbake til saken
+            </Link>
+          </aside>
+        </section>
       </section>
 
       <LightPublicFooter />
