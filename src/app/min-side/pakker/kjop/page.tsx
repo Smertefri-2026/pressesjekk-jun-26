@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
@@ -47,7 +47,7 @@ function formatKrFromOre(amount: number) {
   return new Intl.NumberFormat("nb-NO").format(Math.round(amount / 100));
 }
 
-export default function BuyPackagePage() {
+function BuyPackageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -291,5 +291,27 @@ export default function BuyPackagePage() {
 
       <LightPublicFooter />
     </main>
+  );
+}
+
+export default function BuyPackagePage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-slate-50 text-slate-950">
+          <LightPublicHeader />
+          <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+            <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+              <p className="text-lg font-bold text-slate-700">
+                Laster kjøpsside...
+              </p>
+            </div>
+          </section>
+          <LightPublicFooter />
+        </main>
+      }
+    >
+      <BuyPackageContent />
+    </Suspense>
   );
 }
