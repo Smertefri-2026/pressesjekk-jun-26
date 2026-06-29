@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { monthlyPackages, singlePackages } from "@/data/packagePlans";
+
+type PricingTab = "single" | "bundles" | "monthly";
 
 const caseBundles = [
   {
@@ -54,27 +59,32 @@ const caseBundles = [
   },
 ];
 
-const usageModels = [
-  {
-    title: "Én sak",
-    text: "Passer når du vil vurdere én konkret mediesituasjon. Én sak kan inneholde flere artikler eller URL-er om samme omtale.",
+const tabInfo = {
+  single: {
+    label: "Enkeltkjøp",
+    title: "Kjøp pakke for én konkret mediesak.",
+    text: "En sak kan inneholde flere artikler eller URL-er om samme mediesituasjon. Start enkelt og oppgrader saken hvis den bør følges opp videre.",
   },
-  {
-    title: "Sakspakker",
-    text: "Passer når du har flere saker, men ikke ønsker abonnement. Hver sak starter som rapportpakke og kan oppgraderes.",
+  bundles: {
+    label: "Flere saker",
+    title: "Kjøp flere saker uten abonnement.",
+    text: "Sakspakker passer når du har flere mediesaker, men ikke trenger løpende proff-abonnement. Hver inkluderte sak starter som rapportpakke.",
   },
-  {
-    title: "Proff",
-    text: "Passer for advokater, rådgivere, organisasjoner og andre som jobber løpende med mediesaker.",
+  monthly: {
+    label: "Abonnement",
+    title: "For deg som jobber løpende med mediesaker.",
+    text: "Proff-abonnement passer for advokater, rådgivere, organisasjoner, byråer og redaksjoner som vurderer flere saker hver måned.",
   },
-];
+} as const;
 
 export default function PriserPage() {
+  const [activeTab, setActiveTab] = useState<PricingTab>("single");
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <LightPublicHeader />
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <Link
           href="/"
           className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
@@ -82,81 +92,69 @@ export default function PriserPage() {
           ← Tilbake til forsiden
         </Link>
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
           <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
               Priser
             </p>
 
-            <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl md:text-7xl">
+            <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl md:text-6xl">
               Velg hvordan du vil bruke PresseSjekk.
             </h1>
 
-            <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
+            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-700 sm:text-xl sm:leading-9">
               Start med én sak, kjøp flere saker som pakke, eller velg
-              proff-abonnement for løpende arbeid. Én sak kan inneholde flere
-              artikler eller URL-er om samme mediesituasjon.
+              proff-abonnement for løpende arbeid.
             </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/min-side/saker/ny"
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
-              >
-                Start sak
-              </Link>
-              <Link
-                href="/eksempelrapport"
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                Se eksempelrapport
-              </Link>
-            </div>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-7 shadow-sm">
+          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Prislogikk
+              Viktig
             </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Sakspakker er fleksible. Proff er for løpende bruk.
+            <h2 className="mt-3 text-2xl font-black text-slate-950">
+              Én sak kan ha flere artikler.
             </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Enkeltkjøp og sakspakker passer for sporadisk bruk. Proff passer
-              når du jobber med mediesaker hver måned og ønsker lavere pris per
-              sak over tid.
+            <p className="mt-3 leading-7 text-slate-700">
+              En sak kan inneholde flere URL-er, oppfølgingssaker og artikler om
+              samme mediesituasjon.
             </p>
           </aside>
         </div>
 
-        <section className="mt-16 grid gap-4 md:grid-cols-3">
-          {usageModels.map((item) => (
-            <article
-              key={item.title}
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <h2 className="text-2xl font-black text-slate-950">
-                {item.title}
-              </h2>
-              <p className="mt-4 leading-8 text-slate-700">{item.text}</p>
-            </article>
-          ))}
+        <section className="sticky top-0 z-20 -mx-4 mt-8 border-y border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-3xl sm:border sm:px-3">
+          <div className="grid gap-2 sm:grid-cols-3">
+            {(["single", "bundles", "monthly"] as PricingTab[]).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={`rounded-2xl px-4 py-4 text-sm font-black transition ${
+                  activeTab === tab
+                    ? "bg-slate-950 text-white shadow-sm"
+                    : "bg-white text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                {tabInfo[tab].label}
+              </button>
+            ))}
+          </div>
         </section>
 
-        <section className="mt-16">
+        <section className="mt-8">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-            Én sak
+            {tabInfo[activeTab].label}
           </p>
           <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
-            Kjøp pakke for én konkret mediesak.
+            {tabInfo[activeTab].title}
           </h2>
           <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-            En sak kan bestå av flere artikler, oppfølgingssaker eller URL-er
-            om samme mediesituasjon. Du kan starte enkelt og oppgradere saken
-            hvis den bør følges opp videre.
+            {tabInfo[activeTab].text}
           </p>
+        </section>
 
-          <div className="mt-8 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {activeTab === "single" ? (
+          <section className="mt-8 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
             {singlePackages.map((plan) => (
               <article
                 key={plan.id}
@@ -205,23 +203,11 @@ export default function PriserPage() {
                 </Link>
               </article>
             ))}
-          </div>
-        </section>
+          </section>
+        ) : null}
 
-        <section className="mt-16">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-            Sakspakker
-          </p>
-          <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
-            Kjøp flere saker uten abonnement.
-          </h2>
-          <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-            Sakspakker passer når du har flere mediesaker, men ikke trenger
-            løpende proff-abonnement. Hver inkluderte sak starter som
-            rapportpakke og kan oppgraderes ved behov.
-          </p>
-
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
+        {activeTab === "bundles" ? (
+          <section className="mt-8 grid gap-6 md:grid-cols-3">
             {caseBundles.map((bundle) => (
               <article
                 key={bundle.name}
@@ -264,23 +250,11 @@ export default function PriserPage() {
                 </Link>
               </article>
             ))}
-          </div>
-        </section>
+          </section>
+        ) : null}
 
-        <section className="mt-16">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-            Proff-abonnement
-          </p>
-          <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
-            For deg som jobber løpende med mediesaker.
-          </h2>
-          <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-            Proff gir løpende tilgang og passer for advokater, rådgivere,
-            organisasjoner, byråer og redaksjoner som vurderer flere saker hver
-            måned.
-          </p>
-
-          <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {activeTab === "monthly" ? (
+          <section className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {monthlyPackages.map((plan) => (
               <article
                 key={plan.id}
@@ -323,33 +297,10 @@ export default function PriserPage() {
                 </Link>
               </article>
             ))}
-          </div>
-        </section>
+          </section>
+        ) : null}
 
-        <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-            Utredningspakke
-          </p>
-
-          <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
-            For større saker som krever manuell gjennomgang.
-          </h2>
-
-          <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-            Utredningspakken kan inkludere manuell research, større gjennomgang,
-            strukturering, dokumentliste og AI-støttet analyse ved behov. Denne
-            pakken avtales manuelt.
-          </p>
-
-          <Link
-            href="/kontakt"
-            className="mt-7 inline-flex rounded-xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
-          >
-            Be om utredningspakke
-          </Link>
-        </section>
-
-        <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 text-center shadow-sm sm:p-8">
+        <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-5 text-center shadow-sm sm:p-8">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
             Klar til å starte?
           </p>
