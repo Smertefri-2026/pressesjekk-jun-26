@@ -1,10 +1,13 @@
-export type PackagePlanType = "single" | "monthly";
+export type PackagePlanType = "single" | "bundle" | "monthly";
 
 export type PackagePlanId =
   | "report_pack"
   | "pfu_pack"
   | "full_pack"
   | "investigation_pack"
+  | "case_bundle_3"
+  | "case_bundle_5"
+  | "case_bundle_10"
   | "monthly_start"
   | "monthly_pro"
   | "monthly_agency"
@@ -100,6 +103,60 @@ export const singlePackages: PackagePlan[] = [
   },
 ];
 
+export const caseBundles: PackagePlan[] = [
+  {
+    id: "case_bundle_3",
+    type: "bundle",
+    tag: "Liten pakke",
+    name: "3 saker",
+    price: "1 390 kr",
+    description:
+      "For deg som vil teste flere mediesaker uten å binde deg til abonnement.",
+    features: [
+      "3 rapportpakke-saker",
+      "Kan brukes på ulike mediesaker",
+      "Hver sak kan oppgraderes ved behov",
+      "Passer for privatpersoner og små virksomheter",
+    ],
+    href: "/min-side/pakker/kjop?plan=case_bundle_3",
+    button: "Kjøp 3 saker",
+  },
+  {
+    id: "case_bundle_5",
+    type: "bundle",
+    tag: "Mest fleksibel",
+    name: "5 saker",
+    price: "2 190 kr",
+    description:
+      "For deg som har flere omtaler, klienter eller saker som bør struktureres.",
+    features: [
+      "5 rapportpakke-saker",
+      "Bedre pris enn enkeltkjøp",
+      "Kan brukes over tid",
+      "Oppgradering per sak ved behov",
+    ],
+    href: "/min-side/pakker/kjop?plan=case_bundle_5",
+    button: "Kjøp 5 saker",
+  },
+  {
+    id: "case_bundle_10",
+    type: "bundle",
+    tag: "Best uten abonnement",
+    name: "10 saker",
+    price: "3 990 kr",
+    description:
+      "For deg som trenger flere enkeltsaker, men ikke ønsker månedlig avtale.",
+    features: [
+      "10 rapportpakke-saker",
+      "Lavere pris per sak",
+      "Passer for sporadisk proffbruk",
+      "Proff-abonnement anbefales ved løpende behov",
+    ],
+    href: "/min-side/pakker/kjop?plan=case_bundle_10",
+    button: "Kjøp 10 saker",
+  },
+];
+
 export const monthlyPackages: PackagePlan[] = [
   {
     id: "monthly_start",
@@ -176,7 +233,11 @@ export const monthlyPackages: PackagePlan[] = [
   },
 ];
 
-export const allPackagePlans = [...singlePackages, ...monthlyPackages];
+export const allPackagePlans = [
+  ...singlePackages,
+  ...caseBundles,
+  ...monthlyPackages,
+];
 
 // --- v1 checkout-scope (B4) ---------------------------------------------
 // Kun disse tre pakkene er kjøpbare i v1 sin offentlige checkout.
@@ -212,6 +273,9 @@ export const packageAccessSteps: Record<PackagePlanId, number[]> = {
   pfu_pack: [1, 2, 3, 4],
   full_pack: [1, 2, 3, 4, 5, 6],
   investigation_pack: [1, 2, 3, 4, 5, 6, 7],
+  case_bundle_3: [1, 2, 3],
+  case_bundle_5: [1, 2, 3],
+  case_bundle_10: [1, 2, 3],
   monthly_start: [1, 2, 3],
   monthly_pro: [1, 2, 3],
   monthly_agency: [1, 2, 3],
