@@ -134,6 +134,7 @@ export default function MinSidePage() {
   const [reportCount, setReportCount] = useState(0);
   const [pfuDraftCount, setPfuDraftCount] = useState(0);
   const [activePackageCount, setActivePackageCount] = useState(0);
+  const [availableCaseCount, setAvailableCaseCount] = useState(0);
   const [activePackageCaseId, setActivePackageCaseId] = useState<string | null>(
     null
   );
@@ -255,14 +256,38 @@ export default function MinSidePage() {
               .eq("status", "active")
           : { data: [], error: null };
 
+      const entitlementRows = await supabase
+        .from("user_case_entitlements")
+        .select("included_cases,used_cases,expires_at,status")
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
       const accessRows = ((activeAccessRows.data ?? []) as CaseAccessRow[]).filter(
         (access) => access.status === "active"
+      );
+
+      const availableCases = (entitlementRows.data ?? []).reduce(
+        (sum, entitlement) => {
+          const includedCases = Number(entitlement.included_cases ?? 0);
+          const usedCases = Number(entitlement.used_cases ?? 0);
+          const expiresAt = entitlement.expires_at
+            ? new Date(entitlement.expires_at).getTime()
+            : null;
+
+          if (expiresAt && expiresAt <= Date.now()) {
+            return sum;
+          }
+
+          return sum + Math.max(0, includedCases - usedCases);
+        },
+        0
       );
 
       setCases(caseRows);
       setFolders(folderRows);
       setReports(reportRows);
       setActivePackageCount(accessRows.length);
+      setAvailableCaseCount(availableCases);
       setActivePackageCaseId(accessRows[0]?.case_id ?? null);
 
       if (!profileResult.error) {
@@ -301,19 +326,27 @@ export default function MinSidePage() {
   const packageCaseId = activePackageCaseId ?? firstActiveCase?.id ?? null;
   const packageHref = packageCaseId
     ? `/min-side/saker/${packageCaseId}/pakke`
-    : "/min-side/saker/ny";
+    : availableCaseCount > 0
+      ? "/min-side/saker/ny"
+      : "/priser";
   const packageStatusLabel =
-    activePackageCount === 0
-      ? "Ingen aktive"
-      : activePackageCount === 1
-        ? "1 aktiv"
-        : `${activePackageCount} aktive`;
+    availableCaseCount > 0
+      ? `${availableCaseCount} ledige`
+      : activePackageCount === 0
+        ? "Ingen aktive"
+        : activePackageCount === 1
+          ? "1 aktiv"
+          : `${activePackageCount} aktive`;
   const packageCtaLabel =
-    activePackageCount > 0
-      ? "Se pakker og betaling"
-      : firstActiveCase
-        ? "Velg pakke"
-        : "Opprett første sak";
+    availableCaseCount > 0
+      ? activePackageCount > 0
+        ? `${activePackageCount} aktiv sak`
+        : "Opprett ny sak"
+      : activePackageCount > 0
+        ? "Se pakker og betaling"
+        : firstActiveCase
+          ? "Velg pakke"
+          : "Kjøp pakke";
 
   const archiveItems = useMemo<ArchiveItem[]>(() => {
     const folderItems: ArchiveItem[] = folders
