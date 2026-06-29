@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
@@ -18,10 +18,40 @@ function packageTypeLabel(type: string) {
   return "Enkeltkjøp";
 }
 
+function amountForPackage(packageId: PackagePlanId) {
+  if (packageId === "report_pack") return 49000;
+  if (packageId === "pfu_pack") return 149000;
+  if (packageId === "full_pack") return 299000;
+  if (packageId === "investigation_pack") return 10000000;
+  if (packageId === "case_bundle_3") return 139000;
+  if (packageId === "case_bundle_5") return 219000;
+  if (packageId === "case_bundle_10") return 399000;
+  if (packageId === "monthly_start") return 129000;
+  if (packageId === "monthly_pro") return 499000;
+  if (packageId === "monthly_agency") return 1499000;
+  return 0;
+}
+
+function entitlementValue(packageId: PackagePlanId) {
+  if (packageId === "report_pack") return 49000;
+  if (packageId === "pfu_pack") return 149000;
+  if (packageId === "full_pack") return 299000;
+  if (packageId === "investigation_pack") return 10000000;
+  if (packageId === "case_bundle_3") return 49000;
+  if (packageId === "case_bundle_5") return 49000;
+  if (packageId === "case_bundle_10") return 49000;
+  return 0;
+}
+
+function formatKrFromOre(amount: number) {
+  return new Intl.NumberFormat("nb-NO").format(Math.round(amount / 100));
+}
+
 export default function BuyPackagePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
 
   const rawPlan = searchParams.get("plan");
@@ -31,6 +61,63 @@ export default function BuyPackagePage() {
     if (!isPackagePlanId(rawPlan)) return null;
     return allPackagePlans.find((plan) => plan.id === rawPlan) ?? null;
   }, [rawPlan]);
+
+  const selectedAmount = selectedPlan ? amountForPackage(selectedPlan.id) : 0;
+  const amountToPay = Math.max(selectedAmount - discountAmount, 0);
+
+  useEffect(() => {
+    async function loadDiscount() {
+      setDiscountAmount(0);
+
+      if (!selectedPlan || selectedPlan.type === "monthly") {
+        return;
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        return;
+      }
+
+      const { data: entitlements } = await supabase
+        .from("user_case_entitlements")
+        .select("id, package_id, included_cases, used_cases, expires_at")
+        .eq("status", "active")
+        .order("created_at", { ascending: true });
+
+      let nextDiscount = 0;
+
+      for (const entitlement of entitlements ?? []) {
+        const unusedCases =
+          Number(entitlement.included_cases ?? 0) -
+          Number(entitlement.used_cases ?? 0);
+
+        if (unusedCases <= 0) continue;
+
+        const expiresAt = entitlement.expires_at
+          ? new Date(entitlement.expires_at).getTime()
+          : null;
+
+        if (expiresAt && expiresAt <= Date.now()) continue;
+
+        const value =
+          unusedCases *
+          entitlementValue(entitlement.package_id as PackagePlanId);
+
+        if (value <= 0) continue;
+
+        if (nextDiscount + value > selectedAmount - 100) continue;
+
+        nextDiscount += value;
+      }
+
+      setDiscountAmount(nextDiscount);
+    }
+
+    loadDiscount();
+  }, [selectedAmount, selectedPlan]);
 
   async function startCheckout() {
     if (!selectedPlan) return;
@@ -142,6 +229,29 @@ export default function BuyPackagePage() {
             <p className="mt-3 text-4xl font-black text-slate-950">
               {selectedPlan.price}
             </p>
+
+            {selectedAmount > 0 ? (
+              <div className="mt-5 rounded-2xl bg-slate-950 p-5 text-white">
+                <div className="flex justify-between gap-4 text-sm font-bold text-slate-300">
+                  <span>Ordinær pris</span>
+                  <span>{formatKrFromOre(selectedAmount)} kr</span>
+                </div>
+
+                {discountAmount > 0 ? (
+                  <div className="mt-3 flex justify-between gap-4 text-sm font-bold text-cyan-200">
+                    <span>Fradrag for ubrukte ledige saker</span>
+                    <span>-{formatKrFromOre(discountAmount)} kr</span>
+                  </div>
+                ) : null}
+
+                <div className="mt-4 border-t border-white/15 pt-4">
+                  <div className="flex justify-between gap-4 text-lg font-black">
+                    <span>Å betale nå</span>
+                    <span>{formatKrFromOre(amountToPay)} kr</span>
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             <p className="mt-4 leading-8 text-slate-700">
               {selectedPlan.description}

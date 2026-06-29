@@ -73,6 +73,29 @@ async function activateCaseAccess(session: Stripe.Checkout.Session) {
   if (error) {
     throw new Error(error.message);
   }
+
+  const creditEntitlementIds = String(
+    metadata.credit_entitlement_ids ?? ""
+  )
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+
+  if (creditEntitlementIds.length > 0) {
+    const { error: creditError } = await supabase
+      .from("user_case_entitlements")
+      .update({
+        status: "expired",
+        source: "converted_to_new_purchase",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", userId)
+      .in("id", creditEntitlementIds);
+
+    if (creditError) {
+      throw new Error(creditError.message);
+    }
+  }
 }
 
 async function activateUserEntitlement(session: Stripe.Checkout.Session) {
