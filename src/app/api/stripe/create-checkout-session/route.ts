@@ -1,32 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe/server";
-import { getStripeCheckoutPlan } from "@/lib/stripe/plans";
-import { isV1Purchasable } from "@/data/packagePlans";
+import {
+  getStripeCheckoutPlan,
+  stripeCheckoutPlans,
+} from "@/lib/stripe/plans";
+import type { PackagePlanId } from "@/data/packagePlans";
+
+function packageRank(packageId: PackagePlanId | null) {
+  if (!packageId) return 0;
+  if (packageId === "report_pack") return 1;
+  if (packageId === "pfu_pack") return 2;
+  if (packageId === "full_pack") return 3;
+  if (packageId === "investigation_pack") return 4;
+  return 1;
+}
+
+function getPackageAmount(packageId: PackagePlanId | null) {
+  if (!packageId) return 0;
+  return stripeCheckoutPlans[packageId]?.amount ?? 0;
+}
+
+function packageLabel(packageId: PackagePlanId | null) {
+  if (packageId === "report_pack") return "Rapportpakke";
+  if (packageId === "pfu_pack") return "PFU-pakke";
+  if (packageId === "full_pack") return "Full dokumentpakke";
+  if (packageId === "investigation_pack") return "Utredningspakke";
+  return "Ingen pakke";
+}
+
+function isSingleCasePackage(packageId: PackagePlanId) {
+  return (
+    packageId === "report_pack" ||
+    packageId === "pfu_pack" ||
+    packageId === "full_pack" ||
+    packageId === "investigation_pack"
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const packageId = String(body.packageId || "");
+    const packageId = String(body.packageId || "") as PackagePlanId;
     const caseId = body.caseId ? String(body.caseId) : "";
-
-    if (!isV1Purchasable(packageId)) {
-      return NextResponse.json(
-        {
-          error:
-            "Denne pakken kan ikke kjøpes på nett. Ta kontakt for proff- eller utredningspakke.",
-        },
-        { status: 400 }
-      );
-    }
-
     const plan = getStripeCheckoutPlan(packageId);
 
     if (!plan) {
-      return NextResponse.json(
-        { error: "Ugyldig pakke." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Ugyldig pakke." }, { status: 400 });
     }
 
     if (plan.amount <= 0) {
@@ -68,12 +88,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (plan.mode === "payment" && packageId !== "investigation_pack" && !caseId) {
+    if (isSingleCasePackage(packageId) && !caseId) {
       return NextResponse.json(
         { error: "Enkeltpakker må kobles til en sak." },
         { status: 400 }
       );
     }
+
+    let currentPackageId: PackagePlanId | null = null;
+    let caseTitle = "PresseSjekk-sak";
 
     if (caseId) {
       const { data: caseItem, error: caseError } = await supabase
@@ -83,10 +106,7 @@ export async function POST(request: NextRequest) {
         .maybeSingle();
 
       if (caseError || !caseItem) {
-        return NextResponse.json(
-          { error: "Fant ikke saken." },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Fant ikke saken." }, { status: 404 });
       }
 
       if (caseItem.user_id !== user.id) {
@@ -95,21 +115,63 @@ export async function POST(request: NextRequest) {
           { status: 403 }
         );
       }
+
+      caseTitle = caseItem.title || caseTitle;
+
+      const { data: accessData } = await supabase
+        .from("case_access")
+        .select("package_id,status")
+        .eq("case_id", caseId)
+        .eq("status", "active")
+        .maybeSingle();
+
+      currentPackageId = (accessData?.package_id as PackagePlanId | null) ?? null;
+    }
+
+    const targetRank = packageRank(packageId);
+    const currentRank = packageRank(currentPackageId);
+
+    if (caseId && targetRank <= currentRank) {
+      return NextResponse.json(
+        {
+          error:
+            "Denne saken har allerede samme eller høyere pakke. Kontakt oss ved behov for endring.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const currentAmount = caseId ? getPackageAmount(currentPackageId) : 0;
+    const amountToPay = Math.max(plan.amount - currentAmount, 0);
+
+    if (amountToPay <= 0) {
+      return NextResponse.json(
+        { error: "Det er ikke noe mellomlegg å betale." },
+        { status: 400 }
+      );
     }
 
     const origin = request.headers.get("origin") || "http://localhost:3000";
     const stripe = getStripe();
 
+    const isUpgrade = Boolean(currentPackageId && currentAmount > 0);
+
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: plan.mode,
-      success_url: `${origin}/min-side?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/priser?checkout=cancelled`,
+      success_url: caseId
+        ? `${origin}/min-side/saker/${caseId}/pakke?checkout=success&session_id={CHECKOUT_SESSION_ID}`
+        : `${origin}/min-side?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: caseId
+        ? `${origin}/min-side/saker/${caseId}/pakke?checkout=cancelled`
+        : `${origin}/priser?checkout=cancelled`,
       customer_email: user.email ?? undefined,
       client_reference_id: user.id,
       metadata: {
         user_id: user.id,
         case_id: caseId,
         package_id: plan.packageId,
+        previous_package_id: currentPackageId ?? "",
+        amount_to_pay: String(amountToPay),
         source: "stripe_checkout",
       },
       line_items: [
@@ -117,20 +179,19 @@ export async function POST(request: NextRequest) {
           quantity: 1,
           price_data: {
             currency: plan.currency,
-            unit_amount: plan.amount,
+            unit_amount: amountToPay,
             product_data: {
-              name: plan.name,
-              description: plan.description,
+              name: isUpgrade
+                ? `Oppgradering til ${plan.name}`
+                : plan.name,
+              description: isUpgrade
+                ? `Mellomlegg for ${caseTitle}: ${packageLabel(currentPackageId)} → ${packageLabel(plan.packageId)}`
+                : plan.description,
               metadata: {
                 package_id: plan.packageId,
+                previous_package_id: currentPackageId ?? "",
               },
             },
-            recurring:
-              plan.mode === "subscription"
-                ? {
-                    interval: "month",
-                  }
-                : undefined,
           },
         },
       ],

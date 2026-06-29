@@ -34,7 +34,7 @@ type UpgradeOption = {
 const upgradeOptions: UpgradeOption[] = [
   {
     id: "report_pack",
-    name: "Rapport-pakke",
+    name: "Rapportpakke",
     price: 490,
     tag: "Start",
     description:
@@ -60,7 +60,7 @@ const upgradeOptions: UpgradeOption[] = [
   },
   {
     id: "full_pack",
-    name: "Full dokument-pakke",
+    name: "Full dokumentpakke",
     price: 2990,
     tag: "Best verdi",
     description:
@@ -69,6 +69,21 @@ const upgradeOptions: UpgradeOption[] = [
       "Alt i PFU-pakke",
       "Utkast til politianmeldelse",
       "Videre dokumentgrunnlag for saken",
+    ],
+  },
+  {
+    id: "investigation_pack",
+    name: "Utredningspakke",
+    price: 100000,
+    tag: "Manuell hjelp",
+    description:
+      "For større eller mer alvorlige saker der du ønsker manuell gjennomgang, strukturering og videre strategi.",
+    features: [
+      "Alt i full dokumentpakke",
+      "Manuell vurdering av saken",
+      "Gjennomgang av dokumentasjon",
+      "Kvalitetssikring av rapport og dokumentpakke",
+      "Forslag til videre strategi",
     ],
   },
 ];
@@ -238,7 +253,7 @@ export default function CasePackagePage() {
           </div>
         ) : null}
 
-        <div className="mt-10 grid gap-8 xl:grid-cols-[1fr_320px] xl:items-start">
+        <div className="mt-10">
           <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
               Pakke og betaling
@@ -248,12 +263,31 @@ export default function CasePackagePage() {
               Velg pakke for saken
             </h1>
 
-            <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Her ser du hva saken har nå, hva som er inkludert og hva det koster
-              å oppgradere videre. Ved oppgradering betaler du bare mellomlegget.
-            </p>
+            <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_340px] xl:items-start">
+              <p className="max-w-3xl text-xl leading-9 text-slate-700">
+                Her ser du hva saken har nå, hva som er inkludert og hva det koster
+                å oppgradere videre. Ved oppgradering betaler du bare mellomlegget.
+              </p>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2 2xl:grid-cols-4">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                  Nåværende pakke
+                </p>
+                <h2 className="mt-3 text-3xl font-black text-slate-950">
+                  {packageLabel(currentPackageId)}
+                </h2>
+                <p className="mt-4 leading-8 text-slate-700">
+                  Sak: <span className="font-bold">{caseItem.title}</span>
+                </p>
+                {caseItem.media_name ? (
+                  <p className="mt-2 text-sm font-semibold text-slate-600">
+                    Mediehus: {caseItem.media_name}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {upgradeOptions.map((option) => {
                 const optionRank = packageRank(option.id);
                 const upgradeAmount = Math.max(option.price - currentPrice, 0);
@@ -305,14 +339,7 @@ export default function CasePackagePage() {
                     </ul>
 
                     <div className="mt-6">
-                      {option.manual ? (
-                        <Link
-                          href="/kontakt"
-                          className="block rounded-2xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800"
-                        >
-                          Be om utredningspakke
-                        </Link>
-                      ) : canUpgrade ? (
+                      {canUpgrade ? (
                         <StripeCheckoutButton
                           packageId={option.id}
                           caseId={params.id}
@@ -357,25 +384,7 @@ export default function CasePackagePage() {
             </div>
           </section>
 
-          <aside className="grid gap-6">
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                Nåværende pakke
-              </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                {packageLabel(currentPackageId)}
-              </h2>
-              <p className="mt-4 leading-8 text-slate-700">
-                Sak: <span className="font-bold">{caseItem.title}</span>
-              </p>
-              {caseItem.media_name ? (
-                <p className="mt-2 text-sm font-semibold text-slate-600">
-                  Mediehus: {caseItem.media_name}
-                </p>
-              ) : null}
-            </div>
 
-          </aside>
         </div>
       </section>
 
