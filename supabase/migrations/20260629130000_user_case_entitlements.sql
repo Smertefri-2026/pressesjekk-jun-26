@@ -138,3 +138,21 @@ to service_role;
 grant usage, select
 on all sequences in schema public
 to service_role;
+
+grant usage on schema public to service_role;
+
+grant select, insert, update, delete
+on public.cases
+to service_role;
+
+grant select, insert, update, delete
+on public.case_access
+to service_role;
+
+grant select, insert, update, delete
+on public.user_case_entitlements
+to service_role;
+
+grant usage, select
+on all sequences in schema public
+to service_role;
