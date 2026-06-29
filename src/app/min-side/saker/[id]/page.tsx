@@ -124,6 +124,9 @@ function hasPackageAccess(
 ) {
   const accessRank: Record<PackagePlanId, number> = {
     report_pack: 1,
+    case_bundle_3: 1,
+    case_bundle_5: 1,
+    case_bundle_10: 1,
     monthly_start: 1,
     monthly_pro: 1,
     monthly_agency: 1,
