@@ -269,6 +269,13 @@ export default function MinSidePage() {
   const newCaseLabel = selectedFolderId ? "+ Ny sak her" : "+ Ny sak";
 
   const activeFolders = folders.filter((folder) => !folder.deleted_at);
+  const firstActiveCase = cases.find((caseItem) => !caseItem.deleted_at);
+  const packageHref = firstActiveCase
+    ? `/min-side/saker/${firstActiveCase.id}/pakke`
+    : "/min-side/saker/ny";
+  const packageCtaLabel = firstActiveCase
+    ? "Se pakker og betaling"
+    : "Opprett første sak";
 
   const archiveItems = useMemo<ArchiveItem[]>(() => {
     const folderItems: ArchiveItem[] = folders
@@ -790,13 +797,18 @@ export default function MinSidePage() {
           className="mt-14 hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-5"
           id="oversikt"
         >
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="font-bold text-slate-500">Tilgang / pakker</p>
-            <p className="mt-4 text-3xl font-black text-cyan-700">Kommer</p>
-            <p className="mt-3 text-sm font-semibold text-slate-500">
-              Kobles til Stripe senere
+          <Link
+            href={packageHref}
+            className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-cyan-800">Tilgang / pakker</p>
+            <p className="mt-4 text-3xl font-black text-slate-950">
+              Administrer
             </p>
-          </div>
+            <p className="mt-3 text-sm font-semibold text-cyan-800">
+              {packageCtaLabel}
+            </p>
+          </Link>
 
           <a
             href="#arkiv"
@@ -863,46 +875,48 @@ export default function MinSidePage() {
                 
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setArchiveMode("active");
-                    sessionStorage.removeItem("pressesjekkSelectedFolderId");
-                    setSelectedFolderId(null);
-                  }}
-                  className={`rounded-xl px-5 py-3 text-center text-sm font-black ${
-                    archiveMode === "active"
-                      ? "bg-slate-950 text-white"
-                      : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
-                  }`}
-                >
-                  Saksarkiv
-                </button>
+              <div className="flex flex-col gap-4 sm:items-end">
+                <div className="flex flex-wrap items-center gap-4 text-sm font-black">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setArchiveMode("active");
+                      sessionStorage.removeItem("pressesjekkSelectedFolderId");
+                      setSelectedFolderId(null);
+                    }}
+                    className={
+                      archiveMode === "active"
+                        ? "text-slate-950 underline decoration-cyan-500 decoration-4 underline-offset-8"
+                        : "text-slate-500 hover:text-slate-950"
+                    }
+                  >
+                    Saksarkiv
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setArchiveMode("trash");
-                    sessionStorage.removeItem("pressesjekkSelectedFolderId");
-                    setSelectedFolderId(null);
-                  }}
-                  className={`rounded-xl px-5 py-3 text-center text-sm font-black ${
-                    archiveMode === "trash"
-                      ? "bg-slate-950 text-white"
-                      : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
-                  }`}
-                >
-                  Papirkurv
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setArchiveMode("trash");
+                      sessionStorage.removeItem("pressesjekkSelectedFolderId");
+                      setSelectedFolderId(null);
+                    }}
+                    className={
+                      archiveMode === "trash"
+                        ? "text-slate-950 underline decoration-cyan-500 decoration-4 underline-offset-8"
+                        : "text-slate-500 hover:text-slate-950"
+                    }
+                  >
+                    Papirkurv
+                  </button>
+                </div>
 
                 {archiveMode === "active" ? (
-                  <>
+                  <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
                       onClick={createFolder}
                       disabled={isCreatingFolder}
-                      className="rounded-xl bg-cyan-500 px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-xl border border-cyan-300 bg-cyan-50 px-5 py-3 text-center text-sm font-black text-cyan-950 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isCreatingFolder
                         ? "Oppretter..."
@@ -913,11 +927,11 @@ export default function MinSidePage() {
 
                     <Link
                       href={newCaseHref}
-                      className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                      className="rounded-xl bg-slate-950 px-5 py-3 text-center text-sm font-black text-white hover:bg-slate-800"
                     >
                       {newCaseLabel}
                     </Link>
-                  </>
+                  </div>
                 ) : null}
               </div>
             </div>
@@ -951,18 +965,18 @@ export default function MinSidePage() {
                 </p>
               </div>
 
-              <div className="flex shrink-0 gap-2">
+              <div className="flex shrink-0 items-center gap-3 text-sm font-black">
                 <button
                   type="button"
                   onClick={() => {
                     localStorage.setItem("pressesjekkArchiveViewMode", "list");
                     setViewMode("list");
                   }}
-                  className={`rounded-xl px-3 py-2 text-sm font-black sm:px-4 ${
+                  className={
                     viewMode === "list"
-                      ? "bg-slate-950 text-white"
-                      : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
-                  }`}
+                      ? "text-slate-950 underline decoration-cyan-500 decoration-4 underline-offset-8"
+                      : "text-slate-500 hover:text-slate-950"
+                  }
                 >
                   Liste
                 </button>
@@ -973,11 +987,11 @@ export default function MinSidePage() {
                     localStorage.setItem("pressesjekkArchiveViewMode", "grid");
                     setViewMode("grid");
                   }}
-                  className={`rounded-xl px-3 py-2 text-sm font-black sm:px-4 ${
+                  className={
                     viewMode === "grid"
-                      ? "bg-slate-950 text-white"
-                      : "border border-slate-300 bg-white text-slate-950 hover:bg-slate-100"
-                  }`}
+                      ? "text-slate-950 underline decoration-cyan-500 decoration-4 underline-offset-8"
+                      : "text-slate-500 hover:text-slate-950"
+                  }
                 >
                   Symboler
                 </button>
