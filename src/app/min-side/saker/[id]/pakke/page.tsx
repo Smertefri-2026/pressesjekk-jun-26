@@ -262,7 +262,7 @@ export default function CasePackagePage() {
                 return (
                   <article
                     key={option.id}
-                    className={`rounded-3xl border p-6 shadow-sm ${
+                    className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
                       option.id === "full_pack"
                         ? "border-cyan-300 bg-cyan-50"
                         : "border-slate-200 bg-white"
@@ -274,7 +274,7 @@ export default function CasePackagePage() {
                     <h2 className="mt-3 text-3xl font-black text-slate-950">
                       {option.name}
                     </h2>
-                    <p className="mt-4 min-h-24 leading-8 text-slate-700">
+                    <p className="mt-4 min-h-28 leading-8 text-slate-700">
                       {option.description}
                     </p>
 
@@ -294,7 +294,7 @@ export default function CasePackagePage() {
                       </p>
                     </div>
 
-                    <ul className="mt-5 grid gap-3 text-sm font-semibold text-slate-700">
+                    <ul className="mt-5 grid flex-1 content-start gap-3 text-sm font-semibold text-slate-700">
                       {option.features.map((feature) => (
                         <li key={feature}>✓ {feature}</li>
                       ))}
