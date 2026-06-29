@@ -49,6 +49,12 @@ type ProfileRow = {
   is_admin: boolean | null;
 };
 
+type CaseAccessRow = {
+  case_id: string;
+  package_id: string;
+  status: "active" | "pending" | "cancelled" | "expired";
+};
+
 type ActivityItem = {
   id: string;
   title: string;
@@ -127,6 +133,10 @@ export default function MinSidePage() {
   const [folderCount, setFolderCount] = useState(0);
   const [reportCount, setReportCount] = useState(0);
   const [pfuDraftCount, setPfuDraftCount] = useState(0);
+  const [activePackageCount, setActivePackageCount] = useState(0);
+  const [activePackageCaseId, setActivePackageCaseId] = useState<string | null>(
+    null
+  );
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(() => {
@@ -233,9 +243,27 @@ export default function MinSidePage() {
         (report) => caseIds.has(report.case_id)
       );
 
+      const activeAccessRows =
+        caseRows.length > 0
+          ? await supabase
+              .from("case_access")
+              .select("case_id,package_id,status")
+              .in(
+                "case_id",
+                caseRows.map((caseItem) => caseItem.id)
+              )
+              .eq("status", "active")
+          : { data: [], error: null };
+
+      const accessRows = ((activeAccessRows.data ?? []) as CaseAccessRow[]).filter(
+        (access) => access.status === "active"
+      );
+
       setCases(caseRows);
       setFolders(folderRows);
       setReports(reportRows);
+      setActivePackageCount(accessRows.length);
+      setActivePackageCaseId(accessRows[0]?.case_id ?? null);
 
       if (!profileResult.error) {
         setProfile((profileResult.data ?? null) as ProfileRow | null);
@@ -270,12 +298,22 @@ export default function MinSidePage() {
 
   const activeFolders = folders.filter((folder) => !folder.deleted_at);
   const firstActiveCase = cases.find((caseItem) => !caseItem.deleted_at);
-  const packageHref = firstActiveCase
-    ? `/min-side/saker/${firstActiveCase.id}/pakke`
+  const packageCaseId = activePackageCaseId ?? firstActiveCase?.id ?? null;
+  const packageHref = packageCaseId
+    ? `/min-side/saker/${packageCaseId}/pakke`
     : "/min-side/saker/ny";
-  const packageCtaLabel = firstActiveCase
-    ? "Se pakker og betaling"
-    : "Opprett første sak";
+  const packageStatusLabel =
+    activePackageCount === 0
+      ? "Ingen aktive"
+      : activePackageCount === 1
+        ? "1 aktiv"
+        : `${activePackageCount} aktive`;
+  const packageCtaLabel =
+    activePackageCount > 0
+      ? "Se pakker og betaling"
+      : firstActiveCase
+        ? "Velg pakke"
+        : "Opprett første sak";
 
   const archiveItems = useMemo<ArchiveItem[]>(() => {
     const folderItems: ArchiveItem[] = folders
@@ -803,7 +841,7 @@ export default function MinSidePage() {
           >
             <p className="font-bold text-cyan-800">Tilgang / pakker</p>
             <p className="mt-4 text-3xl font-black text-slate-950">
-              Administrer
+              {packageStatusLabel}
             </p>
             <p className="mt-3 text-sm font-semibold text-cyan-800">
               {packageCtaLabel}
