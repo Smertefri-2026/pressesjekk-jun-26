@@ -1,16 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/server";
-import { getSupabaseServiceClient } from "@/lib/supabase/service";
 import { getStripeCheckoutPlan } from "@/lib/stripe/plans";
+import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import type { PackagePlanId } from "@/data/packagePlans";
 
-export const runtime = "nodejs";
+function includedCasesForPackage(packageId: PackagePlanId) {
+  if (packageId === "case_bundle_3") return 3;
+  if (packageId === "case_bundle_5") return 5;
+  if (packageId === "case_bundle_10") return 10;
+
+  if (packageId === "monthly_start") return 3;
+  if (packageId === "monthly_pro") return 15;
+  if (packageId === "monthly_agency") return 50;
+
+  return 1;
+}
+
+function isEntitlementPackage(packageId: PackagePlanId) {
+  return (
+    packageId === "report_pack" ||
+    packageId === "pfu_pack" ||
+    packageId === "full_pack" ||
+    packageId === "investigation_pack" ||
+    packageId === "case_bundle_3" ||
+    packageId === "case_bundle_5" ||
+    packageId === "case_bundle_10" ||
+    packageId === "monthly_start" ||
+    packageId === "monthly_pro" ||
+    packageId === "monthly_agency" ||
+    packageId === "monthly_enterprise"
+  );
+}
 
 async function activateCaseAccess(session: Stripe.Checkout.Session) {
   const metadata = session.metadata ?? {};
   const userId = metadata.user_id;
   const caseId = metadata.case_id;
-  const packageId = metadata.package_id;
+  const packageId = metadata.package_id as PackagePlanId | undefined;
 
   if (!userId || !caseId || !packageId) {
     throw new Error("Stripe session mangler user_id, case_id eller package_id");
@@ -22,12 +49,12 @@ async function activateCaseAccess(session: Stripe.Checkout.Session) {
     throw new Error(`Ukjent package_id fra Stripe: ${packageId}`);
   }
 
-  const supabase = getSupabaseServiceClient();
+  const supabase = createSupabaseServiceClient();
 
   const { error } = await supabase.from("case_access").upsert(
     {
-      user_id: userId,
       case_id: caseId,
+      user_id: userId,
       package_id: plan.packageId,
       status: "active",
       source: "stripe_checkout",
@@ -38,8 +65,47 @@ async function activateCaseAccess(session: Stripe.Checkout.Session) {
         typeof session.subscription === "string" ? session.subscription : null,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: "case_id" }
+    {
+      onConflict: "case_id",
+    }
   );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+async function activateUserEntitlement(session: Stripe.Checkout.Session) {
+  const metadata = session.metadata ?? {};
+  const userId = metadata.user_id;
+  const packageId = metadata.package_id as PackagePlanId | undefined;
+
+  if (!userId || !packageId) {
+    throw new Error("Stripe session mangler user_id eller package_id");
+  }
+
+  const plan = getStripeCheckoutPlan(packageId);
+
+  if (!plan || !isEntitlementPackage(packageId)) {
+    throw new Error(`Ukjent entitlement package_id fra Stripe: ${packageId}`);
+  }
+
+  const supabase = createSupabaseServiceClient();
+  const includedCases = includedCasesForPackage(packageId);
+
+  const { error } = await supabase.from("user_case_entitlements").insert({
+    user_id: userId,
+    package_id: packageId,
+    included_cases: includedCases,
+    used_cases: 0,
+    status: "active",
+    source: "stripe_checkout",
+    stripe_checkout_session_id: session.id,
+    stripe_customer_id:
+      typeof session.customer === "string" ? session.customer : null,
+    stripe_subscription_id:
+      typeof session.subscription === "string" ? session.subscription : null,
+  });
 
   if (error) {
     throw new Error(error.message);
@@ -50,9 +116,9 @@ export async function POST(request: NextRequest) {
   const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  if (!webhookSecret || webhookSecret === "midlertidig") {
+  if (!webhookSecret) {
     return NextResponse.json(
-      { error: "STRIPE_WEBHOOK_SECRET er ikke satt riktig." },
+      { error: "STRIPE_WEBHOOK_SECRET mangler." },
       { status: 500 }
     );
   }
@@ -61,12 +127,12 @@ export async function POST(request: NextRequest) {
 
   if (!signature) {
     return NextResponse.json(
-      { error: "Mangler stripe-signature header." },
+      { error: "Stripe signature mangler." },
       { status: 400 }
     );
   }
 
-  const rawBody = Buffer.from(await request.arrayBuffer());
+  const rawBody = await request.text();
 
   let event: Stripe.Event;
 
@@ -80,13 +146,19 @@ export async function POST(request: NextRequest) {
 
   try {
     if (event.type === "checkout.session.completed") {
-      await activateCaseAccess(event.data.object as Stripe.Checkout.Session);
+      const session = event.data.object as Stripe.Checkout.Session;
+      const caseId = session.metadata?.case_id;
+
+      if (caseId) {
+        await activateCaseAccess(session);
+      } else {
+        await activateUserEntitlement(session);
+      }
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Webhook-feil.";
+    const message = error instanceof Error ? error.message : "Webhook-feil.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
