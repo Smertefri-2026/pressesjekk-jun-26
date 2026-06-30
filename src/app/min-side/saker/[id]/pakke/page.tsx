@@ -225,10 +225,86 @@ export default function CasePackagePage() {
   const currentRank = packageRank(currentPackageId);
   const currentPrice = packagePrice(currentPackageId);
 
-  const visibleUpgradeOptions =
-    workflowType === "journalist"
-      ? upgradeOptions.filter((option) => option.id === "report_pack")
-      : upgradeOptions;
+  const visibleUpgradeOptions = upgradeOptions;
+
+  const isJournalistWorkflow = workflowType === "journalist";
+
+  const pageEyebrow = isJournalistWorkflow
+    ? "Redaksjonell tilgang"
+    : "Pakke og betaling";
+
+  const pageTitle = isJournalistWorkflow
+    ? "Pakker for redaksjonell sjekk"
+    : "Pakker og betaling";
+
+  const tabIntro =
+    isJournalistWorkflow && activeTab === "upgrade"
+      ? {
+          eyebrow: "Redaksjonell oppgradering",
+          title: "Velg nivå for redaksjonell vurdering.",
+          description:
+            "Dette gjelder bare saken du står på nå. For journalist/redaksjon brukes pakkene til publiseringsgrunnlag, VVP-risiko og redaksjonell kvalitetssikring før publisering.",
+        }
+      : tabText[activeTab];
+
+  function displayUpgradeOption(option: UpgradeOption): UpgradeOption {
+    if (!isJournalistWorkflow) return option;
+
+    const journalistOptions: Partial<Record<PackagePlanId, UpgradeOption>> = {
+      report_pack: {
+        ...option,
+        name: "Redaksjonell rapport",
+        tag: "Start",
+        description:
+          "For redaksjoner som vil få en ryddig vurdering av saken før publisering.",
+        features: [
+          "Redaksjonell rapport basert på saksopplysninger",
+          "Mulige VVP-risikopunkter",
+          "Ryddig PDF-grunnlag før publisering",
+        ],
+      },
+      pfu_pack: {
+        ...option,
+        name: "VVP-risiko og forbedringspunkter",
+        tag: "Anbefalt",
+        description:
+          "For redaksjoner som vil se tydeligere presseetisk risiko og konkrete forbedringspunkter før publisering.",
+        features: [
+          "Alt i redaksjonell rapport",
+          "VVP-risiko og forbedringspunkter",
+          "Sjekk av samtidig imøtegåelse og kildegrunnlag",
+        ],
+      },
+      full_pack: {
+        ...option,
+        name: "Utvidet publiseringsgrunnlag",
+        tag: "Best verdi",
+        description:
+          "For redaksjoner som vil ha et mer komplett grunnlag før publisering av krevende saker.",
+        features: [
+          "Alt i VVP-risiko og forbedringspunkter",
+          "Utvidet publiseringsgrunnlag",
+          "Redaksjonell risikosjekk og dokumentasjonsoversikt",
+        ],
+      },
+      investigation_pack: {
+        ...option,
+        name: "Manuell redaksjonell gjennomgang",
+        tag: "Manuell hjelp",
+        description:
+          "For større eller mer krevende saker der redaksjonen ønsker manuell gjennomgang før publisering.",
+        features: [
+          "Alt i utvidet publiseringsgrunnlag",
+          "Manuell vurdering av saken",
+          "Gjennomgang av dokumentasjon og kildegrunnlag",
+          "Kvalitetssikring av rapport og risikopunkter",
+          "Forslag til videre redaksjonell håndtering",
+        ],
+      },
+    };
+
+    return journalistOptions[option.id] ?? option;
+  }
 
   if (isLoading) {
     return (
@@ -302,11 +378,11 @@ export default function CasePackagePage() {
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
-              Pakke og betaling
+              {pageEyebrow}
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Pakker og betaling
+              {pageTitle}
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
@@ -370,13 +446,13 @@ export default function CasePackagePage() {
 
         <section className="mt-8">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-            {tabText[activeTab].eyebrow}
+            {tabIntro.eyebrow}
           </p>
           <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
-            {tabText[activeTab].title}
+            {tabIntro.title}
           </h2>
           <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-            {tabText[activeTab].description}
+            {tabIntro.description}
           </p>
         </section>
 
@@ -384,6 +460,7 @@ export default function CasePackagePage() {
           <section className="mt-8">
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {visibleUpgradeOptions.map((option) => {
+                const displayOption = displayUpgradeOption(option);
                 const optionRank = packageRank(option.id);
                 const upgradeAmount = Math.max(option.price - currentPrice, 0);
                 const isCurrent = currentPackageId === option.id;
@@ -402,13 +479,13 @@ export default function CasePackagePage() {
                     }`}
                   >
                     <p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-700">
-                      {option.tag}
+                      {displayOption.tag}
                     </p>
                     <h2 className="mt-3 text-3xl font-black text-slate-950">
-                      {option.name}
+                      {displayOption.name}
                     </h2>
                     <p className="mt-4 min-h-28 leading-8 text-slate-700">
-                      {option.description}
+                      {displayOption.description}
                     </p>
 
                     <div className="mt-5 rounded-2xl bg-slate-950 p-4 text-white">
@@ -428,7 +505,7 @@ export default function CasePackagePage() {
                     </div>
 
                     <ul className="mt-5 grid flex-1 content-start gap-3 text-sm font-semibold text-slate-700">
-                      {option.features.map((feature) => (
+                      {displayOption.features.map((feature) => (
                         <li key={feature}>✓ {feature}</li>
                       ))}
                     </ul>
@@ -442,7 +519,7 @@ export default function CasePackagePage() {
                         >
                           {currentPackageId
                             ? `Oppgrader for ${formatKr(upgradeAmount)} kr`
-                            : `Velg ${option.name}`}
+                            : `Velg ${displayOption.name}`}
                         </StripeCheckoutButton>
                       ) : isCurrent ? (
                         <div className="rounded-2xl bg-emerald-100 px-5 py-4 text-center text-sm font-black text-emerald-900">
