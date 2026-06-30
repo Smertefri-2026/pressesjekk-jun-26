@@ -951,14 +951,16 @@ export default function CaseDetailPage() {
                     </StripeCheckoutButton>
                   ))}
 
-                <Link
-                  href="/kontakt"
-                  className="rounded-xl border border-cyan-200 bg-white px-5 py-4 text-center text-sm font-black text-cyan-900 hover:bg-cyan-100"
-                >
-                  {caseAccessPackageId === "full_pack"
-                    ? "Neste steg: spør om utredning eller proffhjelp"
-                    : "Spør om utredningspakke"}
-                </Link>
+                {!isJournalistWorkflow ? (
+                  <Link
+                    href="/kontakt"
+                    className="rounded-xl border border-cyan-200 bg-white px-5 py-4 text-center text-sm font-black text-cyan-900 hover:bg-cyan-100"
+                  >
+                    {caseAccessPackageId === "full_pack"
+                      ? "Neste steg: spør om utredning eller proffhjelp"
+                      : "Spør om utredningspakke"}
+                  </Link>
+                ) : null}
               </div>
             </div>
 
@@ -989,7 +991,7 @@ export default function CaseDetailPage() {
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-                Videre dokumenter
+                {isJournalistWorkflow ? "Redaksjonelt arbeid" : "Videre dokumenter"}
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
                 {nextDocumentsTitle}
@@ -999,77 +1001,104 @@ export default function CaseDetailPage() {
               </p>
 
               <div className="mt-5 grid gap-3">
-                <Link
-                  href={`/min-side/saker/${params.id}/pfu`}
-                  className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
-                >
-                  {isJournalistWorkflow
-                    ? "Åpne publiseringsgrunnlag"
-                    : pfuDrafts.length > 0
-                      ? "Åpne PFU-klage"
-                      : "Lag PFU-klage"}
-                </Link>
+                {isJournalistWorkflow ? (
+                  <>
+                    <Link
+                      href={`/min-side/saker/${params.id}/opplysninger`}
+                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                    >
+                      Åpne publiseringsgrunnlag
+                    </Link>
 
-                <Link
-                  href={`/min-side/saker/${params.id}/politianmeldelse`}
-                  className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
-                >
-                  {policeDrafts.length > 0
-                    ? "Åpne politianmeldelse"
-                    : "Åpne redaksjonell sjekk"}
-                </Link>
+                    <Link
+                      href={`/min-side/saker/${params.id}/rapport`}
+                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                    >
+                      {reportDrafts.length > 0
+                        ? "Åpne redaksjonell rapport"
+                        : "Lag redaksjonell rapport"}
+                    </Link>
 
-                <Link
-                  href={`/min-side/saker/${params.id}/utredning`}
-                  className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
-                >
-                  {investigationDrafts.length > 0
-                    ? "Åpne utredning"
-                    : "Åpne videre vurdering"}
-                </Link>
+                    <Link
+                      href={`/min-side/saker/${params.id}/pakke`}
+                      className="rounded-xl border border-cyan-300 bg-cyan-50 px-5 py-4 text-sm font-black text-cyan-900 hover:bg-cyan-100"
+                    >
+                      Se redaksjonelle pakker
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href={`/min-side/saker/${params.id}/pfu`}
+                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                    >
+                      {pfuDrafts.length > 0 ? "Åpne PFU-klage" : "Lag PFU-klage"}
+                    </Link>
+
+                    <Link
+                      href={`/min-side/saker/${params.id}/politianmeldelse`}
+                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                    >
+                      {policeDrafts.length > 0
+                        ? "Åpne politianmeldelse"
+                        : "Lag politianmeldelse"}
+                    </Link>
+
+                    <Link
+                      href={`/min-side/saker/${params.id}/utredning`}
+                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                    >
+                      {investigationDrafts.length > 0
+                        ? "Åpne utredning"
+                        : "Åpne utredning"}
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
 
-            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                Status
-              </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                {pfuDecision?.decision_received
-                  ? pfuDecisionResultLabel(pfuDecision.decision_result)
-                  : pfuDecision?.pfu_complaint_sent
-                    ? "PFU-klage sendt"
-                    : "Ikke registrert"}
-              </h2>
+            {!isJournalistWorkflow ? (
+              <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+                  Status
+                </p>
+                <h2 className="mt-3 text-3xl font-black text-slate-950">
+                  {pfuDecision?.decision_received
+                    ? pfuDecisionResultLabel(pfuDecision.decision_result)
+                    : pfuDecision?.pfu_complaint_sent
+                      ? "PFU-klage sendt"
+                      : "Ikke registrert"}
+                </h2>
 
-              <div className="mt-5 grid gap-3 text-sm font-semibold text-slate-700">
-                <p>
-                  Klage sendt:{" "}
-                  <span className="font-black text-slate-950">
-                    {pfuDecision?.pfu_complaint_sent ? "Ja" : "Nei / ikke satt"}
-                  </span>
-                </p>
-                <p>
-                  Avgjørelse mottatt:{" "}
-                  <span className="font-black text-slate-950">
-                    {pfuDecision?.decision_received ? "Ja" : "Nei / ikke satt"}
-                  </span>
-                </p>
-                <p>
-                  Opplastet fil:{" "}
-                  <span className="font-black text-slate-950">
-                    {pfuDecision?.uploaded_file_name || "Ingen fil"}
-                  </span>
-                </p>
+                <div className="mt-5 grid gap-3 text-sm font-semibold text-slate-700">
+                  <p>
+                    Klage sendt:{" "}
+                    <span className="font-black text-slate-950">
+                      {pfuDecision?.pfu_complaint_sent ? "Ja" : "Nei / ikke satt"}
+                    </span>
+                  </p>
+                  <p>
+                    Avgjørelse mottatt:{" "}
+                    <span className="font-black text-slate-950">
+                      {pfuDecision?.decision_received ? "Ja" : "Nei / ikke satt"}
+                    </span>
+                  </p>
+                  <p>
+                    Opplastet fil:{" "}
+                    <span className="font-black text-slate-950">
+                      {pfuDecision?.uploaded_file_name || "Ingen fil"}
+                    </span>
+                  </p>
+                </div>
+
+                <Link
+                  href={`/min-side/saker/${params.id}/pfu-avgjorelse`}
+                  className="mt-6 inline-flex rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800"
+                >
+                  Åpne PFU-avgjørelse
+                </Link>
               </div>
-
-              <Link
-                href={`/min-side/saker/${params.id}/pfu-avgjorelse`}
-                className="mt-6 inline-flex rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800"
-              >
-                Åpne PFU-avgjørelse
-              </Link>
-            </div>
+            ) : null}
           </aside>
         </div>
 
