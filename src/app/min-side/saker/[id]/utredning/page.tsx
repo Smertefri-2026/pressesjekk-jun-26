@@ -198,6 +198,8 @@ export default function InvestigationPage() {
     activeInvestigationDraft?.investigation_draft ||
     "Ingen utredning er generert ennå. Trykk på «Generer utredning med KI» for å lage et samlet utredningsutkast basert på saken, saksopplysningene, rapportene, PFU-klagen, PFU-avgjørelsen, politianmeldelsen og dokumentene som allerede er lagt inn.";
 
+  const isJournalistWorkflow = workflowType === "journalist";
+
   async function handleGenerateInvestigationDraft() {
     setIsGeneratingInvestigation(true);
     setErrorMessage("");
@@ -315,6 +317,107 @@ export default function InvestigationPage() {
     link.remove();
 
     URL.revokeObjectURL(url);
+  }
+
+  if (isJournalistWorkflow) {
+    return (
+      <main className="min-h-screen bg-slate-50 text-slate-950">
+        <LightPublicHeader />
+
+        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+          <Link
+            href={`/min-side/saker/${params.id}`}
+            className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          >
+            ← Tilbake til saken
+          </Link>
+
+          <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
+            <section className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm sm:p-10">
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-800">
+                Redaksjonell sjekk
+              </p>
+
+              <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-6xl">
+                Utredningspakke er ikke del av redaksjonelt forhåndsløp
+              </h1>
+
+              <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
+                Denne siden er laget for større saker etter publisering, der en
+                omtalt person, virksomhet eller pårørende trenger samlet
+                dokumentasjon, tidslinje og videre vurdering. For journalist og
+                redaksjon bør hovedløpet være publiseringsgrunnlag, redaksjonell
+                rapport, VVP-risiko og kvalitetssikring før publisering.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href={`/min-side/saker/${params.id}/rapport`}
+                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+                >
+                  Gå til redaksjonell rapport
+                </Link>
+
+                <Link
+                  href={`/min-side/saker/${params.id}/opplysninger`}
+                  className="rounded-2xl border border-cyan-300 bg-white px-6 py-4 font-black text-cyan-900 hover:bg-cyan-100"
+                >
+                  Gå til publiseringsgrunnlag
+                </Link>
+
+                <Link
+                  href={`/min-side/saker/${params.id}/pakke`}
+                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Se redaksjonelle pakker
+                </Link>
+              </div>
+            </section>
+
+            <aside className="grid content-start gap-6">
+              <CaseWorkflowCard
+                caseId={params.id}
+                statusLabel={
+                  caseItem.status === "report_ready" ? "Rapport klar" : "Utkast"
+                }
+                activeStep="rapport"
+                workflowType="journalist"
+                currentPackageId={caseAccessPackageId ?? undefined}
+                stepsDone={{
+                  caseRegistered: true,
+                  caseInputs: Boolean(caseInput),
+                  report: reports.some(
+                    (report) =>
+                      report.report_type === "free_check" ||
+                      report.report_type === "full_report"
+                  ),
+                  pfuDraft: false,
+                  pfuDecision: false,
+                  policeReport: false,
+                  investigation: false,
+                }}
+              />
+
+              <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                  Riktig arbeidsflyt
+                </p>
+                <h2 className="mt-3 text-3xl font-black">
+                  Før publisering
+                </h2>
+                <p className="mt-4 leading-8 text-slate-300">
+                  For redaksjoner bør vurderingen samles i rapport og
+                  publiseringsgrunnlag. Utredning, PFU, PFU-avgjørelse og
+                  politianmeldelse er etter-publisering-løp for andre roller.
+                </p>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <LightPublicFooter />
+      </main>
+    );
   }
 
   return (
