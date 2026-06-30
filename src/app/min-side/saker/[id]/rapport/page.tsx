@@ -314,6 +314,8 @@ export default function CaseReportPage() {
       ? activeReport.recommendations
       : draft.recommendations;
 
+  const isJournalistWorkflow = workflowType === "journalist";
+
   function formatActiveReportForExport() {
     const title = activeReportTitle;
     const date = activeReport?.created_at
@@ -609,10 +611,9 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Rapportutkastet bygger på grunninformasjon og saksopplysninger
-              som allerede er lagret på saken. Utkastet kan brukes som
-              arbeidsgrunnlag før videre vurdering, PFU-klage,
-              politianmeldelse eller utredning.
+              {isJournalistWorkflow
+                ? "Rapportutkastet bygger på publiseringsgrunnlag og saksopplysninger som allerede er lagret på saken. Utkastet kan brukes som arbeidsgrunnlag for redaksjonell kvalitetssikring, VVP-risiko og videre publiseringsvurdering."
+                : "Rapportutkastet bygger på grunninformasjon og saksopplysninger som allerede er lagret på saken. Utkastet kan brukes som arbeidsgrunnlag før videre vurdering, PFU-klage, politianmeldelse eller utredning."}
             </p>
 
 
@@ -681,12 +682,21 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
             ) : null}
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href={`/min-side/saker/${params.id}/pfu`}
-                className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
-              >
-                Gå til PFU-klage
-              </Link>
+              {!isJournalistWorkflow ? (
+                <Link
+                  href={`/min-side/saker/${params.id}/pfu`}
+                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+                >
+                  Gå til PFU-klage
+                </Link>
+              ) : (
+                <Link
+                  href={`/min-side/saker/${params.id}/opplysninger`}
+                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+                >
+                  Til publiseringsgrunnlag
+                </Link>
+              )}
 
               <Link
                 href={`/min-side/saker/${params.id}`}
@@ -783,19 +793,21 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
               </div>
             </div>
 
-            <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Videre arbeid
-              </p>
-              <h2 className="mt-3 text-3xl font-black">
-                Fra rapport til handling
-              </h2>
-              <p className="mt-4 leading-8 text-slate-300">
-                Etter at rapportutkastet er lagret, kan saken brukes videre som
-                grunnlag for PFU-klage, politianmeldelse, dokumentasjon,
-                redigering eller utredning.
-              </p>
-            </div>
+            {!isJournalistWorkflow ? (
+              <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                  Videre arbeid
+                </p>
+                <h2 className="mt-3 text-3xl font-black">
+                  Fra rapport til handling
+                </h2>
+                <p className="mt-4 leading-8 text-slate-300">
+                  Etter at rapportutkastet er lagret, kan saken brukes videre som
+                  grunnlag for PFU-klage, politianmeldelse, dokumentasjon,
+                  redigering eller utredning.
+                </p>
+              </div>
+            ) : null}
           </aside>
         </div>
 
