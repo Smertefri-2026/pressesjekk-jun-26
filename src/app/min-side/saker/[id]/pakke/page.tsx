@@ -155,6 +155,7 @@ export default function CasePackagePage() {
   const searchParams = useSearchParams();
 
   const [activeTab, setActiveTab] = useState<PackageTab>("upgrade");
+  const [workflowType, setWorkflowType] = useState<"standard" | "journalist">("standard");
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [currentPackageId, setCurrentPackageId] =
     useState<PackagePlanId | null>(null);
@@ -191,6 +192,16 @@ export default function CasePackagePage() {
         return;
       }
 
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("role_type")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      setWorkflowType(
+        profileData?.role_type === "journalist" ? "journalist" : "standard"
+      );
+
       setCaseItem(caseData as CaseRow);
 
       const { data: accessData } = await supabase
@@ -213,6 +224,11 @@ export default function CasePackagePage() {
 
   const currentRank = packageRank(currentPackageId);
   const currentPrice = packagePrice(currentPackageId);
+
+  const visibleUpgradeOptions =
+    workflowType === "journalist"
+      ? upgradeOptions.filter((option) => option.id === "report_pack")
+      : upgradeOptions;
 
   if (isLoading) {
     return (
@@ -294,9 +310,9 @@ export default function CasePackagePage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Oppgrader denne saken, kjøp flere ledige saker eller start
-              abonnement. Én sak kan inneholde flere artikler eller URL-er om
-              samme mediesituasjon.
+              {workflowType === "journalist"
+                ? "Administrer tilgang for redaksjonell sjekk, kjøp flere ledige saker eller start abonnement. Én sak kan inneholde flere artikler eller URL-er om samme mediesituasjon."
+                : "Oppgrader denne saken, kjøp flere ledige saker eller start abonnement. Én sak kan inneholde flere artikler eller URL-er om samme mediesituasjon."}
             </p>
           </section>
 
@@ -367,7 +383,7 @@ export default function CasePackagePage() {
         {activeTab === "upgrade" ? (
           <section className="mt-8">
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {upgradeOptions.map((option) => {
+              {visibleUpgradeOptions.map((option) => {
                 const optionRank = packageRank(option.id);
                 const upgradeAmount = Math.max(option.price - currentPrice, 0);
                 const isCurrent = currentPackageId === option.id;

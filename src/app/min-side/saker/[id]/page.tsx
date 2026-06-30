@@ -421,8 +421,10 @@ export default function CaseDetailPage() {
 
   const visibleCheckoutOptions =
     workflowType === "journalist"
-      ? checkoutOptions.filter((option) => option.id === "report_pack")
+      ? visibleCheckoutOptions.filter((option) => option.id === "report_pack")
       : checkoutOptions;
+
+  const isJournalistWorkflow = workflowType === "journalist";
 
   const isOwned = (id: PackagePlanId) =>
     hasPackageAccess(caseAccessPackageId, id);
@@ -920,7 +922,7 @@ export default function CaseDetailPage() {
               ) : null}
 
               <div className="mt-3 grid gap-3">
-                {checkoutOptions
+                {visibleCheckoutOptions
                   .filter(
                     (opt) => !isOwned(opt.id) && opt.id !== primaryPackage
                   )
@@ -988,7 +990,7 @@ export default function CaseDetailPage() {
                   href={`/min-side/saker/${params.id}/pfu`}
                   className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
                 >
-                  {pfuDrafts.length > 0 ? "Åpne PFU-klage" : "Lag PFU-klage"}
+                  {pfuDrafts.length > 0 ? "Åpne PFU-klage" : "Åpne publiseringsgrunnlag"}
                 </Link>
 
                 <Link
@@ -997,7 +999,7 @@ export default function CaseDetailPage() {
                 >
                   {policeDrafts.length > 0
                     ? "Åpne politianmeldelse"
-                    : "Lag politianmeldelse"}
+                    : "Åpne redaksjonell sjekk"}
                 </Link>
 
                 <Link
@@ -1006,14 +1008,14 @@ export default function CaseDetailPage() {
                 >
                   {investigationDrafts.length > 0
                     ? "Åpne utredning"
-                    : "Lag utredning"}
+                    : "Åpne videre vurdering"}
                 </Link>
               </div>
             </div>
 
             <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                PFU-status
+                Status
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
                 {pfuDecision?.decision_received
