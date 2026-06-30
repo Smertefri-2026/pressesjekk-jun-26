@@ -448,6 +448,35 @@ export default function CaseDetailPage() {
   const primaryButtonClass =
     "w-full rounded-xl bg-slate-950 px-5 py-5 text-base font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
 
+
+  const paymentTitle = isJournalistWorkflow
+    ? "Tilgang og redaksjonell sjekk"
+    : "Tilgang og betaling";
+
+  const unlockedTitle = isJournalistWorkflow
+    ? "Hva er tilgjengelig for redaksjonen"
+    : "Hva er låst opp for saken";
+
+  const nextDocumentsTitle = isJournalistWorkflow
+    ? "Videre redaksjonelt arbeid"
+    : "Videre dokumenter";
+
+  const nextDocumentsText = isJournalistWorkflow
+    ? "Når rapporten er klar, kan saken bygges videre med publiseringsgrunnlag, kildevurdering og redaksjonell risikosjekk."
+    : "Når rapporten er klar, kan saken bygges videre med PFU-klage, politianmeldelse eller utredningspakke ved behov.";
+
+  const unlockedCapabilities = isJournalistWorkflow
+    ? [
+        { label: "Redaksjonell rapport", id: "report_pack" as PackagePlanId },
+        { label: "Publiseringsgrunnlag", id: "pfu_pack" as PackagePlanId },
+        { label: "Utvidet VVP-risiko", id: "full_pack" as PackagePlanId },
+      ]
+    : [
+        { label: "Rapport", id: "report_pack" as PackagePlanId },
+        { label: "PFU-klage", id: "pfu_pack" as PackagePlanId },
+        { label: "Politianmeldelse", id: "full_pack" as PackagePlanId },
+      ];
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -797,7 +826,7 @@ export default function CaseDetailPage() {
               className="scroll-mt-24 rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm ring-2 ring-cyan-100 sm:p-7"
             >
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                Tilgang og betaling
+                {paymentTitle}
               </p>
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -866,25 +895,10 @@ export default function CaseDetailPage() {
               ) : null}
 
               <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-slate-500">
-                Hva er låst opp for saken
+                {unlockedTitle}
               </p>
               <div className="mt-3 grid gap-2">
-                {(workflowType === "journalist"
-                  ? [
-                      {
-                        label: "Redaksjonell sjekk",
-                        id: "report_pack" as PackagePlanId,
-                      },
-                    ]
-                  : [
-                      { label: "Rapport", id: "report_pack" as PackagePlanId },
-                      { label: "PFU-klage", id: "pfu_pack" as PackagePlanId },
-                      {
-                        label: "Politianmeldelse",
-                        id: "full_pack" as PackagePlanId,
-                      },
-                    ]
-                ).map((cap) => {
+                {unlockedCapabilities.map((cap) => {
                   const unlocked = hasPackageAccess(caseAccessPackageId, cap.id);
                   return (
                     <div
@@ -978,11 +992,10 @@ export default function CaseDetailPage() {
                 Videre dokumenter
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
-                PFU, politianmeldelse og utredning
+                {nextDocumentsTitle}
               </h2>
               <p className="mt-4 leading-8 text-slate-700">
-                Når rapporten er klar, kan saken bygges videre med PFU-klage,
-                politianmeldelse eller utredningspakke ved behov.
+                {nextDocumentsText}
               </p>
 
               <div className="mt-5 grid gap-3">
@@ -990,7 +1003,11 @@ export default function CaseDetailPage() {
                   href={`/min-side/saker/${params.id}/pfu`}
                   className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
                 >
-                  {pfuDrafts.length > 0 ? "Åpne PFU-klage" : "Åpne publiseringsgrunnlag"}
+                  {isJournalistWorkflow
+                    ? "Åpne publiseringsgrunnlag"
+                    : pfuDrafts.length > 0
+                      ? "Åpne PFU-klage"
+                      : "Lag PFU-klage"}
                 </Link>
 
                 <Link
