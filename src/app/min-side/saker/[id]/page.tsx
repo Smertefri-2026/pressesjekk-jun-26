@@ -421,7 +421,7 @@ export default function CaseDetailPage() {
 
   const visibleCheckoutOptions =
     workflowType === "journalist"
-      ? visibleCheckoutOptions.filter((option) => option.id === "report_pack")
+      ? checkoutOptions.filter((option) => option.id === "report_pack")
       : checkoutOptions;
 
   const isJournalistWorkflow = workflowType === "journalist";
