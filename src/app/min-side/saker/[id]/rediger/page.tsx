@@ -268,18 +268,17 @@ export default function EditCasePage() {
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
             <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
-              Rediger sak
+              {workflowType === "journalist" ? "Rediger redaksjonell sak" : "Rediger sak"}
             </p>
 
             <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
-              Rediger sak
+              {workflowType === "journalist" ? "Rediger redaksjonell sak" : "Rediger sak"}
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Oppdater grunninformasjon, status, mediehus, artikkellenke og
-              kort beskrivelse. Saksopplysninger, rapport, PFU-klage,
-              PFU-avgjørelse, politianmeldelse og utredning håndteres i
-              saksgangen.
+              {workflowType === "journalist"
+                ? "Oppdater grunninformasjon, status, mediehus, lenke, arbeidstittel og kort redaksjonell beskrivelse. Publiseringsgrunnlag og rapport håndteres i egne steg."
+                : "Oppdater grunninformasjon, status, mediehus, artikkellenke og kort beskrivelse. Saksopplysninger, rapport, PFU-klage, PFU-avgjørelse, politianmeldelse og utredning håndteres i saksgangen."}
             </p>
 
             {user?.email ? (
@@ -324,10 +323,10 @@ export default function EditCasePage() {
             className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
           >
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
-              Saksinformasjon
+              {workflowType === "journalist" ? "Publiseringsinformasjon" : "Saksinformasjon"}
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
-              Grunnopplysninger
+              {workflowType === "journalist" ? "Grunnlag før publisering" : "Grunnopplysninger"}
             </h2>
 
             <div className="mt-8 grid gap-5">
@@ -336,7 +335,7 @@ export default function EditCasePage() {
                   htmlFor="title"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Tittel på saken
+                  {workflowType === "journalist" ? "Tittel på redaksjonell sak" : "Tittel på saken"}
                 </label>
                 <input
                   id="title"
@@ -391,7 +390,7 @@ export default function EditCasePage() {
                     htmlFor="publishedDate"
                     className="text-sm font-bold text-slate-800"
                   >
-                    Publiseringsdato
+                    {workflowType === "journalist" ? "Planlagt eller faktisk publiseringsdato" : "Publiseringsdato"}
                   </label>
                   <input
                     id="publishedDate"
@@ -408,7 +407,7 @@ export default function EditCasePage() {
                   htmlFor="articleTitle"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Artikkeloverskrift
+                  {workflowType === "journalist" ? "Arbeidstittel eller artikkeloverskrift" : "Artikkeloverskrift"}
                 </label>
                 <input
                   id="articleTitle"
@@ -424,7 +423,7 @@ export default function EditCasePage() {
                   htmlFor="articleUrl"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Lenke til artikkel
+                  {workflowType === "journalist" ? "Lenke til utkast eller publisert artikkel" : "Lenke til artikkel"}
                 </label>
                 <input
                   id="articleUrl"
@@ -440,7 +439,7 @@ export default function EditCasePage() {
                   htmlFor="shortDescription"
                   className="text-sm font-bold text-slate-800"
                 >
-                  Kort beskrivelse
+                  {workflowType === "journalist" ? "Kort redaksjonell beskrivelse" : "Kort beskrivelse"}
                 </label>
                 <textarea
                   id="shortDescription"
@@ -479,29 +478,29 @@ export default function EditCasePage() {
           <aside className="grid content-start gap-6">
             <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-                Oppdatert grunnlag
+                {workflowType === "journalist" ? "Oppdatert publiseringsgrunnlag" : "Oppdatert grunnlag"}
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
-                Endringer kan påvirke rapporten
+                {workflowType === "journalist" ? "Endringer kan påvirke redaksjonell rapport" : "Endringer kan påvirke rapporten"}
               </h2>
               <p className="mt-4 leading-8 text-slate-700">
-                Hvis du endrer artikkeldata, status eller beskrivelse, kan det
-                være lurt å gå gjennom rapport, PFU-klage, politianmeldelse og
-                utredning på nytt.
+                {workflowType === "journalist"
+                  ? "Hvis du endrer arbeidstittel, status, lenke eller beskrivelse, kan det være lurt å gå gjennom publiseringsgrunnlaget og rapporten på nytt."
+                  : "Hvis du endrer artikkeldata, status eller beskrivelse, kan det være lurt å gå gjennom rapport, PFU-klage, politianmeldelse og utredning på nytt."}
               </p>
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
-                Videre arbeid
+                {workflowType === "journalist" ? "Videre redaksjonelt arbeid" : "Videre arbeid"}
               </p>
               <h2 className="mt-3 text-3xl font-black">
-                Bruk saksgangen
+                {workflowType === "journalist" ? "Bruk redaksjonell saksgang" : "Bruk saksgangen"}
               </h2>
               <p className="mt-4 leading-8 text-slate-300">
-                Etter at grunninformasjonen er lagret, kan du gå videre til
-                saksopplysninger, rapport, PFU-klage, politianmeldelse eller
-                utredning i saksgangen.
+                {workflowType === "journalist"
+                  ? "Etter at grunninformasjonen er lagret, kan du gå videre til publiseringsgrunnlag og redaksjonell rapport."
+                  : "Etter at grunninformasjonen er lagret, kan du gå videre til saksopplysninger, rapport, PFU-klage, politianmeldelse eller utredning i saksgangen."}
               </p>
             </div>
           </aside>
