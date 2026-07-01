@@ -65,6 +65,19 @@ type PfuDecisionRow = {
   next_step_interest: string | null;
 };
 
+type CaseArticleLinkRow = {
+  id: string;
+  case_id: string;
+  user_id: string;
+  url: string;
+  title: string | null;
+  media_name: string | null;
+  published_date: string | null;
+  is_primary: boolean;
+  sort_order: number;
+  created_at: string;
+};
+
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
   if (status === "in_progress") return "Under arbeid";
@@ -187,6 +200,12 @@ export default function CaseDetailPage() {
   const [editPublishedDate, setEditPublishedDate] = useState("");
   const [editShortDescription, setEditShortDescription] = useState("");
 
+  const [articleLinks, setArticleLinks] = useState<CaseArticleLinkRow[]>([]);
+  const [newArticleUrl, setNewArticleUrl] = useState("");
+  const [newArticleTitle, setNewArticleTitle] = useState("");
+  const [isAddingArticleLink, setIsAddingArticleLink] = useState(false);
+  const [deletingArticleLinkId, setDeletingArticleLinkId] = useState<string | null>(null);
+
   useEffect(() => {
     async function loadCase() {
       setIsLoading(true);
@@ -249,6 +268,18 @@ export default function CaseDetailPage() {
       setEditArticleUrl(loadedCase.article_url ?? "");
       setEditPublishedDate(loadedCase.published_date ?? "");
       setEditShortDescription(loadedCase.short_description ?? "");
+
+      const { data: articleLinksData, error: articleLinksError } = await supabase
+        .from("case_article_links")
+        .select("id,case_id,user_id,url,title,media_name,published_date,is_primary,sort_order,created_at")
+        .eq("case_id", params.id)
+        .order("is_primary", { ascending: false })
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true });
+
+      if (!articleLinksError) {
+        setArticleLinks((articleLinksData ?? []) as CaseArticleLinkRow[]);
+      }
 
       const { data: inputData, error: inputError } = await supabase
         .from("case_inputs")
@@ -346,6 +377,59 @@ export default function CaseDetailPage() {
       return;
     }
 
+    const primaryUrl = editArticleUrl.trim();
+
+    if (primaryUrl) {
+      const existingPrimaryLink = articleLinks.find((link) => link.is_primary);
+
+      if (existingPrimaryLink) {
+        const { data: updatedPrimaryLink } = await supabase
+          .from("case_article_links")
+          .update({
+            url: primaryUrl,
+            title: editArticleTitle.trim() || null,
+            media_name: editMediaName.trim() || null,
+            published_date: editPublishedDate || null,
+            sort_order: 0,
+          })
+          .eq("id", existingPrimaryLink.id)
+          .select("id,case_id,user_id,url,title,media_name,published_date,is_primary,sort_order,created_at")
+          .single();
+
+        if (updatedPrimaryLink) {
+          setArticleLinks((current) =>
+            current.map((link) =>
+              link.id === existingPrimaryLink.id
+                ? (updatedPrimaryLink as CaseArticleLinkRow)
+                : link
+            )
+          );
+        }
+      } else {
+        const { data: insertedPrimaryLink } = await supabase
+          .from("case_article_links")
+          .insert({
+            case_id: params.id,
+            user_id: user.id,
+            url: primaryUrl,
+            title: editArticleTitle.trim() || null,
+            media_name: editMediaName.trim() || null,
+            published_date: editPublishedDate || null,
+            is_primary: true,
+            sort_order: 0,
+          })
+          .select("id,case_id,user_id,url,title,media_name,published_date,is_primary,sort_order,created_at")
+          .single();
+
+        if (insertedPrimaryLink) {
+          setArticleLinks((current) => [
+            insertedPrimaryLink as CaseArticleLinkRow,
+            ...current,
+          ]);
+        }
+      }
+    }
+
     setCaseItem({
       ...caseItem,
       ...updates,
@@ -353,6 +437,86 @@ export default function CaseDetailPage() {
 
     setIsSavingBasicInfo(false);
     setIsEditingBasicInfo(false);
+  }
+
+  async function handleAddArticleLink(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!user || !caseItem) {
+      setErrorMessage("Du må være innlogget for å legge til artikkellenke.");
+      return;
+    }
+
+    const cleanUrl = newArticleUrl.trim();
+    const cleanTitle = newArticleTitle.trim();
+
+    if (!cleanUrl) {
+      setErrorMessage("Legg inn en URL først.");
+      return;
+    }
+
+    if (articleLinks.length >= 5) {
+      setErrorMessage("Du kan ha maks 5 artikkellenker per sak i denne versjonen.");
+      return;
+    }
+
+    if (articleLinks.some((link) => link.url.trim() === cleanUrl)) {
+      setErrorMessage("Denne URL-en er allerede lagt til på saken.");
+      return;
+    }
+
+    setIsAddingArticleLink(true);
+    setErrorMessage("");
+
+    const { data, error } = await supabase
+      .from("case_article_links")
+      .insert({
+        case_id: params.id,
+        user_id: user.id,
+        url: cleanUrl,
+        title: cleanTitle || null,
+        media_name: null,
+        published_date: null,
+        is_primary: false,
+        sort_order: articleLinks.length,
+      })
+      .select("id,case_id,user_id,url,title,media_name,published_date,is_primary,sort_order,created_at")
+      .single();
+
+    if (error) {
+      setErrorMessage(error.message);
+      setIsAddingArticleLink(false);
+      return;
+    }
+
+    setArticleLinks((current) => [...current, data as CaseArticleLinkRow]);
+    setNewArticleUrl("");
+    setNewArticleTitle("");
+    setIsAddingArticleLink(false);
+  }
+
+  async function handleDeleteArticleLink(link: CaseArticleLinkRow) {
+    if (link.is_primary) {
+      setErrorMessage("Hovedartikkelen kan endres i grunninformasjonen, men ikke slettes her.");
+      return;
+    }
+
+    setDeletingArticleLinkId(link.id);
+    setErrorMessage("");
+
+    const { error } = await supabase
+      .from("case_article_links")
+      .delete()
+      .eq("id", link.id);
+
+    if (error) {
+      setErrorMessage(error.message);
+      setDeletingArticleLinkId(null);
+      return;
+    }
+
+    setArticleLinks((current) => current.filter((item) => item.id !== link.id));
+    setDeletingArticleLinkId(null);
   }
 
   const reportDrafts = reports.filter(
@@ -673,7 +837,7 @@ export default function CaseDetailPage() {
                       htmlFor="editArticleUrl"
                       className="text-sm font-bold text-slate-800"
                     >
-                      Lenke til artikkel
+                      Hovedlenke til artikkel
                     </label>
                     <input
                       id="editArticleUrl"
@@ -755,7 +919,7 @@ export default function CaseDetailPage() {
                     </p>
                   </InfoBlock>
 
-                  <InfoBlock label="Lenke">
+                  <InfoBlock label="Hovedartikkel">
                     {caseItem.article_url ? (
                       <a
                         href={caseItem.article_url}
@@ -771,6 +935,106 @@ export default function CaseDetailPage() {
                       </p>
                     )}
                   </InfoBlock>
+
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold uppercase tracking-[0.18em] text-slate-500">
+                          Relaterte artikler / URL-er
+                        </p>
+                        <p className="mt-2 text-sm font-semibold text-slate-600">
+                          {articleLinks.length}/5 lenker lagt til. Hovedartikkelen analyseres tyngst,
+                          mens relaterte lenker brukes som kontekst.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-3">
+                      {articleLinks.length === 0 ? (
+                        <p className="rounded-xl border border-dashed border-slate-300 bg-white p-4 text-sm font-semibold text-slate-600">
+                          Ingen artikkellenker er registrert ennå.
+                        </p>
+                      ) : (
+                        articleLinks.map((link) => (
+                          <div
+                            key={link.id}
+                            className="rounded-xl border border-slate-200 bg-white p-4"
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-700">
+                                  {link.is_primary ? "Hovedartikkel" : "Relatert artikkel"}
+                                </p>
+                                {link.title ? (
+                                  <p className="mt-2 font-black text-slate-950">
+                                    {link.title}
+                                  </p>
+                                ) : null}
+                                <a
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="mt-2 block break-words text-sm font-bold text-cyan-700 hover:text-cyan-900"
+                                >
+                                  {link.url}
+                                </a>
+                              </div>
+
+                              {!link.is_primary ? (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteArticleLink(link)}
+                                  disabled={deletingArticleLinkId === link.id}
+                                  className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  {deletingArticleLinkId === link.id ? "Sletter..." : "Slett"}
+                                </button>
+                              ) : null}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {articleLinks.length < 5 ? (
+                      <form
+                        onSubmit={handleAddArticleLink}
+                        className="mt-5 grid gap-3 rounded-xl border border-cyan-200 bg-cyan-50 p-4"
+                      >
+                        <p className="text-sm font-black text-cyan-900">
+                          Legg til flere URL-er om samme mediesituasjon
+                        </p>
+
+                        <input
+                          type="url"
+                          value={newArticleUrl}
+                          onChange={(event) => setNewArticleUrl(event.target.value)}
+                          placeholder="https://..."
+                          className="w-full rounded-xl border border-cyan-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-cyan-500"
+                        />
+
+                        <input
+                          type="text"
+                          value={newArticleTitle}
+                          onChange={(event) => setNewArticleTitle(event.target.value)}
+                          placeholder="Valgfri tittel / kort navn på lenken"
+                          className="w-full rounded-xl border border-cyan-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-cyan-500"
+                        />
+
+                        <button
+                          type="submit"
+                          disabled={isAddingArticleLink}
+                          className="w-fit rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isAddingArticleLink ? "Legger til..." : "Legg til URL"}
+                        </button>
+                      </form>
+                    ) : (
+                      <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-900">
+                        Maks 5 URL-er per sak i denne versjonen.
+                      </p>
+                    )}
+                  </div>
 
                   <InfoBlock label="Kort beskrivelse">
                     {caseItem.short_description || "Ikke lagt inn ennå."}
