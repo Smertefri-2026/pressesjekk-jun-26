@@ -303,10 +303,9 @@ export default function ProfilePage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Profilen brukes til rapporter, PFU-klager, kontaktinformasjon,
-              betaling og eventuell bestilling av utredningspakke. For
-              profesjonelle brukere kan profilen også brukes til
-              firmaopplysninger, klientarbeid og fakturering.
+              {roleType === "journalist"
+                ? "Profilen brukes til redaksjonelle rapporter, publiseringsgrunnlag, kontaktinformasjon og betaling. For redaksjoner kan profilen også brukes til firmaopplysninger og fakturering."
+                : "Profilen brukes til rapporter, PFU-klager, kontaktinformasjon, betaling og eventuell bestilling av utredningspakke. For profesjonelle brukere kan profilen også brukes til firmaopplysninger, klientarbeid og fakturering."}
             </p>
           </section>
 
@@ -320,9 +319,9 @@ export default function ProfilePage() {
             </h2>
 
             <p className="mt-4 leading-8 text-slate-700">
-              Opplysningene du legger inn her kan brukes automatisk i rapporter,
-              PFU-klager, fakturaer og senere bestillinger av
-              utredningspakker. Du kan starte enkelt og fylle ut mer senere.
+              {roleType === "journalist"
+                ? "Opplysningene du legger inn her kan brukes automatisk i redaksjonelle rapporter, publiseringsgrunnlag, fakturaer og senere bestillinger. Du kan starte enkelt og fylle ut mer senere."
+                : "Opplysningene du legger inn her kan brukes automatisk i rapporter, PFU-klager, fakturaer og senere bestillinger av utredningspakker. Du kan starte enkelt og fylle ut mer senere."}
             </p>
           </aside>
         </div>
@@ -347,8 +346,9 @@ export default function ProfilePage() {
                     Person og rolle
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Navn og rolle brukes for å tilpasse rapporter, maler og
-                    senere profftilgang.
+                    {roleType === "journalist"
+                      ? "Navn og rolle brukes for å tilpasse redaksjonelle rapporter, publiseringsgrunnlag og senere profftilgang."
+                      : "Navn og rolle brukes for å tilpasse rapporter, maler og senere profftilgang."}
                   </p>
                 </div>
 
@@ -454,7 +454,9 @@ export default function ProfilePage() {
                     Adresse
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Adressen kan senere brukes ved bestilling av trykt utredning
+                    {roleType === "journalist"
+                      ? "Adressen kan senere brukes ved fakturering eller levering av dokumentasjon"
+                      : "Adressen kan senere brukes ved bestilling av trykt utredning"}
                     eller annen dokumentasjon.
                   </p>
                 </div>
@@ -649,8 +651,9 @@ export default function ProfilePage() {
                     Faktura og levering
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Valgfritt. Brukes senere hvis faktura, dokumentpakke eller
-                    utredningspakke skal sendes til en annen adresse.
+                    {roleType === "journalist"
+                      ? "Valgfritt. Brukes senere hvis faktura eller dokumentasjon skal sendes til en annen adresse."
+                      : "Valgfritt. Brukes senere hvis faktura, dokumentpakke eller utredningspakke skal sendes til en annen adresse."}
                   </p>
                 </div>
 
@@ -800,8 +803,9 @@ export default function ProfilePage() {
               </h2>
 
               <p className="mt-4 leading-8 text-slate-700">
-                Legg inn fornavn og etternavn for at navn skal kunne brukes
-                automatisk i rapporter, PFU-klager og dokumentpakker.
+                {roleType === "journalist"
+                  ? "Legg inn fornavn og etternavn for at navn skal kunne brukes automatisk i redaksjonelle rapporter og publiseringsgrunnlag."
+                  : "Legg inn fornavn og etternavn for at navn skal kunne brukes automatisk i rapporter, PFU-klager og dokumentpakker."}
               </p>
             </div>
           </aside>
