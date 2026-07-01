@@ -129,6 +129,21 @@ function packageLabel(packageId: PackagePlanId | null) {
   return "Ingen aktiv pakke";
 }
 
+function journalistPackageLabel(packageId: PackagePlanId | null) {
+  if (packageId === "report_pack") return "Redaksjonell rapport";
+  if (packageId === "pfu_pack") return "VVP-risiko og forbedringspunkter";
+  if (packageId === "full_pack") return "Utvidet publiseringsgrunnlag";
+  if (packageId === "investigation_pack") return "Manuell redaksjonell gjennomgang";
+  if (packageId === "case_bundle_3") return "3 redaksjonelle saker";
+  if (packageId === "case_bundle_5") return "5 redaksjonelle saker";
+  if (packageId === "case_bundle_10") return "10 redaksjonelle saker";
+  if (packageId === "monthly_start") return "Redaksjonell månedsavtale Start";
+  if (packageId === "monthly_pro") return "Redaksjonell månedsavtale Pro";
+  if (packageId === "monthly_agency") return "Redaksjonell månedsavtale Byrå";
+  if (packageId === "monthly_enterprise") return "Enterprise";
+  return "Ingen aktiv tilgang";
+}
+
 function packageRank(packageId: PackagePlanId | null) {
   if (!packageId) return 0;
   if (packageId === "report_pack") return 1;
@@ -198,9 +213,14 @@ export default function CasePackagePage() {
         .eq("id", user.id)
         .maybeSingle();
 
-      setWorkflowType(
-        profileData?.role_type === "journalist" ? "journalist" : "standard"
-      );
+      const nextWorkflowType =
+        profileData?.role_type === "journalist" ? "journalist" : "standard";
+
+      setWorkflowType(nextWorkflowType);
+
+      if (nextWorkflowType === "journalist") {
+        setActiveTab("bundles");
+      }
 
       setCaseItem(caseData as CaseRow);
 
@@ -237,15 +257,30 @@ export default function CasePackagePage() {
     ? "Pakker for redaksjonell sjekk"
     : "Pakker og betaling";
 
+  const visibleTabs: PackageTab[] = isJournalistWorkflow
+    ? ["bundles", "monthly"]
+    : ["upgrade", "bundles", "monthly"];
+
+  const currentPackageLabel = isJournalistWorkflow
+    ? journalistPackageLabel(currentPackageId)
+    : packageLabel(currentPackageId);
+
   const tabIntro =
-    isJournalistWorkflow && activeTab === "upgrade"
+    isJournalistWorkflow && activeTab === "bundles"
       ? {
-          eyebrow: "Redaksjonell oppgradering",
-          title: "Velg nivå for redaksjonell vurdering.",
+          eyebrow: "Enkeltsaker",
+          title: "Kjøp flere redaksjonelle saker.",
           description:
-            "Dette gjelder bare saken du står på nå. For journalist/redaksjon brukes pakkene til publiseringsgrunnlag, VVP-risiko og redaksjonell kvalitetssikring før publisering.",
+            "Sakspakker legges på kontoen din som ledige redaksjonelle saker. Hver sak kan brukes til publiseringsgrunnlag og rapport før publisering.",
         }
-      : tabText[activeTab];
+      : isJournalistWorkflow && activeTab === "monthly"
+        ? {
+            eyebrow: "Abonnement",
+            title: "Start abonnement for løpende redaksjonelt arbeid.",
+            description:
+              "For redaksjoner som jobber med flere saker hver måned. Abonnement gir inkluderte saker per måned.",
+          }
+        : tabText[activeTab];
 
   function displayUpgradeOption(option: UpgradeOption): UpgradeOption {
     if (!isJournalistWorkflow) return option;
@@ -386,19 +421,19 @@ export default function CasePackagePage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              {workflowType === "journalist"
-                ? "Administrer tilgang for redaksjonell sjekk, kjøp flere ledige saker eller start abonnement. Én sak kan inneholde flere artikler eller URL-er om samme mediesituasjon."
+              {isJournalistWorkflow
+                ? "Kjøp enkeltsaker eller start abonnement for redaksjonell sjekk. Én sak kan inneholde flere artikler eller URL-er om samme mediesituasjon."
                 : "Oppgrader denne saken, kjøp flere ledige saker eller start abonnement. Én sak kan inneholde flere artikler eller URL-er om samme mediesituasjon."}
             </p>
           </section>
 
           <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
-              Nåværende pakke
+              {isJournalistWorkflow ? "Nåværende tilgang" : "Nåværende pakke"}
             </p>
 
             <h2 className="mt-4 text-3xl font-black text-slate-950">
-              {packageLabel(currentPackageId)}
+              {currentPackageLabel}
             </h2>
 
             <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
@@ -422,8 +457,12 @@ export default function CasePackagePage() {
         </div>
 
         <section className="sticky top-0 z-20 -mx-4 mt-8 border-y border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-3xl sm:border sm:px-3">
-          <div className="grid gap-2 sm:grid-cols-3">
-            {(["upgrade", "bundles", "monthly"] as PackageTab[]).map((tab) => (
+          <div
+            className={`grid gap-2 ${
+              isJournalistWorkflow ? "sm:grid-cols-2" : "sm:grid-cols-3"
+            }`}
+          >
+            {visibleTabs.map((tab) => (
               <button
                 key={tab}
                 type="button"
@@ -437,7 +476,9 @@ export default function CasePackagePage() {
                 {tab === "upgrade"
                   ? "Oppgrader saken"
                   : tab === "bundles"
-                    ? "Kjøp flere saker"
+                    ? isJournalistWorkflow
+                      ? "Enkeltsaker"
+                      : "Kjøp flere saker"
                     : "Abonnement"}
               </button>
             ))}
