@@ -789,6 +789,8 @@ export default function MinSidePage() {
     );
   }
 
+  const isJournalistWorkflow = profile?.role_type === "journalist";
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -820,9 +822,9 @@ export default function MinSidePage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Her administrerer du mediesakene dine. Du kan opprette saker,
-              samle dokumentasjon, lage rapporter, PFU-klager,
-              politianmeldelser og utredninger, og organisere alt i mapper.
+              {isJournalistWorkflow
+                ? "Her administrerer du redaksjonelle saker. Du kan opprette saker, samle publiseringsgrunnlag, dokumentasjon og kilder, lage redaksjonelle rapporter og organisere alt i mapper."
+                : "Her administrerer du mediesakene dine. Du kan opprette saker, samle dokumentasjon, lage rapporter, PFU-klager, politianmeldelser og utredninger, og organisere alt i mapper."}
             </p>
           </section>
 
@@ -926,7 +928,9 @@ export default function MinSidePage() {
             href="#arkiv"
             className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-slate-500">Rapporter</p>
+            <p className="font-bold text-slate-500">
+              {isJournalistWorkflow ? "Redaksjonelle rapporter" : "Rapporter"}
+            </p>
             <p className="mt-4 text-5xl font-black text-slate-950">
               {reportCount}
             </p>
@@ -936,9 +940,11 @@ export default function MinSidePage() {
           </a>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="font-bold text-slate-500">PFU-klage</p>
+            <p className="font-bold text-slate-500">
+              {isJournalistWorkflow ? "Publiseringsgrunnlag" : "PFU-klage"}
+            </p>
             <p className="mt-4 text-5xl font-black text-slate-950">
-              {pfuDraftCount}
+              {isJournalistWorkflow ? caseCount : pfuDraftCount}
             </p>
           </div>
         </section>
@@ -1447,8 +1453,9 @@ export default function MinSidePage() {
 
               {activityItems.length === 0 ? (
                 <p className="mt-4 leading-8 text-slate-300">
-                  Aktivitet vises her når du har opprettet din første sak,
-                  rapport, PFU-klage, politianmeldelse eller utredning.
+                  {isJournalistWorkflow
+                    ? "Aktivitet vises her når du har opprettet din første redaksjonelle sak, lagt inn publiseringsgrunnlag eller laget rapport."
+                    : "Aktivitet vises her når du har opprettet din første sak, rapport, PFU-klage, politianmeldelse eller utredning."}
                 </p>
               ) : (
                 <div className="mt-5 grid gap-3">
