@@ -25,28 +25,28 @@ const socialLinks = [
 
 export function LightPublicFooter() {
   return (
-    <footer className="border-t border-slate-200 bg-white">
+    <footer className="border-t border-slate-700 bg-slate-900 text-slate-200">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <section>
-            <BrandLogo size="footer" />
+            <BrandLogo size="footer" tone="dark" />
 
-            <p className="mt-5 max-w-md text-sm leading-7 text-slate-600">
+            <p className="mt-5 max-w-md text-sm leading-7 text-slate-300">
               PresseSjekk gir veiledende analyser og dokumenthjelp. Tjenesten
               erstatter ikke advokat, PFU, redaktøransvar eller domstolene.
             </p>
           </section>
 
           <section>
-            <h2 className="text-sm font-black uppercase tracking-[0.22em] text-slate-950">
+            <h2 className="text-sm font-black uppercase tracking-[0.22em] text-white">
               Sider
             </h2>
-            <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-600">
+            <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-300">
               {pageLinks.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="hover:text-slate-950"
+                  className="hover:text-white"
                 >
                   {item.label}
                 </Link>
@@ -55,15 +55,15 @@ export function LightPublicFooter() {
           </section>
 
           <section>
-            <h2 className="text-sm font-black uppercase tracking-[0.22em] text-slate-950">
+            <h2 className="text-sm font-black uppercase tracking-[0.22em] text-white">
               Trygghet
             </h2>
-            <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-600">
+            <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-300">
               {trustLinks.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="hover:text-slate-950"
+                  className="hover:text-white"
                 >
                   {item.label}
                 </Link>
@@ -74,18 +74,18 @@ export function LightPublicFooter() {
           </section>
 
           <section>
-            <h2 className="text-sm font-black uppercase tracking-[0.22em] text-slate-950">
+            <h2 className="text-sm font-black uppercase tracking-[0.22em] text-white">
               Følg oss
             </h2>
-            <p className="mt-5 text-sm leading-7 text-slate-600">
+            <p className="mt-5 text-sm leading-7 text-slate-300">
             </p>
 
-            <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-600">
+            <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-300">
               {socialLinks.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="hover:text-slate-950"
+                  className="hover:text-white"
                   aria-label={`${item.label} kommer senere`}
                 >
                   {item.label}
@@ -98,7 +98,7 @@ export function LightPublicFooter() {
           </section>
         </div>
 
-        <div className="mt-10 border-t border-slate-200 pt-6 text-sm leading-7 text-slate-500">
+        <div className="mt-10 border-t border-slate-700 pt-6 text-sm leading-7 text-slate-400">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p>© {new Date().getFullYear()} PresseSjekk. Alle rettigheter forbeholdt.</p>
             <p>Veiledende analyser og dokumenthjelp for mediesaker.</p>
