@@ -164,25 +164,27 @@ export default function HomePage() {
               rettsstatus er presist forklart.
             </p>
 
-            <figure className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <img
-                src="/images/bilde2.png"
-                alt="Oversikt over punkter PresseSjekk vurderer rundt en mediesak."
-                className="w-full object-cover"
-                loading="lazy"
-              />
-            </figure>
+            <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
+              <figure className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:order-2">
+                <img
+                  src="/images/bilde2.png"
+                  alt="Oversikt over punkter PresseSjekk vurderer rundt en mediesak."
+                  className="w-full object-cover"
+                  loading="lazy"
+                />
+              </figure>
 
-            <div className="mt-8 grid gap-3 md:grid-cols-2">
-              {checks.map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
-                >
-                  <span className="mr-2 text-red-700">✓</span>
-                  {item}
-                </div>
-              ))}
+              <div className="grid gap-3 md:grid-cols-2 lg:order-1 lg:grid-cols-1">
+                {checks.map((item) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
+                  >
+                    <span className="mr-2 text-red-700">✓</span>
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
