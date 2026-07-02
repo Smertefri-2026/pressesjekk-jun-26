@@ -190,14 +190,14 @@ export default function EksempelrapportPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/"
-          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          className="text-sm font-semibold text-red-700 hover:text-red-900"
         >
           ← Tilbake til forsiden
         </Link>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               Eksempelrapport
             </p>
 
@@ -212,24 +212,10 @@ export default function EksempelrapportPage() {
               ikke ekte juridiske vurderinger.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/pressesjekk"
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
-              >
-                Start sjekk
-              </Link>
-              <Link
-                href="/priser"
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                Se pakker og priser
-              </Link>
-            </div>
           </section>
 
-          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-7 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
+          <aside className="hidden rounded-3xl border border-red-200 bg-red-50 p-7 shadow-sm lg:block">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
               Demo
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
@@ -249,7 +235,7 @@ export default function EksempelrapportPage() {
                   className={`rounded-2xl p-4 text-left text-sm font-black shadow-sm transition ${
                     activeTab === item.key
                       ? "bg-slate-950 text-white"
-                      : "bg-white text-slate-950 hover:bg-blue-50"
+                      : "bg-white text-slate-950 hover:bg-red-50"
                   }`}
                 >
                   <span className="block text-xs font-black uppercase tracking-[0.18em] opacity-70">
@@ -262,26 +248,38 @@ export default function EksempelrapportPage() {
           </aside>
         </div>
 
-        <section className="mt-12 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-          <div className="grid gap-3 md:grid-cols-4">
+        <section className="mt-12 overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex gap-3 overflow-x-auto pb-1 md:grid md:grid-cols-4 md:overflow-visible md:pb-0">
             {tabs.map((item) => (
               <button
                 key={item.key}
                 type="button"
                 onClick={() => setActiveTab(item.key)}
-                className={`rounded-2xl border px-4 py-4 text-left transition ${
+                className={`min-w-[210px] rounded-2xl border px-4 py-4 text-left transition md:min-w-0 ${
                   activeTab === item.key
-                    ? "border-blue-500 bg-blue-50"
+                    ? "border-slate-950 bg-slate-950 text-white"
                     : "border-slate-200 bg-slate-50 hover:bg-white"
                 }`}
               >
-                <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">
+                <p
+                  className={`text-xs font-black uppercase tracking-[0.18em] ${
+                    activeTab === item.key ? "text-orange-300" : "text-red-700"
+                  }`}
+                >
                   {item.step}
                 </p>
-                <p className="mt-1 text-lg font-black text-slate-950">
+                <p
+                  className={`mt-1 text-lg font-black ${
+                    activeTab === item.key ? "text-white" : "text-slate-950"
+                  }`}
+                >
                   {item.label}
                 </p>
-                <p className="mt-1 text-xs font-semibold text-slate-500">
+                <p
+                  className={`mt-1 text-xs font-semibold ${
+                    activeTab === item.key ? "text-slate-300" : "text-slate-500"
+                  }`}
+                >
                   {item.packageName}
                 </p>
               </button>
@@ -291,7 +289,7 @@ export default function EksempelrapportPage() {
 
         <section className="mt-8 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               {active.eyebrow}
             </p>
 
@@ -307,8 +305,8 @@ export default function EksempelrapportPage() {
               {active.subtitle}
             </p>
 
-            <div className="mt-8 rounded-3xl border border-blue-200 bg-blue-50 p-5">
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-blue-800">
+            <div className="mt-8 rounded-3xl border border-red-200 bg-red-50 p-5">
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-red-800">
                 Eksempel / sammendrag
               </p>
               <p className="mt-3 leading-8 text-slate-700">{active.summary}</p>
@@ -347,7 +345,7 @@ export default function EksempelrapportPage() {
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
                 Innhold
               </p>
               <h2 className="mt-3 text-2xl font-black text-slate-950">
@@ -357,7 +355,7 @@ export default function EksempelrapportPage() {
               <ul className="mt-5 space-y-3 text-sm leading-7 text-slate-700">
                 {active.bullets.map((item) => (
                   <li key={item}>
-                    <span className="mr-2 text-blue-700">✓</span>
+                    <span className="mr-2 text-red-700">✓</span>
                     {item}
                   </li>
                 ))}
@@ -365,7 +363,7 @@ export default function EksempelrapportPage() {
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
                 Test selv
               </p>
               <h2 className="mt-3 text-3xl font-black">
@@ -377,7 +375,7 @@ export default function EksempelrapportPage() {
               </p>
               <Link
                 href="/pressesjekk"
-                className="mt-6 block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-300"
+                className="mt-6 block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600"
               >
                 Start sjekk
               </Link>
@@ -388,7 +386,7 @@ export default function EksempelrapportPage() {
         <section className="mt-16 rounded-3xl bg-slate-950 p-8 text-white shadow-sm">
           <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
                 Eksempel på tidslinje
               </p>
               <h2 className="mt-3 text-4xl font-black">
@@ -407,7 +405,7 @@ export default function EksempelrapportPage() {
                   key={item}
                   className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200"
                 >
-                  <span className="mr-2 text-blue-300">{index + 1}.</span>
+                  <span className="mr-2 text-orange-300">{index + 1}.</span>
                   {item}
                 </div>
               ))}
@@ -416,7 +414,7 @@ export default function EksempelrapportPage() {
         </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
             Klar til å teste?
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -431,7 +429,7 @@ export default function EksempelrapportPage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/pressesjekk"
-              className="rounded-xl bg-blue-500 px-6 py-4 font-bold text-slate-950 hover:bg-blue-500"
+              className="rounded-xl bg-red-500 px-6 py-4 font-bold text-slate-950 hover:bg-red-500"
             >
               Start sjekk
             </Link>
