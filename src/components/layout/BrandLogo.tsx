@@ -16,7 +16,7 @@ export function BrandLogo({ size = "header" }: BrandLogoProps) {
       <p
         className={`mt-1 ${taglineSize} font-bold uppercase tracking-[0.04em] text-red-700`}
       >
-        Din kontroll av medieomtale
+        Din kontroll av media
       </p>
     </Link>
   );
