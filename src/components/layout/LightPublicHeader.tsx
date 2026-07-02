@@ -90,16 +90,6 @@ export function LightPublicHeader() {
           </div>
 
           <div className="flex items-center justify-between gap-2 py-3 sm:hidden">
-            <button
-              type="button"
-              onClick={() => setIsOpen((value) => !value)}
-              className="flex h-10 w-8 shrink-0 items-center justify-center bg-transparent text-2xl font-black leading-none text-slate-950 hover:text-orange-600"
-              aria-expanded={isOpen}
-              aria-label={isOpen ? "Lukk meny" : "Åpne meny"}
-            >
-              {isOpen ? "×" : "☰"}
-            </button>
-
             <div className="min-w-0 flex-1">
               <BrandLogo size="header" />
             </div>
@@ -118,6 +108,16 @@ export function LightPublicHeader() {
               >
                 Start
               </Link>
+
+              <button
+                type="button"
+                onClick={() => setIsOpen((value) => !value)}
+                className="flex h-10 w-8 shrink-0 items-center justify-center bg-transparent text-2xl font-black leading-none text-slate-950 hover:text-orange-600"
+                aria-expanded={isOpen}
+                aria-label={isOpen ? "Lukk meny" : "Åpne meny"}
+              >
+                {isOpen ? "×" : "☰"}
+              </button>
             </div>
           </div>
 
