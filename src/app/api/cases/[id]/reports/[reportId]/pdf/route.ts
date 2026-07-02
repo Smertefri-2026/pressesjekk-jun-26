@@ -449,7 +449,7 @@ async function createReportPdf(reportText: string) {
       color: dark,
     });
 
-    currentPage.drawText("Din kontroll av medieomtale", {
+    currentPage.drawText("Din kontroll av media", {
       x: margin,
       y: pageHeight - 60,
       size: 9,
