@@ -223,38 +223,13 @@ export default function EksempelrapportPage() {
 
           </section>
 
-          <aside className="hidden rounded-3xl border border-red-200 bg-red-50 p-7 shadow-sm lg:block">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
-              Demo
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Fire dokumenttyper
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Velg fanene under for å se hvordan samme sak kan brukes til ulike
-              dokumentpakker.
-            </p>
-
-            <div className="mt-6 grid gap-3">
-              {tabs.map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => setActiveTab(item.key)}
-                  className={`rounded-2xl p-4 text-left text-sm font-black shadow-sm transition ${
-                    activeTab === item.key
-                      ? "bg-slate-950 text-white"
-                      : "bg-white text-slate-950 hover:bg-red-50"
-                  }`}
-                >
-                  <span className="block text-xs font-black uppercase tracking-[0.18em] opacity-70">
-                    {item.step}
-                  </span>
-                  <span className="mt-1 block">{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </aside>
+          <figure className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <img
+              src="/images/eksempelrapport2.png"
+              alt="Illustrasjon av fire dokumenttyper i en strukturert mediesak."
+              className="h-full min-h-[210px] w-full object-cover sm:min-h-[280px] lg:min-h-[360px]"
+            />
+          </figure>
         </div>
 
         <section className="mt-12 overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -353,6 +328,15 @@ export default function EksempelrapportPage() {
               </p>
             </div>
 
+            <figure className="hidden overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm lg:block">
+              <img
+                src="/images/eksempelrapport3.png"
+                alt="Illustrasjon av strukturert vurdering, dokumentasjon og vedlegg i en mediesak."
+                className="w-full object-cover"
+                loading="lazy"
+              />
+            </figure>
+
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
                 Innhold
@@ -392,33 +376,44 @@ export default function EksempelrapportPage() {
           </aside>
         </section>
 
-        <section className="mt-16 rounded-3xl bg-slate-950 p-8 text-white shadow-sm">
-          <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
-                Eksempel på tidslinje
-              </p>
-              <h2 className="mt-3 text-4xl font-black">
-                Samme sak kan bygges videre
-              </h2>
-              <p className="mt-5 max-w-3xl leading-8 text-slate-300">
-                En mediesak endrer seg ofte etter publisering. Derfor bør
-                dokumentasjon, tilsvar, rapporter og videre oppfølging samles i
-                én saksgang.
-              </p>
+        <section className="mt-16 overflow-hidden rounded-3xl bg-slate-950 text-white shadow-sm">
+          <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_460px] lg:items-stretch">
+            <div className="grid content-start gap-6">
+              <div>
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+                  Eksempel på tidslinje
+                </p>
+                <h2 className="mt-3 text-4xl font-black">
+                  Samme sak kan bygges videre
+                </h2>
+                <p className="mt-5 max-w-3xl leading-8 text-slate-300">
+                  En mediesak endrer seg ofte etter publisering. Derfor bør
+                  dokumentasjon, tilsvar, rapporter og videre oppfølging samles i
+                  én saksgang.
+                </p>
+              </div>
+
+              <div className="grid gap-3">
+                {timeline.map((item, index) => (
+                  <div
+                    key={item}
+                    className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200"
+                  >
+                    <span className="mr-2 text-orange-300">{index + 1}.</span>
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="grid gap-3">
-              {timeline.map((item, index) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200"
-                >
-                  <span className="mr-2 text-orange-300">{index + 1}.</span>
-                  {item}
-                </div>
-              ))}
-            </div>
+            <figure className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+              <img
+                src="/images/eksempelrapport4.png"
+                alt="Illustrasjon av en komplett mediesak med dokumenter, tidslinje og vedlegg."
+                className="h-full min-h-[230px] w-full object-cover sm:min-h-[300px] lg:min-h-[420px]"
+                loading="lazy"
+              />
+            </figure>
           </div>
         </section>
 
