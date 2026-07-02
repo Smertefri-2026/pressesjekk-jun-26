@@ -208,7 +208,7 @@ export function QuickCheckBox() {
         <button
           type="submit"
           disabled={isChecking}
-          className="mt-4 block w-full rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-4 block w-full rounded-xl bg-red-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isChecking
             ? "Sjekker..."
@@ -235,15 +235,15 @@ export function QuickCheckBox() {
       ) : null}
 
       {isChecking ? (
-        <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm font-semibold leading-6 text-blue-900">
+        <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-semibold leading-6 text-red-900">
           Kjører rask sjekk... Dette kan ta opptil 2 minutter. Ikke oppdater
           siden mens raskrapporten lages.
         </div>
       ) : null}
 
       {!isChecking && quickCheck ? (
-        <section className="mt-5 rounded-3xl border border-blue-200 bg-white p-5 shadow-sm">
-          <p className="text-sm font-black uppercase tracking-[0.18em] text-blue-800">
+        <section className="mt-5 rounded-3xl border border-red-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-red-800">
             Raskrapport
           </p>
 
@@ -263,11 +263,11 @@ export function QuickCheckBox() {
             <p className="mt-2 break-words text-sm font-bold text-slate-950">
               {quickCheck.url}
             </p>
-            <p className="mt-2 text-sm font-semibold text-blue-800">
+            <p className="mt-2 text-sm font-semibold text-red-800">
               Kilde: {quickDomain}
             </p>
 
-            <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+            <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4">
               <p className="text-sm font-black text-slate-950">
                 {quickCheck.check_count === null
                   ? "Søketeller lastes..."
@@ -336,7 +336,7 @@ export function QuickCheckBox() {
           ) : null}
 
           {missingPoints.length > 0 ? (
-            <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+            <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4">
               <p className="font-black text-slate-950">
                 Dette mangler før en reell vurdering
               </p>

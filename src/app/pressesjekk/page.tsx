@@ -59,14 +59,14 @@ export default function PresseSjekkPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/"
-          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          className="text-sm font-semibold text-red-700 hover:text-red-900"
         >
           ← Tilbake til forsiden
         </Link>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               Start sjekk
             </p>
 
@@ -83,7 +83,7 @@ export default function PresseSjekkPage() {
           </section>
 
           <aside className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               Kom i gang
             </p>
 
@@ -115,10 +115,10 @@ export default function PresseSjekkPage() {
           </aside>
         </div>
 
-        <section className="mt-12 rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-8">
+        <section className="mt-12 rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-8">
           <div className="grid gap-8 lg:grid-cols-[360px_1fr] lg:items-start">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
                 Rask sjekk eller egen sak
               </p>
 
@@ -156,7 +156,7 @@ export default function PresseSjekkPage() {
               key={item.title}
               className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm"
             >
-              <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 text-lg font-black text-blue-800">
+              <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-red-100 text-lg font-black text-red-800">
                 ✓
               </div>
               <h2 className="text-2xl font-black text-slate-950">
@@ -169,7 +169,7 @@ export default function PresseSjekkPage() {
 
         <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_390px]">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               Hva kan du gjøre?
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -186,7 +186,7 @@ export default function PresseSjekkPage() {
                   key={item}
                   className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
                 >
-                  <span className="mr-2 text-blue-700">✓</span>
+                  <span className="mr-2 text-red-700">✓</span>
                   {item}
                 </div>
               ))}
@@ -209,7 +209,7 @@ export default function PresseSjekkPage() {
         </section>
 
         <section className="mt-16">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
             Pakker
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -261,7 +261,7 @@ export default function PresseSjekkPage() {
 
               <Link
                 href="/min-side/saker/ny"
-                className="mt-5 block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-300"
+                className="mt-5 block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-red-700"
               >
                 Start ny sak
               </Link>

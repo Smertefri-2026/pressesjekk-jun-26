@@ -94,7 +94,7 @@ export function LightPublicHeader() {
                 <Link
                   href="/pressesjekk"
                   onClick={() => setIsOpen(false)}
-                  className="mt-2 rounded-xl bg-blue-500 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-blue-500"
+                  className="mt-2 rounded-xl bg-red-500 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-red-500"
                 >
                   Start gratis sjekk
                 </Link>
