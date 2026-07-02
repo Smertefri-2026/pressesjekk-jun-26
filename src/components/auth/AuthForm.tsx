@@ -83,7 +83,7 @@ export function AuthForm() {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
       <div>
-        <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+        <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
           Innlogging
         </p>
         <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950">
@@ -146,7 +146,7 @@ export function AuthForm() {
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
                 placeholder="Ditt navn"
-                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
               />
             </div>
 
@@ -161,7 +161,7 @@ export function AuthForm() {
                 id="roleType"
                 value={roleType}
                 onChange={(event) => setRoleType(event.target.value)}
-                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
               >
                 {roleOptions.map((role) => (
                   <option key={role.value} value={role.value}>
@@ -189,7 +189,7 @@ export function AuthForm() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="din@epost.no"
-            className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+            className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
           />
         </div>
 
@@ -211,7 +211,7 @@ export function AuthForm() {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Minimum 6 tegn"
-            className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+            className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
           />
         </div>
 

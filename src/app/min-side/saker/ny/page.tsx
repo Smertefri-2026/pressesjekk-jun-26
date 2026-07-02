@@ -195,13 +195,13 @@ export default function NewCasePage() {
         <section className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
           <Link
             href="/min-side"
-            className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
           >
             ← Tilbake til Min Side
           </Link>
 
           <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Kjøp først
             </p>
 
@@ -218,7 +218,7 @@ export default function NewCasePage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/priser"
-                className="rounded-xl bg-cyan-500 px-6 py-4 font-black text-slate-950 hover:bg-cyan-400"
+                className="rounded-xl bg-blue-500 px-6 py-4 font-black text-slate-950 hover:bg-blue-500"
               >
                 Se priser og kjøp
               </Link>
@@ -245,14 +245,14 @@ export default function NewCasePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Ny sak
             </p>
 
@@ -276,8 +276,8 @@ export default function NewCasePage() {
             ) : null}
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               Tips
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
@@ -296,7 +296,7 @@ export default function NewCasePage() {
             onSubmit={handleSubmit}
             className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
           >
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
               Saksinformasjon
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -318,7 +318,7 @@ export default function NewCasePage() {
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   placeholder="F.eks. VG-artikkel om større mediesak"
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -336,7 +336,7 @@ export default function NewCasePage() {
                     value={mediaName}
                     onChange={(event) => setMediaName(event.target.value)}
                     placeholder="VG, NRK, TV 2, lokalavis..."
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                   />
                 </div>
 
@@ -352,7 +352,7 @@ export default function NewCasePage() {
                     type="date"
                     value={publishedDate}
                     onChange={(event) => setPublishedDate(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                   />
                 </div>
               </div>
@@ -370,7 +370,7 @@ export default function NewCasePage() {
                   value={articleTitle}
                   onChange={(event) => setArticleTitle(event.target.value)}
                   placeholder="Skriv overskriften slik den står i artikkelen"
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -387,7 +387,7 @@ export default function NewCasePage() {
                   value={articleUrl}
                   onChange={(event) => setArticleUrl(event.target.value)}
                   placeholder="https://..."
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -404,7 +404,7 @@ export default function NewCasePage() {
                   value={shortDescription}
                   onChange={(event) => setShortDescription(event.target.value)}
                   placeholder="Skriv kort hva saken handler om, og hvorfor du ønsker å sjekke den..."
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -425,8 +425,8 @@ export default function NewCasePage() {
           </form>
 
           <aside className="grid content-start gap-6">
-            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+            <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
                 Arbeidsflyt
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -440,7 +440,7 @@ export default function NewCasePage() {
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Etter opprettelse
               </p>
               <h2 className="mt-3 text-3xl font-black">

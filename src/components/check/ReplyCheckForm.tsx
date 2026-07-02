@@ -10,7 +10,7 @@ const contactOptions = [
 export function ReplyCheckForm() {
   return (
     <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-      <p className="text-sm font-semibold text-cyan-300">Steg 3</p>
+      <p className="text-sm font-semibold text-blue-300">Steg 3</p>
       <h2 className="mt-2 text-2xl font-bold">
         Tilsvar og kontakt før publisering
       </h2>
@@ -20,7 +20,7 @@ export function ReplyCheckForm() {
           <label className="text-sm text-slate-300">
             Ble du kontaktet før publisering?
           </label>
-          <select className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none focus:border-cyan-300">
+          <select className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none focus:border-blue-300">
             {contactOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}
@@ -31,7 +31,7 @@ export function ReplyCheckForm() {
           <label className="text-sm text-slate-300">
             Fikk du konkrete beskyldninger?
           </label>
-          <select className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none focus:border-cyan-300">
+          <select className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none focus:border-blue-300">
             <option>Ja</option>
             <option>Delvis</option>
             <option>Nei</option>
@@ -43,7 +43,7 @@ export function ReplyCheckForm() {
           <label className="text-sm text-slate-300">
             Hvor lang svarfrist fikk du?
           </label>
-          <select className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none focus:border-cyan-300">
+          <select className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none focus:border-blue-300">
             <option>Ingen tydelig frist</option>
             <option>Under 1 time</option>
             <option>1–3 timer</option>
@@ -57,7 +57,7 @@ export function ReplyCheckForm() {
           <label className="text-sm text-slate-300">
             Ble svaret ditt tatt med?
           </label>
-          <select className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none focus:border-cyan-300">
+          <select className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none focus:border-blue-300">
             <option>Ja, korrekt</option>
             <option>Ja, men bare delvis</option>
             <option>Nei</option>
@@ -70,7 +70,7 @@ export function ReplyCheckForm() {
       <textarea
         placeholder="Skriv kort hva som skjedde før publisering..."
         rows={5}
-        className="mt-5 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+        className="mt-5 w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-4 text-white outline-none placeholder:text-slate-500 focus:border-blue-300"
       />
     </div>
   );

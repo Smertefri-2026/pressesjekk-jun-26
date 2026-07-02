@@ -75,13 +75,13 @@ export default function VilkarPage() {
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link href="/" className="text-sm font-semibold text-cyan-700 hover:text-cyan-900">
+        <Link href="/" className="text-sm font-semibold text-blue-700 hover:text-blue-900">
           ← Tilbake til forsiden
         </Link>
 
         <div className="mt-10">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Vilkår
             </p>
 
@@ -114,7 +114,7 @@ export default function VilkarPage() {
         </div>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
             Vilkår
           </p>
           <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">

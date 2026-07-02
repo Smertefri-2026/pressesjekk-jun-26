@@ -10,7 +10,7 @@ export function CaseFindings({ findings }: CaseFindingsProps) {
       <ul className="mt-5 space-y-3 text-slate-300">
         {findings.map((finding) => (
           <li key={finding} className="flex gap-3">
-            <span className="text-cyan-300">✓</span>
+            <span className="text-blue-300">✓</span>
             <span>{finding}</span>
           </li>
         ))}

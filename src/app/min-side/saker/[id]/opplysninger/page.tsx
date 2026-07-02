@@ -639,7 +639,7 @@ export default function CaseInputsPage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <Link
             href="/min-side"
-            className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
           >
             ← Tilbake til Min Side
           </Link>
@@ -667,14 +667,14 @@ export default function CaseInputsPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               {isJournalist ? "Publiseringsgrunnlag" : "Saksopplysninger"}
             </p>
 
@@ -693,7 +693,7 @@ export default function CaseInputsPage() {
               onSubmit={handleSubmit}
               className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
             >
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
               Opplysninger
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -714,7 +714,7 @@ export default function CaseInputsPage() {
                   value={articleText}
                   onChange={(event) => setArticleText(event.target.value)}
                   placeholder={isJournalist ? "Lim inn publiseringsutkast, artikkeltekst eller relevante utdrag her..." : "Lim inn artikkeltekst eller relevante utdrag her..."}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -731,7 +731,7 @@ export default function CaseInputsPage() {
                   value={whatHappened}
                   onChange={(event) => setWhatHappened(event.target.value)}
                   placeholder={isJournalist ? "Forklar hva som bør kvalitetssikres: fakta, kildegrunnlag, vinkling, tilsvar, identifisering eller publiseringsrisiko..." : "Forklar kort hva saken handler om, og hva du mener bør undersøkes..."}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -747,7 +747,7 @@ export default function CaseInputsPage() {
                     id="yourRole"
                     value={yourRole}
                     onChange={(event) => setYourRole(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                   >
                     <option value="">Velg rolle i saken</option>
                     {yourRole && !caseRoleOptions.includes(yourRole) ? (
@@ -800,7 +800,7 @@ export default function CaseInputsPage() {
                   value={replyText}
                   onChange={(event) => setReplyText(event.target.value)}
                   placeholder={isJournalist ? "Lim inn eller oppsummer spørsmål, tilsvar, sitatsjekk, samtidig imøtegåelse eller kontakt med berørt part..." : "Lim inn eller oppsummer hva du sendte til redaksjonen..."}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -817,7 +817,7 @@ export default function CaseInputsPage() {
                   value={editorResponse}
                   onChange={(event) => setEditorResponse(event.target.value)}
                   placeholder={isJournalist ? "Skriv kort hva kilden eller den berørte parten svarte, eller lim inn relevant svar..." : "Skriv kort hva redaksjonen svarte, eller lim inn relevant svar..."}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -832,7 +832,7 @@ export default function CaseInputsPage() {
                   id="legalStatus"
                   value={legalStatus}
                   onChange={(event) => setLegalStatus(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 >
                   <option value="">{isJournalist ? "Velg status" : "Velg rettsstatus"}</option>
                   <option value="not_relevant">Ikke relevant</option>
@@ -860,7 +860,7 @@ export default function CaseInputsPage() {
                     setLegalStatusDetails(event.target.value)
                   }
                   placeholder={isJournalist ? "Forklar kort om det finnes publiseringsrisiko, uavklarte fakta, kildekonflikt, identifisering, rettslig prosess eller andre forhold..." : "Forklar kort om saken er anmeldt, henlagt, avgjort, påklaget eller annet..."}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -879,7 +879,7 @@ export default function CaseInputsPage() {
                     setDocumentationSummary(event.target.value)
                   }
                   placeholder={isJournalist ? "List opp kilder, dokumenter, e-poster, sitatsjekk, tilsvar, faktagrunnlag, åpne kilder eller annen dokumentasjon..." : "List opp dokumenter, e-poster, SMS, vedlegg, skjermbilder eller andre bevis som finnes..."}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -896,12 +896,12 @@ export default function CaseInputsPage() {
                   value={desiredOutcome}
                   onChange={(event) => setDesiredOutcome(event.target.value)}
                   placeholder={isJournalist ? "F.eks. styrke faktagrunnlag, avklare vinkling, redusere publiseringsrisiko, sikre tilsvar eller dokumentere redaksjonelle vurderinger..." : "F.eks. retting, tilsvar, beklagelse, avindeksering, PFU-klage eller bedre dokumentasjon..."}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
               {saveMessage ? (
-                <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
+                <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold leading-6 text-blue-900">
                   {saveMessage}
                 </div>
               ) : null}
@@ -923,7 +923,7 @@ export default function CaseInputsPage() {
 
                 <Link
                   href={`/min-side/saker/${params.id}/rapport`}
-                  className="rounded-2xl border border-cyan-300 bg-cyan-50 px-6 py-4 font-black text-cyan-900 hover:bg-cyan-100"
+                  className="rounded-2xl border border-blue-300 bg-blue-50 px-6 py-4 font-black text-blue-900 hover:bg-blue-100"
                 >
                   Gå til rapport
                 </Link>
@@ -939,7 +939,7 @@ export default function CaseInputsPage() {
           </form>
             ) : (
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                 Opplysninger
               </p>
 
@@ -967,7 +967,7 @@ export default function CaseInputsPage() {
               </p>
 
               {saveMessage ? (
-                <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
+                <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold leading-6 text-blue-900">
                   {saveMessage}
                 </div>
               ) : null}
@@ -1089,7 +1089,7 @@ export default function CaseInputsPage() {
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-0 shadow-sm">
               <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-8">
                 <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                     Dokumenter
                   </p>
                   <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -1150,7 +1150,7 @@ export default function CaseInputsPage() {
                             setDocumentTitle(event.target.value)
                           }
                           placeholder="F.eks. E-post fra journalist"
-                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                         />
                       </div>
 
@@ -1170,7 +1170,7 @@ export default function CaseInputsPage() {
                                 .value as CaseDocumentRow["document_type"]
                             )
                           }
-                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                         >
                           {documentTypeOptions.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -1196,7 +1196,7 @@ export default function CaseInputsPage() {
                           setDocumentDescription(event.target.value)
                         }
                         placeholder="Forklar kort hva dokumentet viser..."
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                       />
                     </div>
 
@@ -1213,7 +1213,7 @@ export default function CaseInputsPage() {
                         onChange={(event) =>
                           setSelectedDocumentFile(event.target.files?.[0] ?? null)
                         }
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none file:mr-4 file:rounded-xl file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-black file:text-white focus:border-cyan-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none file:mr-4 file:rounded-xl file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-black file:text-white focus:border-blue-500 focus:bg-white"
                       />
                       <p className="mt-2 text-sm leading-6 text-slate-500">
                         Start med PDF, bilder, tekstfiler eller e-postvedlegg.
@@ -1228,7 +1228,7 @@ export default function CaseInputsPage() {
                     ) : null}
 
                     {documentMessage ? (
-                      <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold leading-6 text-cyan-900">
+                      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold leading-6 text-blue-900">
                         {documentMessage}
                       </div>
                     ) : null}
@@ -1299,9 +1299,9 @@ export default function CaseInputsPage() {
                     {documentItems.map((document) => (
                       <article
                         key={document.id}
-                        className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-cyan-50 hover:shadow-md"
+                        className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-blue-50 hover:shadow-md"
                       >
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">
                           {documentTypeLabel(document.document_type)}
                         </p>
                         <h3 className="mt-2 text-xl font-black text-slate-950">
@@ -1371,28 +1371,28 @@ export default function CaseInputsPage() {
                     <button
                       type="button"
                       onClick={() => handleDocumentSort("name")}
-                      className="text-left hover:text-cyan-700"
+                      className="text-left hover:text-blue-700"
                     >
                       Navn{documentSortLabel("name")}
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDocumentSort("type")}
-                      className="text-left hover:text-cyan-700"
+                      className="text-left hover:text-blue-700"
                     >
                       Type{documentSortLabel("type")}
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDocumentSort("size")}
-                      className="text-left hover:text-cyan-700"
+                      className="text-left hover:text-blue-700"
                     >
                       Størrelse{documentSortLabel("size")}
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDocumentSort("date")}
-                      className="text-left hover:text-cyan-700"
+                      className="text-left hover:text-blue-700"
                     >
                       Dato{documentSortLabel("date")}
                     </button>
@@ -1403,7 +1403,7 @@ export default function CaseInputsPage() {
                     {documentItems.map((document) => (
                       <div
                         key={document.id}
-                        className="grid grid-cols-[minmax(0,1fr)_112px] gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_130px_110px_110px_180px] md:items-center"
+                        className="grid grid-cols-[minmax(0,1fr)_112px] gap-3 px-5 py-4 transition hover:bg-blue-50 md:grid-cols-[1fr_130px_110px_110px_180px] md:items-center"
                       >
                         <div className="min-w-0">
                           <p className="truncate text-base font-black text-slate-950">
@@ -1434,7 +1434,7 @@ export default function CaseInputsPage() {
                               <button
                                 type="button"
                                 onClick={() => restoreDocument(document)}
-                                className="rounded-lg border border-cyan-200 bg-white px-3 py-2 text-xs font-black text-cyan-700 hover:bg-cyan-50"
+                                className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-50"
                               >
                                 Gjenopprett
                               </button>
@@ -1501,7 +1501,7 @@ export default function CaseInputsPage() {
           />
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Neste steg
               </p>
               <h2 className="mt-3 text-3xl font-black">

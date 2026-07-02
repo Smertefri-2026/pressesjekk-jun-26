@@ -571,7 +571,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <Link
             href="/min-side"
-            className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
           >
             ← Tilbake til Min Side
           </Link>
@@ -595,14 +595,14 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Rapportutkast
             </p>
 
@@ -619,7 +619,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
 
 
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
               Rapport
             </p>
 
@@ -639,7 +639,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                   type="button"
                   onClick={handleGenerateAiReport}
                   disabled={isGeneratingAiReport}
-                  className="col-span-2 w-full rounded-2xl bg-cyan-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
+                  className="col-span-2 w-full rounded-2xl bg-blue-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
                 >
                   {isGeneratingAiReport
                     ? "Genererer..."
@@ -650,7 +650,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                   type="button"
                   onClick={handleDownloadReportPdf}
                   disabled={!activeReport}
-                  className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-2 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
+                  className="col-span-1 w-full rounded-2xl border border-blue-300 bg-blue-50 px-2 py-4 text-center text-base font-black text-blue-900 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
                 >
                   Last ned PDF
                 </button>
@@ -732,7 +732,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
           />
 
 <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                 Rapportversjoner
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -759,8 +759,8 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                         onClick={() => setSelectedReportId(report.id)}
                         className={`rounded-2xl border p-4 text-left transition ${
                           isSelected
-                            ? "border-cyan-400 bg-cyan-50 shadow-sm"
-                            : "border-slate-200 bg-slate-50 hover:bg-cyan-50"
+                            ? "border-blue-500 bg-blue-50 shadow-sm"
+                            : "border-slate-200 bg-slate-50 hover:bg-blue-50"
                         }`}
                       >
                         <p className="font-black text-slate-950">
@@ -772,7 +772,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
                           {formatDate(report.created_at)}
                         </p>
                         {isSelected ? (
-                          <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                          <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-blue-700">
                             Vises nå
                           </p>
                         ) : null}
@@ -795,7 +795,7 @@ Dette er et foreløpig og veiledende rapportutkast. Det er ikke juridisk rådgiv
 
             {!isJournalistWorkflow ? (
               <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                   Videre arbeid
                 </p>
                 <h2 className="mt-3 text-3xl font-black">

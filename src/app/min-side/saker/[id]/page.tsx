@@ -571,7 +571,7 @@ export default function CaseDetailPage() {
       price: "1 490 kr",
       label: "Oppgrader til PFU-pakke – 1 490 kr",
       buttonClass:
-        "w-full rounded-xl bg-cyan-600 px-5 py-4 text-sm font-black text-white hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60",
+        "w-full rounded-xl bg-blue-700 px-5 py-4 text-sm font-black text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60",
     },
     {
       id: "full_pack",
@@ -579,7 +579,7 @@ export default function CaseDetailPage() {
       price: "2 990 kr",
       label: "Oppgrader til full dokumentpakke – 2 990 kr",
       buttonClass:
-        "w-full rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60",
+        "w-full rounded-xl bg-blue-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60",
     },
   ];
 
@@ -662,7 +662,7 @@ export default function CaseDetailPage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <Link
             href="/min-side"
-            className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
           >
             ← Tilbake til Min Side
           </Link>
@@ -692,14 +692,14 @@ export default function CaseDetailPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               PresseSjekk-sak
             </p>
 
@@ -714,7 +714,7 @@ export default function CaseDetailPage() {
             </p>
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                 Grunninformasjon
               </p>
 
@@ -754,7 +754,7 @@ export default function CaseDetailPage() {
                       type="text"
                       value={editTitle}
                       onChange={(event) => setEditTitle(event.target.value)}
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                     />
                   </div>
 
@@ -771,7 +771,7 @@ export default function CaseDetailPage() {
                       onChange={(event) =>
                         setEditStatus(event.target.value as CaseRow["status"])
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                     >
                       <option value="draft">Utkast</option>
                       <option value="in_progress">Under arbeid</option>
@@ -793,7 +793,7 @@ export default function CaseDetailPage() {
                         type="text"
                         value={editMediaName}
                         onChange={(event) => setEditMediaName(event.target.value)}
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                       />
                     </div>
 
@@ -811,7 +811,7 @@ export default function CaseDetailPage() {
                         onChange={(event) =>
                           setEditPublishedDate(event.target.value)
                         }
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -828,7 +828,7 @@ export default function CaseDetailPage() {
                       type="text"
                       value={editArticleTitle}
                       onChange={(event) => setEditArticleTitle(event.target.value)}
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                     />
                   </div>
 
@@ -844,7 +844,7 @@ export default function CaseDetailPage() {
                       type="url"
                       value={editArticleUrl}
                       onChange={(event) => setEditArticleUrl(event.target.value)}
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                     />
                   </div>
 
@@ -862,7 +862,7 @@ export default function CaseDetailPage() {
                       onChange={(event) =>
                         setEditShortDescription(event.target.value)
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                     />
                   </div>
 
@@ -925,7 +925,7 @@ export default function CaseDetailPage() {
                         href={caseItem.article_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="block break-words text-lg font-bold text-cyan-700 hover:text-cyan-900"
+                        className="block break-words text-lg font-bold text-blue-700 hover:text-blue-900"
                       >
                         {caseItem.article_url}
                       </a>
@@ -962,7 +962,7 @@ export default function CaseDetailPage() {
                           >
                             <div className="flex flex-wrap items-start justify-between gap-3">
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs font-black uppercase tracking-[0.16em] text-cyan-700">
+                                <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">
                                   {link.is_primary ? "Hovedartikkel" : "Relatert artikkel"}
                                 </p>
                                 {link.title ? (
@@ -974,7 +974,7 @@ export default function CaseDetailPage() {
                                   href={link.url}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="mt-2 block break-words text-sm font-bold text-cyan-700 hover:text-cyan-900"
+                                  className="mt-2 block break-words text-sm font-bold text-blue-700 hover:text-blue-900"
                                 >
                                   {link.url}
                                 </a>
@@ -999,9 +999,9 @@ export default function CaseDetailPage() {
                     {articleLinks.length < 5 ? (
                       <form
                         onSubmit={handleAddArticleLink}
-                        className="mt-5 grid gap-3 rounded-xl border border-cyan-200 bg-cyan-50 p-4"
+                        className="mt-5 grid gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4"
                       >
-                        <p className="text-sm font-black text-cyan-900">
+                        <p className="text-sm font-black text-blue-900">
                           Legg til flere URL-er om samme mediesituasjon
                         </p>
 
@@ -1010,7 +1010,7 @@ export default function CaseDetailPage() {
                           value={newArticleUrl}
                           onChange={(event) => setNewArticleUrl(event.target.value)}
                           placeholder="https://..."
-                          className="w-full rounded-xl border border-cyan-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-cyan-500"
+                          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-blue-500"
                         />
 
                         <input
@@ -1018,7 +1018,7 @@ export default function CaseDetailPage() {
                           value={newArticleTitle}
                           onChange={(event) => setNewArticleTitle(event.target.value)}
                           placeholder="Valgfri tittel / kort navn på lenken"
-                          className="w-full rounded-xl border border-cyan-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-cyan-500"
+                          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-blue-500"
                         />
 
                         <button
@@ -1087,9 +1087,9 @@ export default function CaseDetailPage() {
 
             <div
               id="betaling"
-              className="scroll-mt-24 rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm ring-2 ring-cyan-100 sm:p-7"
+              className="scroll-mt-24 rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm ring-2 ring-blue-100 sm:p-7"
             >
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
                 {paymentTitle}
               </p>
 
@@ -1115,14 +1115,14 @@ export default function CaseDetailPage() {
                   className={`mt-5 rounded-2xl border-2 p-5 ${
                     primaryIsSelected
                       ? "border-amber-400 bg-amber-50"
-                      : "border-cyan-400 bg-cyan-50"
+                      : "border-blue-500 bg-blue-50"
                   }`}
                 >
                   <p
                     className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.15em] ${
                       primaryIsSelected
                         ? "bg-amber-200 text-amber-900"
-                        : "bg-cyan-200 text-cyan-900"
+                        : "bg-blue-200 text-blue-900"
                     }`}
                   >
                     {primaryIsSelected
@@ -1218,7 +1218,7 @@ export default function CaseDetailPage() {
                 {!isJournalistWorkflow ? (
                   <Link
                     href="/kontakt"
-                    className="rounded-xl border border-cyan-200 bg-white px-5 py-4 text-center text-sm font-black text-cyan-900 hover:bg-cyan-100"
+                    className="rounded-xl border border-blue-200 bg-white px-5 py-4 text-center text-sm font-black text-blue-900 hover:bg-blue-100"
                   >
                     {caseAccessPackageId === "full_pack"
                       ? "Neste steg: spør om utredning eller proffhjelp"
@@ -1229,7 +1229,7 @@ export default function CaseDetailPage() {
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Rapport
               </p>
               <h2 className="mt-3 text-3xl font-black">
@@ -1247,14 +1247,14 @@ export default function CaseDetailPage() {
 
               <Link
                 href={`/min-side/saker/${params.id}/rapport`}
-                className="mt-6 inline-flex rounded-xl bg-cyan-400 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-300"
+                className="mt-6 inline-flex rounded-xl bg-blue-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-blue-300"
               >
                 {reportDrafts.length > 0 ? "Åpne rapport" : "Lag rapport"}
               </Link>
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                 {isJournalistWorkflow ? "Redaksjonelt arbeid" : "Videre dokumenter"}
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -1285,7 +1285,7 @@ export default function CaseDetailPage() {
 
                     <Link
                       href={`/min-side/saker/${params.id}/pakke`}
-                      className="rounded-xl border border-cyan-300 bg-cyan-50 px-5 py-4 text-sm font-black text-cyan-900 hover:bg-cyan-100"
+                      className="rounded-xl border border-blue-300 bg-blue-50 px-5 py-4 text-sm font-black text-blue-900 hover:bg-blue-100"
                     >
                       Se redaksjonelle pakker
                     </Link>
@@ -1322,8 +1322,8 @@ export default function CaseDetailPage() {
             </div>
 
             {!isJournalistWorkflow ? (
-              <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+              <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
                   Status
                 </p>
                 <h2 className="mt-3 text-3xl font-black text-slate-950">

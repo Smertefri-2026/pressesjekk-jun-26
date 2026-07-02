@@ -210,8 +210,8 @@ export function CaseWorkflowCard({
   }
 
   return (
-    <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-      <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+    <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+      <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
         Saksgang
       </p>
 
@@ -219,8 +219,8 @@ export function CaseWorkflowCard({
         {statusLabel}
       </h2>
 
-      <div className="mt-5 rounded-2xl border border-cyan-200 bg-white/70 p-4">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-800">
+      <div className="mt-5 rounded-2xl border border-blue-200 bg-white/70 p-4">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-800">
           {workflowType === "journalist" ? "Arbeidsflyt" : "Valgt pakke"}
         </p>
         <p className="mt-2 text-lg font-black text-slate-950">
@@ -255,11 +255,11 @@ export function CaseWorkflowCard({
               <span
                 className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
                   isActive
-                    ? "bg-cyan-300 text-slate-950"
+                    ? "bg-blue-300 text-slate-950"
                     : isLocked
                       ? "bg-slate-200 text-slate-500"
                       : isDone
-                        ? "bg-cyan-500 text-slate-950"
+                        ? "bg-blue-500 text-slate-950"
                         : "bg-slate-200 text-slate-500"
                 }`}
               >
@@ -291,7 +291,7 @@ export function CaseWorkflowCard({
                 {showUpgradeButton ? (
                   <a
                     href="#betaling"
-                    className="mt-3 inline-flex rounded-xl bg-cyan-500 px-4 py-2 text-xs font-black text-slate-950 hover:bg-cyan-400"
+                    className="mt-3 inline-flex rounded-xl bg-blue-500 px-4 py-2 text-xs font-black text-slate-950 hover:bg-blue-500"
                   >
                     Oppgrader til {upgradePackage.name}
                   </a>
@@ -304,7 +304,7 @@ export function CaseWorkflowCard({
             return (
               <div
                 key={step.key}
-                className="rounded-2xl border border-cyan-100 bg-white/50 p-3 text-slate-500"
+                className="rounded-2xl border border-blue-100 bg-white/50 p-3 text-slate-500"
               >
                 {stepContent}
               </div>
@@ -319,8 +319,8 @@ export function CaseWorkflowCard({
                 isActive
                   ? "border-slate-950 bg-slate-950 text-white shadow-sm"
                   : isDone
-                    ? "border-cyan-300 bg-white text-slate-950 hover:bg-cyan-50"
-                    : "border-cyan-100 bg-white/50 text-slate-400 hover:bg-white/70"
+                    ? "border-blue-300 bg-white text-slate-950 hover:bg-blue-50"
+                    : "border-blue-100 bg-white/50 text-slate-400 hover:bg-white/70"
               }`}
             >
               {stepContent}

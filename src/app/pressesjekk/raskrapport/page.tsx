@@ -113,14 +113,14 @@ export default function QuickReportPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/pressesjekk"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til Start sjekk
         </Link>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Raskrapport
             </p>
 
@@ -135,8 +135,8 @@ export default function QuickReportPage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-7 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-7 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               Søketeller
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
@@ -182,7 +182,7 @@ export default function QuickReportPage() {
         ) : quickCheck ? (
           <>
             <section className="mt-12 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                 Artikkel
               </p>
               <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -195,7 +195,7 @@ export default function QuickReportPage() {
 
             <section className="mt-8 grid gap-8 lg:grid-cols-[1fr_390px]">
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                   KI-raskrapport
                 </p>
 
@@ -232,7 +232,7 @@ export default function QuickReportPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-3xl border border-cyan-200 bg-cyan-50 p-5">
+                <div className="mt-6 rounded-3xl border border-blue-200 bg-blue-50 p-5">
                   <h3 className="text-xl font-black text-slate-950">
                     Hva mangler før reell vurdering?
                   </h3>
@@ -259,7 +259,7 @@ export default function QuickReportPage() {
                 </div>
 
                 <div className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                     Lagret sak
                   </p>
                   <h2 className="mt-3 text-3xl font-black">
@@ -273,7 +273,7 @@ export default function QuickReportPage() {
 
                   <Link
                     href={`/min-side/saker/ny?url=${encodedUrl}&role=mentioned`}
-                    className="mt-6 block rounded-xl bg-cyan-400 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-300"
+                    className="mt-6 block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-300"
                   >
                     Opprett lagret sak
                   </Link>

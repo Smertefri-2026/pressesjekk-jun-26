@@ -363,7 +363,7 @@ export default function CasePackagePage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <Link
             href="/min-side"
-            className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
           >
             ← Tilbake til Min Side
           </Link>
@@ -389,7 +389,7 @@ export default function CasePackagePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href={`/min-side/saker/${params.id}`}
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til saken
         </Link>
@@ -412,7 +412,7 @@ export default function CasePackagePage() {
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               {pageEyebrow}
             </p>
 
@@ -427,8 +427,8 @@ export default function CasePackagePage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               {isJournalistWorkflow ? "Nåværende tilgang" : "Nåværende pakke"}
             </p>
 
@@ -486,7 +486,7 @@ export default function CasePackagePage() {
         </section>
 
         <section className="mt-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
             {tabIntro.eyebrow}
           </p>
           <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
@@ -515,11 +515,11 @@ export default function CasePackagePage() {
                       option.id === "investigation_pack"
                         ? "border-amber-300 bg-amber-50"
                         : option.id === "full_pack"
-                          ? "border-cyan-300 bg-cyan-50"
+                          ? "border-blue-300 bg-blue-50"
                           : "border-slate-200 bg-white"
                     }`}
                   >
-                    <p className="text-sm font-bold uppercase tracking-[0.22em] text-cyan-700">
+                    <p className="text-sm font-bold uppercase tracking-[0.22em] text-blue-700">
                       {displayOption.tag}
                     </p>
                     <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -536,7 +536,7 @@ export default function CasePackagePage() {
                       <p className="mt-1 text-3xl font-black">
                         {formatKr(option.price)} kr
                       </p>
-                      <p className="mt-2 text-sm font-semibold text-cyan-200">
+                      <p className="mt-2 text-sm font-semibold text-blue-200">
                         {canUpgrade
                           ? `Mellomlegg nå: ${formatKr(upgradeAmount)} kr`
                           : isCurrent
@@ -605,7 +605,7 @@ export default function CasePackagePage() {
                 key={bundle.id}
                 className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
               >
-                <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
+                <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
                   {bundle.tag}
                 </p>
 
@@ -624,7 +624,7 @@ export default function CasePackagePage() {
                 <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                   {bundle.features.map((feature) => (
                     <li key={feature} className="flex gap-2">
-                      <span className="text-cyan-700">✓</span>
+                      <span className="text-blue-700">✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -632,7 +632,7 @@ export default function CasePackagePage() {
 
                 <Link
                   href={`/min-side/pakker/kjop?plan=${bundle.id}`}
-                  className="mt-auto block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
+                  className="mt-auto block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-500"
                 >
                   {bundle.button}
                 </Link>
@@ -649,11 +649,11 @@ export default function CasePackagePage() {
                   key={plan.id}
                   className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
                     plan.id === "monthly_pro"
-                      ? "border-cyan-300 bg-cyan-50"
+                      ? "border-blue-300 bg-blue-50"
                       : "border-slate-200 bg-white"
                   }`}
                 >
-                  <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
+                  <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
                     {plan.tag}
                   </p>
 
@@ -672,7 +672,7 @@ export default function CasePackagePage() {
                   <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex gap-2">
-                        <span className="text-cyan-700">✓</span>
+                        <span className="text-blue-700">✓</span>
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -695,7 +695,7 @@ export default function CasePackagePage() {
             </div>
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                 Administrer abonnement
               </p>
               <h2 className="mt-3 text-2xl font-black text-slate-950">

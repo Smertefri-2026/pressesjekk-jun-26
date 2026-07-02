@@ -52,13 +52,13 @@ export default function OmPage() {
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link href="/" className="text-sm font-semibold text-cyan-700 hover:text-cyan-900">
+        <Link href="/" className="text-sm font-semibold text-blue-700 hover:text-blue-900">
           ← Tilbake til forsiden
         </Link>
 
         <section className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Om PresseSjekk
             </p>
 
@@ -89,8 +89,8 @@ export default function OmPage() {
             </div>
           </div>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               Hovedidé
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
@@ -106,7 +106,7 @@ export default function OmPage() {
         </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
             Hvorfor
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -145,7 +145,7 @@ export default function OmPage() {
 
         <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
               Prinsipper
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -158,7 +158,7 @@ export default function OmPage() {
                   key={item}
                   className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
                 >
-                  <span className="mr-2 text-cyan-700">✓</span>
+                  <span className="mr-2 text-blue-700">✓</span>
                   {item}
                 </div>
               ))}
@@ -182,7 +182,7 @@ export default function OmPage() {
         </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
             For hvem
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -207,7 +207,7 @@ export default function OmPage() {
         <section className="mt-16 rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-8">
           <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-center">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Visjon
               </p>
               <h2 className="mt-3 text-4xl font-black">
@@ -221,7 +221,7 @@ export default function OmPage() {
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Neste steg
               </p>
               <p className="mt-4 text-2xl font-black">
@@ -229,7 +229,7 @@ export default function OmPage() {
               </p>
               <Link
                 href="/pressesjekk"
-                className="mt-6 inline-flex rounded-xl bg-cyan-400 px-6 py-4 font-black text-slate-950 hover:bg-cyan-300"
+                className="mt-6 inline-flex rounded-xl bg-blue-500 px-6 py-4 font-black text-slate-950 hover:bg-blue-300"
               >
                 Start sjekk
               </Link>

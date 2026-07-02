@@ -175,13 +175,13 @@ function BuyPackageContent() {
       <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/priser"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til priser
         </Link>
 
         <div className="mt-8">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
             Kjøp pakke
           </p>
 
@@ -211,14 +211,14 @@ function BuyPackageContent() {
             </p>
             <Link
               href="/priser"
-              className="mt-6 inline-flex rounded-xl bg-cyan-500 px-5 py-3 font-black text-slate-950 hover:bg-cyan-400"
+              className="mt-6 inline-flex rounded-xl bg-blue-500 px-5 py-3 font-black text-slate-950 hover:bg-blue-500"
             >
               Se priser
             </Link>
           </section>
         ) : (
           <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-            <p className="inline-flex rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
+            <p className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
               {packageTypeLabel(selectedPlan.type)}
             </p>
 
@@ -238,7 +238,7 @@ function BuyPackageContent() {
                 </div>
 
                 {discountAmount > 0 ? (
-                  <div className="mt-3 flex justify-between gap-4 text-sm font-bold text-cyan-200">
+                  <div className="mt-3 flex justify-between gap-4 text-sm font-bold text-blue-200">
                     <span>Fradrag for ubrukte ledige saker</span>
                     <span>-{formatKrFromOre(discountAmount)} kr</span>
                   </div>
@@ -260,13 +260,13 @@ function BuyPackageContent() {
             <ul className="mt-6 grid gap-3 text-sm font-medium text-slate-700">
               {selectedPlan.features.map((feature) => (
                 <li key={feature} className="flex gap-2">
-                  <span className="text-cyan-700">✓</span>
+                  <span className="text-blue-700">✓</span>
                   <span>{feature}</span>
                 </li>
               ))}
             </ul>
 
-            <div className="mt-7 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm leading-7 text-slate-700">
+            <div className="mt-7 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm leading-7 text-slate-700">
               Når betalingen er fullført, blir pakken lagt på kontoen din som
               ledige saker. Du kan opprette saken etterpå fra Min Side.
             </div>
@@ -281,7 +281,7 @@ function BuyPackageContent() {
               type="button"
               onClick={startCheckout}
               disabled={isLoading}
-              className="mt-7 w-full rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-7 w-full rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isLoading ? "Sender deg til betaling ..." : "Gå til betaling"}
             </button>

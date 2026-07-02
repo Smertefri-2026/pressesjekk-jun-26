@@ -20,7 +20,7 @@ export function DashboardStats({ activeCases }: DashboardStatsProps) {
           <p className="text-sm text-slate-400">{item.label}</p>
           <p
             className={`mt-3 text-4xl font-bold ${
-              item.highlight ? "text-cyan-300" : ""
+              item.highlight ? "text-blue-300" : ""
             }`}
           >
             {item.value}

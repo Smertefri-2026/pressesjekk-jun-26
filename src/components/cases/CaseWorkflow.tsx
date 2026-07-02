@@ -53,8 +53,8 @@ export function CaseWorkflow({
   ];
 
   return (
-    <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-      <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+    <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+      <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
         Saksgang
       </p>
 
@@ -81,8 +81,8 @@ export function CaseWorkflow({
               compact ? "p-3" : "p-4"
             } ${
               step.done
-                ? "border-cyan-300 bg-white text-slate-950 hover:bg-cyan-50"
-                : "border-cyan-100 bg-white/50 text-slate-400 hover:bg-white/70"
+                ? "border-blue-300 bg-white text-slate-950 hover:bg-blue-50"
+                : "border-blue-100 bg-white/50 text-slate-400 hover:bg-white/70"
             }`}
           >
             <div className="flex items-start gap-3">
@@ -91,7 +91,7 @@ export function CaseWorkflow({
                   compact ? "h-6 w-6 text-[11px]" : "h-7 w-7 text-xs"
                 } ${
                   step.done
-                    ? "bg-cyan-500 text-slate-950"
+                    ? "bg-blue-500 text-slate-950"
                     : "bg-slate-200 text-slate-500"
                 }`}
               >

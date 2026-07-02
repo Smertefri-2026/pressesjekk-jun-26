@@ -84,14 +84,14 @@ export default function HvordanDetFungererPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til forsiden
         </Link>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Slik fungerer det
             </p>
 
@@ -122,8 +122,8 @@ export default function HvordanDetFungererPage() {
             </div>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-7 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-7 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               Kort forklart
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
@@ -151,7 +151,7 @@ export default function HvordanDetFungererPage() {
         </div>
 
         <section className="mt-16">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
             Prosessen
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -164,7 +164,7 @@ export default function HvordanDetFungererPage() {
                 key={step.title}
                 className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
               >
-                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-100 text-lg font-black text-cyan-800">
+                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 text-lg font-black text-blue-800">
                   {index + 1}
                 </div>
                 <h3 className="text-xl font-black text-slate-950">
@@ -182,7 +182,7 @@ export default function HvordanDetFungererPage() {
               key={item.title}
               className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
             >
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-cyan-700">
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-blue-700">
                 {item.steps}
               </p>
               <h2 className="mt-3 text-2xl font-black text-slate-950">
@@ -195,7 +195,7 @@ export default function HvordanDetFungererPage() {
 
         <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
               Hva vurderes?
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -214,7 +214,7 @@ export default function HvordanDetFungererPage() {
                   key={item}
                   className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
                 >
-                  <span className="mr-2 text-cyan-700">✓</span>
+                  <span className="mr-2 text-blue-700">✓</span>
                   {item}
                 </div>
               ))}
@@ -245,7 +245,7 @@ export default function HvordanDetFungererPage() {
         <section className="mt-16 rounded-3xl bg-slate-950 p-8 text-white shadow-sm">
           <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Hva får du?
               </p>
               <h2 className="mt-3 text-4xl font-black">
@@ -288,7 +288,7 @@ export default function HvordanDetFungererPage() {
         </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
             Klar til å prøve?
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -302,7 +302,7 @@ export default function HvordanDetFungererPage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/pressesjekk"
-              className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950 hover:bg-cyan-400"
+              className="rounded-xl bg-blue-500 px-6 py-4 font-bold text-slate-950 hover:bg-blue-500"
             >
               Start sjekk
             </Link>

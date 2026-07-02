@@ -24,7 +24,7 @@ export function CaseArticleCard({ item }: CaseArticleCardProps) {
         </div>
         <div>
           <p className="text-sm text-slate-400">Sjekket før</p>
-          <p className="mt-1 font-semibold text-cyan-300">
+          <p className="mt-1 font-semibold text-blue-300">
             {item.checkedCount} ganger
           </p>
         </div>

@@ -87,14 +87,14 @@ export default function PriserPage() {
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <Link
           href="/"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til forsiden
         </Link>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Priser
             </p>
 
@@ -108,8 +108,8 @@ export default function PriserPage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               Viktig
             </p>
             <h2 className="mt-3 text-2xl font-black text-slate-950">
@@ -142,7 +142,7 @@ export default function PriserPage() {
         </section>
 
         <section className="mt-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
             {tabInfo[activeTab].label}
           </p>
           <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
@@ -162,11 +162,11 @@ export default function PriserPage() {
                   plan.id === "investigation_pack"
                     ? "border-amber-300 bg-amber-50"
                     : plan.id === "full_pack"
-                      ? "border-cyan-300 bg-cyan-50"
+                      ? "border-blue-300 bg-blue-50"
                       : "border-slate-200 bg-white"
                 }`}
               >
-                <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
+                <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
                   {plan.tag}
                 </p>
 
@@ -185,7 +185,7 @@ export default function PriserPage() {
                 <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex gap-2">
-                      <span className="text-cyan-700">✓</span>
+                      <span className="text-blue-700">✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -197,7 +197,7 @@ export default function PriserPage() {
                       ? "/kontakt"
                       : `/min-side/saker/ny?package=${plan.id}`
                   }
-                  className="mt-auto block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
+                  className="mt-auto block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-500"
                 >
                   {plan.button}
                 </Link>
@@ -213,7 +213,7 @@ export default function PriserPage() {
                 key={bundle.name}
                 className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
               >
-                <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
+                <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
                   {bundle.tag}
                 </p>
 
@@ -225,7 +225,7 @@ export default function PriserPage() {
                   {bundle.price}
                 </p>
 
-                <p className="mt-2 text-sm font-black text-cyan-800">
+                <p className="mt-2 text-sm font-black text-blue-800">
                   {bundle.perCase}
                 </p>
 
@@ -236,7 +236,7 @@ export default function PriserPage() {
                 <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                   {bundle.features.map((feature) => (
                     <li key={feature} className="flex gap-2">
-                      <span className="text-cyan-700">✓</span>
+                      <span className="text-blue-700">✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -260,11 +260,11 @@ export default function PriserPage() {
                 key={plan.id}
                 className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
                   plan.id === "monthly_pro"
-                    ? "border-cyan-300 bg-cyan-50"
+                    ? "border-blue-300 bg-blue-50"
                     : "border-slate-200 bg-white"
                 }`}
               >
-                <p className="inline-flex w-fit rounded-full bg-cyan-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-cyan-800">
+                <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
                   {plan.tag}
                 </p>
 
@@ -283,7 +283,7 @@ export default function PriserPage() {
                 <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex gap-2">
-                      <span className="text-cyan-700">✓</span>
+                      <span className="text-blue-700">✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -311,7 +311,7 @@ export default function PriserPage() {
         ) : null}
 
         <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-5 text-center shadow-sm sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
             Klar til å starte?
           </p>
 
@@ -327,7 +327,7 @@ export default function PriserPage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/min-side/saker/ny"
-              className="rounded-xl bg-cyan-500 px-6 py-4 font-bold text-slate-950 hover:bg-cyan-400"
+              className="rounded-xl bg-blue-500 px-6 py-4 font-bold text-slate-950 hover:bg-blue-500"
             >
               Start sak
             </Link>

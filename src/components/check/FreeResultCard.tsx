@@ -1,7 +1,7 @@
 export function FreeResultCard() {
   return (
-    <aside className="h-fit rounded-3xl border border-cyan-300/30 bg-cyan-300/10 p-6 lg:sticky lg:top-8">
-      <p className="text-sm uppercase tracking-[0.25em] text-cyan-200">
+    <aside className="h-fit rounded-3xl border border-blue-300/30 bg-blue-300/10 p-6 lg:sticky lg:top-8">
+      <p className="text-sm uppercase tracking-[0.25em] text-blue-200">
         Gratis forhåndsresultat
       </p>
 
@@ -24,7 +24,7 @@ export function FreeResultCard() {
         </ul>
       </div>
 
-      <button className="mt-6 w-full rounded-xl bg-cyan-300 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-200">
+      <button className="mt-6 w-full rounded-xl bg-blue-300 px-5 py-3 font-semibold text-slate-950 hover:bg-blue-200">
         Velg rapportpakke
       </button>
 

@@ -9,11 +9,11 @@ export function CaseCard({ item }: CaseCardProps) {
   return (
     <Link
       href={item.href}
-      className="block rounded-3xl border border-white/10 bg-white/[0.03] p-6 hover:border-cyan-300/50"
+      className="block rounded-3xl border border-white/10 bg-white/[0.03] p-6 hover:border-blue-300/50"
     >
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
-          <p className="text-sm text-cyan-300">
+          <p className="text-sm text-blue-300">
             {item.media} · {item.date}
           </p>
           <h3 className="mt-2 text-xl font-bold">{item.title}</h3>

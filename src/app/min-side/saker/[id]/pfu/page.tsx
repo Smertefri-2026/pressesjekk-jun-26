@@ -525,14 +525,14 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
           <Link
             href={`/min-side/saker/${params.id}`}
-            className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
           >
             ← Tilbake til saken
           </Link>
 
           <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <section className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm sm:p-10">
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-800">
+            <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm sm:p-10">
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-800">
                 Redaksjonell sjekk
               </p>
 
@@ -557,7 +557,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
                 <Link
                   href={`/min-side/saker/${params.id}/opplysninger`}
-                  className="rounded-2xl border border-cyan-300 bg-white px-6 py-4 font-black text-cyan-900 hover:bg-cyan-100"
+                  className="rounded-2xl border border-blue-300 bg-white px-6 py-4 font-black text-blue-900 hover:bg-blue-100"
                 >
                   Gå til publiseringsgrunnlag
                 </Link>
@@ -596,7 +596,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               />
 
               <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                   Riktig arbeidsflyt
                 </p>
                 <h2 className="mt-3 text-3xl font-black">
@@ -623,14 +623,14 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               PFU-klage
             </p>
 
@@ -646,7 +646,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
             </p>
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                 Kladd
               </p>
 
@@ -667,7 +667,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                   type="button"
                   onClick={handleGenerateAiPfuDraft}
                   disabled={isGeneratingAiDraft}
-                  className="col-span-2 w-full rounded-2xl bg-cyan-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
+                  className="col-span-2 w-full rounded-2xl bg-blue-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
                 >
                   {isGeneratingAiDraft
                     ? "Genererer..."
@@ -678,7 +678,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                   type="button"
                   onClick={handleDownloadPfuDraftPdf}
                   disabled={!activePfuDraft}
-                  className="col-span-1 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-3 py-4 text-center text-base font-black text-cyan-900 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
+                  className="col-span-1 w-full rounded-2xl border border-blue-300 bg-blue-50 px-3 py-4 text-center text-base font-black text-blue-900 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
                 >
                   Last ned PDF
                 </button>
@@ -705,7 +705,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               ) : null}
 
               {copyMessage ? (
-                <div className="mt-6 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-sm font-semibold text-cyan-800">
+                <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-800">
                   {copyMessage}
                 </div>
               ) : null}
@@ -726,7 +726,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
                 <Link
                   href={`/min-side/saker/${params.id}/politianmeldelse`}
-                  className="rounded-2xl border border-cyan-300 bg-cyan-50 px-6 py-4 font-black text-cyan-900 hover:bg-cyan-100"
+                  className="rounded-2xl border border-blue-300 bg-blue-50 px-6 py-4 font-black text-blue-900 hover:bg-blue-100"
                 >
                   Gå til politianmeldelse
                 </Link>
@@ -768,7 +768,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
             />
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                 Lagrede PFU-klager
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -795,8 +795,8 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                         onClick={() => setSelectedPfuDraftId(draft.id)}
                         className={`rounded-2xl border p-4 text-left transition ${
                           isSelected
-                            ? "border-cyan-400 bg-cyan-50 shadow-sm"
-                            : "border-slate-200 bg-slate-50 hover:bg-cyan-50"
+                            ? "border-blue-500 bg-blue-50 shadow-sm"
+                            : "border-slate-200 bg-slate-50 hover:bg-blue-50"
                         }`}
                       >
                         <p className="font-black text-slate-950">
@@ -806,7 +806,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                           {formatDate(draft.created_at)}
                         </p>
                         {isSelected ? (
-                          <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
+                          <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-blue-700">
                             Vises nå
                           </p>
                         ) : null}
@@ -818,7 +818,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Videre arbeid
               </p>
               <h2 className="mt-3 text-3xl font-black">

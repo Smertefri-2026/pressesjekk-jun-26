@@ -10,7 +10,7 @@ export default function NotFound() {
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1fr_390px] lg:items-center">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               404 / Siden finnes ikke
             </p>
 
@@ -39,15 +39,15 @@ export default function NotFound() {
               </Link>
               <Link
                 href="/kontakt"
-                className="rounded-xl border border-cyan-300 bg-cyan-50 px-6 py-4 font-bold text-cyan-900 hover:bg-cyan-100"
+                className="rounded-xl border border-blue-300 bg-blue-50 px-6 py-4 font-bold text-blue-900 hover:bg-blue-100"
               >
                 Kontakt oss
               </Link>
             </div>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-7 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-7 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               Feil side, riktig spor
             </p>
 

@@ -41,13 +41,13 @@ export default function KontaktPage() {
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link href="/" className="text-sm font-semibold text-cyan-700 hover:text-cyan-900">
+        <Link href="/" className="text-sm font-semibold text-blue-700 hover:text-blue-900">
           ← Tilbake til forsiden
         </Link>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Kontakt
             </p>
 
@@ -77,8 +77,8 @@ export default function KontaktPage() {
             </div>
           </section>
 
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               Raskeste vei
             </p>
             <h2 className="mt-4 text-3xl font-black text-slate-950">
@@ -92,7 +92,7 @@ export default function KontaktPage() {
 
             <Link
               href="/pressesjekk"
-              className="mt-6 block rounded-xl bg-cyan-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-cyan-400"
+              className="mt-6 block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-500"
             >
               Start sjekk
             </Link>
@@ -101,7 +101,7 @@ export default function KontaktPage() {
 
         <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
           <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
               Kontaktskjema
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -122,7 +122,7 @@ export default function KontaktPage() {
                   <input
                     type="text"
                     placeholder="Ditt navn"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -133,7 +133,7 @@ export default function KontaktPage() {
                   <input
                     type="email"
                     placeholder="din@epost.no"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -142,7 +142,7 @@ export default function KontaktPage() {
                 <label className="text-sm font-bold text-slate-700">
                   Hva gjelder henvendelsen?
                 </label>
-                <select className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500">
+                <select className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500">
                   <option>Velg tema</option>
                   {formTopics.map((topic) => (
                     <option key={topic}>{topic}</option>
@@ -157,7 +157,7 @@ export default function KontaktPage() {
                 <textarea
                   rows={7}
                   placeholder="Skriv kort hva du ønsker hjelp med..."
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500"
                 />
               </div>
 
@@ -165,7 +165,7 @@ export default function KontaktPage() {
 
               <button
                 type="button"
-                className="rounded-xl bg-cyan-500 px-6 py-4 font-black text-slate-950 hover:bg-cyan-400"
+                className="rounded-xl bg-blue-500 px-6 py-4 font-black text-slate-950 hover:bg-blue-500"
               >
                 Send melding
               </button>
@@ -188,7 +188,7 @@ export default function KontaktPage() {
             </section>
 
             <section className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Proff og utredning
               </p>
               <h2 className="mt-3 text-2xl font-black">
@@ -200,7 +200,7 @@ export default function KontaktPage() {
               </p>
               <Link
                 href="/proff"
-                className="mt-6 inline-block rounded-xl bg-cyan-400 px-5 py-3 font-black text-slate-950 hover:bg-cyan-300"
+                className="mt-6 inline-block rounded-xl bg-blue-500 px-5 py-3 font-black text-slate-950 hover:bg-blue-300"
               >
                 Les om proffløsning
               </Link>

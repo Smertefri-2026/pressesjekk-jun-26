@@ -15,7 +15,7 @@ export function CaseTimeline({ timeline }: CaseTimelineProps) {
             key={`${item.date}-${item.title}`}
             className="rounded-2xl border border-white/10 bg-slate-900 p-5"
           >
-            <p className="text-sm text-cyan-300">{item.date}</p>
+            <p className="text-sm text-blue-300">{item.date}</p>
             <h3 className="mt-2 font-bold">{item.title}</h3>
             <p className="mt-2 leading-7 text-slate-300">{item.text}</p>
           </div>

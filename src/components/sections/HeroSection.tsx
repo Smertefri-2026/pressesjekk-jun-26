@@ -4,7 +4,7 @@ export function HeroSection() {
   return (
     <div className="grid flex-1 items-center gap-10 py-14 lg:grid-cols-[1fr_360px]">
       <section className="rounded-3xl border border-white/10 bg-white/3 p-8 shadow-2xl lg:p-12">
-        <p className="mb-5 inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-200">
+        <p className="mb-5 inline-flex rounded-full border border-blue-300/30 bg-blue-300/10 px-4 py-2 text-sm text-blue-200">
           AI-basert analyse av medieartikler
         </p>
 
@@ -22,7 +22,7 @@ export function HeroSection() {
           <input
             type="text"
             placeholder="Lim inn URL til artikkel..."
-            className="min-h-12 rounded-xl border border-slate-200 px-4 outline-none focus:border-cyan-500"
+            className="min-h-12 rounded-xl border border-slate-200 px-4 outline-none focus:border-blue-500"
           />
           <Link
             href="/pressesjekk"

@@ -813,7 +813,7 @@ export default function MinSidePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               Dashboard
             </p>
 
@@ -828,8 +828,8 @@ export default function MinSidePage() {
             </p>
           </section>
 
-          <aside className="hidden rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7 lg:block">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="hidden rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7 lg:block">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               Konto
             </p>
 
@@ -855,7 +855,7 @@ export default function MinSidePage() {
               {profile?.is_admin ? (
                 <Link
                   href="/admin"
-                  className="rounded-xl border border-cyan-300 bg-cyan-100 px-5 py-3 text-center text-sm font-black text-cyan-950 hover:bg-cyan-200"
+                  className="rounded-xl border border-blue-300 bg-blue-100 px-5 py-3 text-center text-sm font-black text-cyan-950 hover:bg-blue-200"
                 >
                   Admin
                 </Link>
@@ -869,13 +869,13 @@ export default function MinSidePage() {
         <section className="mt-10 md:hidden">
           <Link
             href={packageHref}
-            className="block rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="block rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-cyan-800">Tilgang / pakker</p>
+            <p className="font-bold text-blue-800">Tilgang / pakker</p>
             <p className="mt-4 text-4xl font-black text-slate-950">
               {packageStatusLabel}
             </p>
-            <p className="mt-3 text-sm font-semibold text-cyan-800">
+            <p className="mt-3 text-sm font-semibold text-blue-800">
               {packageCtaLabel}
             </p>
           </Link>
@@ -887,13 +887,13 @@ export default function MinSidePage() {
         >
           <Link
             href={packageHref}
-            className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-cyan-800">Tilgang / pakker</p>
+            <p className="font-bold text-blue-800">Tilgang / pakker</p>
             <p className="mt-4 text-3xl font-black text-slate-950">
               {packageStatusLabel}
             </p>
-            <p className="mt-3 text-sm font-semibold text-cyan-800">
+            <p className="mt-3 text-sm font-semibold text-blue-800">
               {packageCtaLabel}
             </p>
           </Link>
@@ -906,7 +906,7 @@ export default function MinSidePage() {
             <p className="mt-4 text-5xl font-black text-slate-950">
               {folderCount}
             </p>
-            <p className="mt-3 text-sm font-semibold text-cyan-700">
+            <p className="mt-3 text-sm font-semibold text-blue-700">
               Se arkiv
             </p>
           </a>
@@ -919,7 +919,7 @@ export default function MinSidePage() {
             <p className="mt-4 text-5xl font-black text-slate-950">
               {caseCount}
             </p>
-            <p className="mt-3 text-sm font-semibold text-cyan-700">
+            <p className="mt-3 text-sm font-semibold text-blue-700">
               Se arkiv
             </p>
           </a>
@@ -934,7 +934,7 @@ export default function MinSidePage() {
             <p className="mt-4 text-5xl font-black text-slate-950">
               {reportCount}
             </p>
-            <p className="mt-3 text-sm font-semibold text-cyan-700">
+            <p className="mt-3 text-sm font-semibold text-blue-700">
               Se rapporter
             </p>
           </a>
@@ -953,7 +953,7 @@ export default function MinSidePage() {
           <div className="rounded-3xl border border-slate-200 bg-white p-0 shadow-sm">
             <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div>
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
                   Saksarkiv
                 </p>
                 <h2 className="mt-2 text-3xl font-black text-slate-950">
@@ -978,7 +978,7 @@ export default function MinSidePage() {
                     }}
                     className={
                       archiveMode === "active"
-                        ? "text-slate-950 underline decoration-cyan-500 decoration-4 underline-offset-8"
+                        ? "text-slate-950 underline decoration-blue-500 decoration-4 underline-offset-8"
                         : "text-slate-500 hover:text-slate-950"
                     }
                   >
@@ -994,7 +994,7 @@ export default function MinSidePage() {
                     }}
                     className={
                       archiveMode === "trash"
-                        ? "text-slate-950 underline decoration-cyan-500 decoration-4 underline-offset-8"
+                        ? "text-slate-950 underline decoration-blue-500 decoration-4 underline-offset-8"
                         : "text-slate-500 hover:text-slate-950"
                     }
                   >
@@ -1008,7 +1008,7 @@ export default function MinSidePage() {
                       type="button"
                       onClick={createFolder}
                       disabled={isCreatingFolder}
-                      className="rounded-xl border border-cyan-300 bg-cyan-50 px-5 py-3 text-center text-sm font-black text-cyan-950 hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-xl border border-blue-300 bg-blue-50 px-5 py-3 text-center text-sm font-black text-cyan-950 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isCreatingFolder
                         ? "Oppretter..."
@@ -1043,7 +1043,7 @@ export default function MinSidePage() {
                       sessionStorage.removeItem("pressesjekkSelectedFolderId");
                       setSelectedFolderId(null);
                     }}
-                    className="shrink-0 text-sm font-black text-cyan-700 hover:text-cyan-900"
+                    className="shrink-0 text-sm font-black text-blue-700 hover:text-blue-900"
                   >
                     <span className="sm:hidden">← Tilbake</span>
                     <span className="hidden sm:inline">
@@ -1066,7 +1066,7 @@ export default function MinSidePage() {
                   }}
                   className={
                     viewMode === "list"
-                      ? "text-slate-950 underline decoration-cyan-500 decoration-4 underline-offset-8"
+                      ? "text-slate-950 underline decoration-blue-500 decoration-4 underline-offset-8"
                       : "text-slate-500 hover:text-slate-950"
                   }
                 >
@@ -1081,7 +1081,7 @@ export default function MinSidePage() {
                   }}
                   className={
                     viewMode === "grid"
-                      ? "text-slate-950 underline decoration-cyan-500 decoration-4 underline-offset-8"
+                      ? "text-slate-950 underline decoration-blue-500 decoration-4 underline-offset-8"
                       : "text-slate-500 hover:text-slate-950"
                   }
                 >
@@ -1114,7 +1114,7 @@ export default function MinSidePage() {
                         type="button"
                         onClick={createFolder}
                         disabled={isCreatingFolder}
-                        className="rounded-xl bg-cyan-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-xl bg-blue-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isCreatingFolder
                           ? "Oppretter..."
@@ -1143,7 +1143,7 @@ export default function MinSidePage() {
                   {archiveItems.map((item) => (
                     <article
                       key={item.id}
-                      className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-cyan-50 hover:shadow-md"
+                      className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-blue-50 hover:shadow-md"
                     >
                       {item.type === "Mappe" ? (
                         <button
@@ -1196,7 +1196,7 @@ export default function MinSidePage() {
                             <button
                               type="button"
                               onClick={() => restoreFromTrash(item)}
-                              className="rounded-xl border border-cyan-200 bg-white px-4 py-3 text-sm font-black text-cyan-700 hover:bg-cyan-50"
+                              className="rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-700 hover:bg-blue-50"
                             >
                               Gjenopprett
                             </button>
@@ -1279,28 +1279,28 @@ export default function MinSidePage() {
                   <button
                     type="button"
                     onClick={() => handleSort("name")}
-                    className="pl-12 text-left hover:text-cyan-700"
+                    className="pl-12 text-left hover:text-blue-700"
                   >
                     Navn{sortLabel("name")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSort("type")}
-                    className="text-left hover:text-cyan-700"
+                    className="text-left hover:text-blue-700"
                   >
                     Type{sortLabel("type")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSort("status")}
-                    className="text-left hover:text-cyan-700"
+                    className="text-left hover:text-blue-700"
                   >
                     Status{sortLabel("status")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSort("date")}
-                    className="text-left hover:text-cyan-700"
+                    className="text-left hover:text-blue-700"
                   >
                     Dato{sortLabel("date")}
                   </button>
@@ -1311,7 +1311,7 @@ export default function MinSidePage() {
                   {archiveItems.map((item) => (
                     <div
                       key={item.id}
-                      className="grid grid-cols-[minmax(0,1fr)_116px] gap-3 px-5 py-4 transition hover:bg-cyan-50 md:grid-cols-[1fr_110px_120px_120px_230px] md:items-center"
+                      className="grid grid-cols-[minmax(0,1fr)_116px] gap-3 px-5 py-4 transition hover:bg-blue-50 md:grid-cols-[1fr_110px_120px_120px_230px] md:items-center"
                     >
                       {item.type === "Mappe" ? (
                         <button
@@ -1373,7 +1373,7 @@ export default function MinSidePage() {
                             <button
                               type="button"
                               onClick={() => restoreFromTrash(item)}
-                              className="rounded-lg border border-cyan-200 bg-white px-3 py-2 text-xs font-black text-cyan-700 hover:bg-cyan-50"
+                              className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-50"
                             >
                               Gjenopprett
                             </button>
@@ -1447,7 +1447,7 @@ export default function MinSidePage() {
 
           <aside className="grid gap-6">
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Siste aktivitet
               </p>
 
@@ -1469,7 +1469,7 @@ export default function MinSidePage() {
                       <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-300">
                         {item.description}
                       </p>
-                      <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-300">
+                      <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-blue-300">
                         {formatActivityDate(item.created_at)}
                       </p>
                     </Link>
@@ -1481,8 +1481,8 @@ export default function MinSidePage() {
           </aside>
         </section>
         <section className="mt-8 lg:hidden">
-          <aside className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
               Konto
             </p>
 

@@ -375,14 +375,14 @@ export default function PfuDecisionPage() {
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
           <Link
             href={`/min-side/saker/${params.id}`}
-            className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
           >
             ← Tilbake til saken
           </Link>
 
           <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <section className="rounded-3xl border border-cyan-200 bg-cyan-50 p-6 shadow-sm sm:p-10">
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-800">
+            <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm sm:p-10">
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-800">
                 Redaksjonell sjekk
               </p>
 
@@ -407,7 +407,7 @@ export default function PfuDecisionPage() {
 
                 <Link
                   href={`/min-side/saker/${params.id}/opplysninger`}
-                  className="rounded-2xl border border-cyan-300 bg-white px-6 py-4 font-black text-cyan-900 hover:bg-cyan-100"
+                  className="rounded-2xl border border-blue-300 bg-white px-6 py-4 font-black text-blue-900 hover:bg-blue-100"
                 >
                   Gå til publiseringsgrunnlag
                 </Link>
@@ -446,7 +446,7 @@ export default function PfuDecisionPage() {
               />
 
               <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                   Riktig arbeidsflyt
                 </p>
                 <h2 className="mt-3 text-3xl font-black">
@@ -474,14 +474,14 @@ export default function PfuDecisionPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="text-sm font-semibold text-cyan-700 hover:text-cyan-900"
+          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
         >
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
               PFU-avgjørelse
             </p>
 
@@ -498,7 +498,7 @@ export default function PfuDecisionPage() {
               onSubmit={handleSave}
               className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
             >
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
               PFU-status
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -542,7 +542,7 @@ export default function PfuDecisionPage() {
                   type="date"
                   value={pfuSentDate}
                   onChange={(event) => setPfuSentDate(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -559,7 +559,7 @@ export default function PfuDecisionPage() {
                   value={pfuCaseNumber}
                   onChange={(event) => setPfuCaseNumber(event.target.value)}
                   placeholder="F.eks. 123/26"
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -576,7 +576,7 @@ export default function PfuDecisionPage() {
                   value={pfuCaseUrl}
                   onChange={(event) => setPfuCaseUrl(event.target.value)}
                   placeholder="https://..."
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -613,7 +613,7 @@ export default function PfuDecisionPage() {
                   type="date"
                   value={decisionDate}
                   onChange={(event) => setDecisionDate(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -628,7 +628,7 @@ export default function PfuDecisionPage() {
                   id="decisionResult"
                   value={decisionResult}
                   onChange={(event) => setDecisionResult(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 >
                   <option value="">Velg resultat</option>
                   <option value="upheld">Felt</option>
@@ -653,7 +653,7 @@ export default function PfuDecisionPage() {
                   value={decisionSummary}
                   onChange={(event) => setDecisionSummary(event.target.value)}
                   placeholder="Oppsummer kort hva PFU kom frem til..."
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -670,7 +670,7 @@ export default function PfuDecisionPage() {
                   value={decisionText}
                   onChange={(event) => setDecisionText(event.target.value)}
                   placeholder="Lim inn hele eller deler av PFU-avgjørelsen..."
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 />
               </div>
 
@@ -706,7 +706,7 @@ export default function PfuDecisionPage() {
                   onChange={(event) =>
                     setNextStepInterest(event.target.value)
                   }
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-cyan-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
                 >
                   <option value="">Ikke valgt</option>
                   <option value="need_review">Ja, vurder neste steg</option>
@@ -754,7 +754,7 @@ export default function PfuDecisionPage() {
 
                 <Link
                   href={`/min-side/saker/${params.id}/utredning`}
-                  className="col-span-2 w-full rounded-2xl border border-cyan-300 bg-cyan-50 px-6 py-4 text-center font-black text-cyan-900 hover:bg-cyan-100 sm:col-span-1 sm:w-auto"
+                  className="col-span-2 w-full rounded-2xl border border-blue-300 bg-blue-50 px-6 py-4 text-center font-black text-blue-900 hover:bg-blue-100 sm:col-span-1 sm:w-auto"
                 >
                   Gå til utredning
                 </Link>
@@ -796,8 +796,8 @@ export default function PfuDecisionPage() {
               }}
             />
 
-            <div className="rounded-3xl border border-cyan-200 bg-cyan-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-800">
+            <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
                 Lagret status
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -825,7 +825,7 @@ export default function PfuDecisionPage() {
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-cyan-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
                 Videre arbeid
               </p>
               <h2 className="mt-3 text-3xl font-black">
