@@ -108,31 +108,40 @@ const exampleData = {
     eyebrow: "Politianmeldelse",
     title: "Foreløpig utkast til politianmeldelse",
     subtitle:
-      "Et nøkternt vurderingsgrunnlag for alvorlige saker der politianmeldelse kan vurderes.",
+      "Et strukturert vurderingsgrunnlag for alvorlige mediesaker der politisporet, PFU-sporet og et mulig sivilt krav må skilles tydelig.",
     summary:
-      "Dette eksempelet viser hvordan en politianmeldelse kan struktureres dersom en mediesak oppleves som svært belastende. Teksten er forsiktig formulert og ber politiet eller juridisk rådgiver vurdere om det finnes grunnlag for videre oppfølging.",
+      "Dette eksempelet viser hvordan PresseSjekk kan hjelpe med å strukturere en mulig politianmeldelse uten å konkludere juridisk. Utkastet skiller mellom presseetiske forhold, mulige straffbare forhold og ærekrenkende eller omdømmeskadelig omtale som normalt må vurderes som et sivilt spor.",
     sections: [
       {
         title: "1. Anmelder / klager",
-        text: "Navn: Ola Nordmann. Rolle: Privatperson. Saken gjelder medieomtale der Ola mener han er fremstilt på en uriktig og belastende måte.",
+        text: "Navn: Ola Nordmann. Rolle: Privatperson. Saken gjelder medieomtale der Ola mener han er fremstilt på en uriktig, belastende og omdømmeskadelig måte.",
       },
       {
         title: "2. Kort sammendrag",
-        text: "Eksempelavisen publiserte en artikkel der Ola Nordmann ble omtalt i en konflikt. Ola mener omtalen kan gi et uriktig og skadelig inntrykk, og at redaksjonen ikke har håndtert hans tilsvar på en tilfredsstillende måte.",
+        text: "Eksempelavisen publiserte en artikkel der Ola Nordmann ble omtalt i en konflikt. Ola mener omtalen kan gi et uriktig og skadelig inntrykk, og at redaksjonen ikke har håndtert samtidig imøtegåelse, tilsvar eller senere oppdatering på en tilfredsstillende måte.",
       },
       {
-        title: "3. Hva som bes vurdert",
-        text: "Det bes vurdert om omtalen, presentasjonen og eventuell manglende oppdatering kan gi grunnlag for videre undersøkelse. Saken fremstår likevel primært som presseetisk og eventuelt sivilrettslig.",
+        title: "3. Mulige strafferettslige spørsmål",
+        text: "Politiet vurderer konkrete straffbare forhold, ikke PFU-spørsmål alene. I en mediesak kan det for eksempel være relevant å beskrive om publiseringen kan berøre privatlivets fred etter straffeloven § 267, hensynsløs atferd etter straffeloven § 266, trusler, hatefulle ytringer eller andre konkrete personrettede forhold. Utkastet skal ikke konkludere, men be om at forholdene vurderes dersom faktagrunnlaget tilsier det.",
       },
       {
-        title: "4. Forbehold",
-        text: "Dette er et foreløpig utkast. Det er ikke juridisk rådgivning, ikke en konklusjon om straffbart forhold og må kvalitetssikres før eventuell innsending.",
+        title: "4. Ærekrenkelse og sivilt spor",
+        text: "Påstander som oppleves ærekrenkende eller omdømmeskadelige bør beskrives konkret. Samtidig er ærekrenkelser normalt ikke en vanlig politisak alene, men et mulig sivilt spor, blant annet etter skadeserstatningsloven § 3-6 a. Derfor bør utkastet skille tydelig mellom politisporet og et mulig krav om erstatning eller oppreisning.",
+      },
+      {
+        title: "5. Dokumentasjon og vedlegg",
+        text: "Utkastet bør vise til artikkel, publiseringsdato, skjermbilder, kontakt med journalist eller redaktør, eventuelt tilsvar, PFU-spor, senere oppdateringer og annen dokumentasjon som kan belyse saken.",
+      },
+      {
+        title: "6. Forbehold",
+        text: "Dette er et foreløpig utkast og et arbeidsgrunnlag. Det er ikke juridisk rådgivning, ikke en konklusjon om straffbart forhold og må kvalitetssikres av bruker eller advokat før eventuell innsending.",
       },
     ],
     bullets: [
-      "Politianmeldelse bør bare brukes i alvorlige saker.",
-      "Teksten bør være nøktern og dokumentert.",
-      "Det bør skilles mellom presseetikk, sivile krav og mulig straffespor.",
+      "Skiller mellom PFU-spor, mulig straffespor og sivilt/erstatningsrettslig spor.",
+      "Forklarer at politiet vurderer konkrete straffbare forhold, ikke presseetikk alene.",
+      "Kan omtale privatlivets fred, hensynsløs atferd, trusler eller hatefulle ytringer hvis faktagrunnlaget tilsier det.",
+      "Plasserer ærekrenkende og omdømmeskadelig omtale i et mulig sivilt spor.",
       "Advokat bør vurdere teksten før bruk.",
     ],
   },
