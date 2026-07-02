@@ -36,8 +36,14 @@ const audiences = [
     label: "Start sak",
   },
   {
+    title: "For journalister og redaksjoner",
+    text: "Kvalitetssikre publiseringsgrunnlag, kilder, tilsvar og VVP-risiko før publisering eller videre arbeid.",
+    href: "/min-side/saker/ny?role=journalist",
+    label: "Start redaksjonell sak",
+  },
+  {
     title: "For proffbrukere",
-    text: "For redaksjoner, journalister, advokater, PR-rådgivere og organisasjoner som jobber med flere mediesaker.",
+    text: "For advokater, PR-rådgivere, organisasjoner og andre som jobber med flere mediesaker over tid.",
     href: "/proff",
     label: "Se proffløsning",
   },
@@ -240,7 +246,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="mt-16 grid gap-6 lg:grid-cols-3">
+        <section className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {audiences.map((item) => (
             <article
               key={item.title}
