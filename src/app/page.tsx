@@ -78,17 +78,17 @@ export default function HomePage() {
               bør følges opp.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3 text-sm font-semibold text-slate-600">
-              <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
+            <div className="mt-8 grid max-w-md grid-cols-2 gap-3 text-sm font-semibold text-slate-600">
+              <span className="block w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-left">
                 For privatpersoner
               </span>
-              <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
+              <span className="block w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-left">
                 For bedrifter
               </span>
-              <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
+              <span className="block w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-left">
                 For advokater
               </span>
-              <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
+              <span className="block w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-left">
                 For redaksjoner
               </span>
             </div>
