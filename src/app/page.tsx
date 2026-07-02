@@ -164,7 +164,7 @@ export default function HomePage() {
               rettsstatus er presist forklart.
             </p>
 
-            <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px] lg:items-start">
+            <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_300px] lg:items-start">
               <figure className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:order-2">
                 <img
                   src="/images/bilde2.png"
@@ -174,7 +174,7 @@ export default function HomePage() {
                 />
               </figure>
 
-              <div className="grid gap-3 md:grid-cols-2 lg:order-1 lg:grid-cols-1">
+              <div className="grid gap-3 md:grid-cols-2 lg:order-1 lg:grid-cols-2">
                 {checks.map((item) => (
                   <div
                     key={item}
@@ -226,19 +226,8 @@ export default function HomePage() {
                 dokumentasjon, rapport, PFU-klage, PFU-avgjørelse, politianmeldelse og
                 utredningspakke kan bygges i samme sak.
               </p>
-            </div>
 
-            <div className="grid gap-4">
-              <figure className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
-                <img
-                  src="/images/bilde3.png"
-                  alt="Dokumentpakke med rapport, tilsvar og dokumentasjon for en mediesak."
-                  className="w-full object-cover"
-                  loading="lazy"
-                />
-              </figure>
-
-              <div className="grid gap-3">
+              <div className="mt-8 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
                   1. Legg inn artikkel
                 </div>
@@ -253,6 +242,15 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+
+            <figure className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] lg:self-stretch">
+              <img
+                src="/images/bilde3.png"
+                alt="Dokumentpakke med rapport, tilsvar og dokumentasjon for en mediesak."
+                className="h-full min-h-[260px] w-full object-cover"
+                loading="lazy"
+              />
+            </figure>
           </div>
         </section>
 
