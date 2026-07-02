@@ -100,25 +100,13 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* TODO: Pressevern/caps-kampanje – reservert plass, ekte annonse legges til senere */}
-          <aside className="hidden rounded-3xl border border-dashed border-slate-300 bg-white p-7 shadow-sm lg:block">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-slate-500">
-              Pressevern
-            </p>
-
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Medlemskap og caps – kommer snart
-            </h2>
-
-            <p className="mt-4 leading-8 text-slate-600">
-              Her kommer en egen kampanje for Pressevern – medlemskap, innhold
-              og produkter. Plassen er reservert inntil videre.
-            </p>
-
-            <span className="mt-6 inline-flex items-center rounded-full border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-500">
-              Kommer snart
-            </span>
-          </aside>
+          <figure className="hidden overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm lg:block">
+            <img
+              src="/images/bilde1.png"
+              alt="Skjerm med artikkel, sjekkliste og dokumentasjon samlet i PresseSjekk."
+              className="h-full min-h-[360px] w-full object-cover"
+            />
+          </figure>
         </div>
 
         <section className="mt-12 rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-8">
@@ -176,6 +164,15 @@ export default function HomePage() {
               rettsstatus er presist forklart.
             </p>
 
+            <figure className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <img
+                src="/images/bilde2.png"
+                alt="Oversikt over punkter PresseSjekk vurderer rundt en mediesak."
+                className="w-full object-cover"
+                loading="lazy"
+              />
+            </figure>
+
             <div className="mt-8 grid gap-3 md:grid-cols-2">
               {checks.map((item) => (
                 <div
@@ -229,18 +226,29 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid gap-3">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
-                1. Legg inn artikkel
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
-                2. Svar på tilsvar-spørsmål
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
-                3. Legg til dokumentasjon
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
-                4. Generer rapport, PFU, politianmeldelse eller utredning
+            <div className="grid gap-4">
+              <figure className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04]">
+                <img
+                  src="/images/bilde3.png"
+                  alt="Dokumentpakke med rapport, tilsvar og dokumentasjon for en mediesak."
+                  className="w-full object-cover"
+                  loading="lazy"
+                />
+              </figure>
+
+              <div className="grid gap-3">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
+                  1. Legg inn artikkel
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
+                  2. Svar på tilsvar-spørsmål
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
+                  3. Legg til dokumentasjon
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200">
+                  4. Generer rapport, PFU, politianmeldelse eller utredning
+                </div>
               </div>
             </div>
           </div>
