@@ -5,11 +5,11 @@ import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 const steps = [
   {
     title: "Sak registrert",
-    text: "Start med å opprette en sak. Du legger inn tittel, medieomtale, lenke eller artikkeltekst og en kort forklaring av hva saken gjelder.",
+    text: "Start med å opprette en mediesak. Du legger inn tittel, én eller flere lenker, artikkeltekst og en kort forklaring av hva du mener er problematisk.",
   },
   {
     title: "Saksopplysninger",
-    text: "Her samler du fakta, tilsvar, kontakt med redaksjonen, rettsstatus, dokumentasjon og vedlegg. Dette blir grunnlaget for resten av saksgangen.",
+    text: "Her samler du fakta, tilsvar, kontakt med redaksjonen, rettsstatus, dokumentasjon, vedlegg og egne vurderinger. Dette blir grunnlaget for resten av saksgangen.",
   },
   {
     title: "Rapport",
@@ -25,7 +25,7 @@ const steps = [
   },
   {
     title: "Politianmeldelse",
-    text: "I alvorlige saker kan du lage et nøkternt utkast til politianmeldelse eller vurderingsgrunnlag. Dette må alltid kvalitetssikres før bruk.",
+    text: "I alvorlige saker kan du lage et nøkternt vurderingsgrunnlag for mulig politianmeldelse. Utkastet skiller mellom presseetikk, mulig straffespor og sivilt spor, og må alltid kvalitetssikres før bruk.",
   },
   {
     title: "Utredningspakke",
@@ -46,7 +46,7 @@ const packages = [
   },
   {
     title: "Full dokumentpakke",
-    text: "Gir tilgang til rapport, PFU-klage og PFU-avgjørelse, PFU-avgjørelse og politianmeldelse.",
+    text: "Gir tilgang til rapport, PFU-klage, PFU-avgjørelse og utkast til politianmeldelse.",
     steps: "Steg 1–6",
   },
   {
@@ -84,14 +84,14 @@ export default function HvordanDetFungererPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/"
-          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          className="text-sm font-semibold text-red-700 hover:text-red-900"
         >
           ← Tilbake til forsiden
         </Link>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               Slik fungerer det
             </p>
 
@@ -100,63 +100,59 @@ export default function HvordanDetFungererPage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              PresseSjekk er bygget som en saksgang. Du starter med én
-              mediesak, samler opplysninger og dokumentasjon, og kan deretter
-              bygge rapport, PFU-klage, politianmeldelse og utredning etter
-              behov.
+              PresseSjekk er bygget som en saksgang, ikke bare en enkel
+              URL-sjekk. Du starter med én mediesak, samler opplysninger,
+              tilsvar og dokumentasjon, og kan deretter bygge rapport,
+              PFU-klage, politianmeldelse eller utredning etter behov.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/pressesjekk"
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
-              >
-                Start sjekk
-              </Link>
-              <Link
-                href="/priser"
-                className="rounded-xl border border-slate-300 bg-white px-6 py-4 font-bold text-slate-950 hover:bg-slate-100"
-              >
-                Se pakker og priser
-              </Link>
-            </div>
           </section>
 
-          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-7 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
-              Kort forklart
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Ikke bare en URL-sjekk
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              En mediesak handler ofte om mer enn teksten i artikkelen. Derfor
-              ser PresseSjekk også på tilsvar, kontakt før publisering,
-              dokumentasjon, rettsstatus, vedlegg og videre oppfølging.
-            </p>
-
-            <div className="mt-6 rounded-2xl bg-white p-5 shadow-sm">
-              <p className="text-sm font-semibold text-slate-500">
-                Hovedidé
-              </p>
-              <p className="mt-2 text-2xl font-black text-slate-950">
-                Artikkel + dokumentasjon + saksgang
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Jo bedre grunnlag du legger inn, desto bedre kan rapportene og
-                dokumentpakkene struktureres.
-              </p>
-            </div>
-          </aside>
+          <figure className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <img
+              src="/images/hvordan-det-fungerer1.png"
+              alt="Illustrasjon av en medieartikkel som bygges om til en strukturert saksmappe."
+              className="h-full min-h-[230px] w-full object-cover sm:min-h-[300px] lg:min-h-[390px]"
+            />
+          </figure>
         </div>
 
+        <section className="mt-12 rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm sm:p-8">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
+            Kort forklart
+          </p>
+          <h2 className="mt-3 text-3xl font-black text-slate-950">
+            Ikke bare en URL-sjekk
+          </h2>
+          <p className="mt-4 max-w-4xl leading-8 text-slate-700">
+            En mediesak handler ofte om mer enn teksten i artikkelen. Derfor
+            ser PresseSjekk også på tilsvar, kontakt før publisering,
+            dokumentasjon, rettsstatus, vedlegg og videre oppfølging. Jo bedre
+            grunnlag du legger inn, desto bedre kan rapportene og
+            dokumentpakkene struktureres.
+          </p>
+        </section>
+
         <section className="mt-16">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
             Prosessen
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
             Syv steg fra sak til utredning
           </h2>
+          <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+            Saken kan bygges trinn for trinn. Noen trenger bare rapport. Andre
+            trenger PFU-klage, politianmeldelse eller en samlet utredningspakke.
+          </p>
+
+          <figure className="mt-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <img
+              src="/images/hvordan-det-fungerer2.png"
+              alt="Illustrasjon av syv steg i en mediesak fra sak til utredning."
+              className="w-full object-cover"
+              loading="lazy"
+            />
+          </figure>
 
           <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {steps.map((step, index) => (
@@ -164,7 +160,7 @@ export default function HvordanDetFungererPage() {
                 key={step.title}
                 className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
               >
-                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-100 text-lg font-black text-blue-800">
+                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-2xl bg-red-100 text-lg font-black text-red-800">
                   {index + 1}
                 </div>
                 <h3 className="text-xl font-black text-slate-950">
@@ -182,7 +178,7 @@ export default function HvordanDetFungererPage() {
               key={item.title}
               className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
             >
-              <p className="text-sm font-black uppercase tracking-[0.18em] text-blue-700">
+              <p className="text-sm font-black uppercase tracking-[0.18em] text-red-700">
                 {item.steps}
               </p>
               <h2 className="mt-3 text-2xl font-black text-slate-950">
@@ -195,7 +191,7 @@ export default function HvordanDetFungererPage() {
 
         <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               Hva vurderes?
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -214,7 +210,7 @@ export default function HvordanDetFungererPage() {
                   key={item}
                   className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-800"
                 >
-                  <span className="mr-2 text-blue-700">✓</span>
+                  <span className="mr-2 text-red-700">✓</span>
                   {item}
                 </div>
               ))}
@@ -245,7 +241,7 @@ export default function HvordanDetFungererPage() {
         <section className="mt-16 rounded-3xl bg-slate-950 p-8 text-white shadow-sm">
           <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
                 Hva får du?
               </p>
               <h2 className="mt-3 text-4xl font-black">
@@ -288,7 +284,7 @@ export default function HvordanDetFungererPage() {
         </section>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
             Klar til å prøve?
           </p>
           <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -302,7 +298,7 @@ export default function HvordanDetFungererPage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/pressesjekk"
-              className="rounded-xl bg-blue-500 px-6 py-4 font-bold text-slate-950 hover:bg-blue-500"
+              className="rounded-xl bg-red-500 px-6 py-4 font-bold text-slate-950 hover:bg-red-500"
             >
               Start sjekk
             </Link>
