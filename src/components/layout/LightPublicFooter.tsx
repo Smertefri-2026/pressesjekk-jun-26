@@ -18,10 +18,61 @@ const trustLinks = [
 ];
 
 const socialLinks = [
-  { href: "#", label: "Facebook" },
-  { href: "#", label: "YouTube" },
-  { href: "#", label: "TikTok" },
-];
+  {
+    href: "https://www.facebook.com/pressesjekk",
+    label: "Facebook",
+    icon: "facebook",
+  },
+  {
+    href: "https://www.youtube.com/@PresseSjekk",
+    label: "YouTube",
+    icon: "youtube",
+  },
+  {
+    href: "https://www.tiktok.com/@pressesjekk",
+    label: "TikTok",
+    icon: "tiktok",
+  },
+] as const;
+
+function SocialIcon({ icon }: { icon: (typeof socialLinks)[number]["icon"] }) {
+  if (icon === "facebook") {
+    return (
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        className="h-4 w-4 shrink-0"
+        fill="currentColor"
+      >
+        <path d="M13.5 21v-7.4h2.5l.4-2.9h-2.9V8.8c0-.8.2-1.4 1.4-1.4h1.5V4.8c-.3 0-1.2-.1-2.2-.1-2.2 0-3.7 1.3-3.7 3.8v2.1H8v2.9h2.5V21h3z" />
+      </svg>
+    );
+  }
+
+  if (icon === "youtube") {
+    return (
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        className="h-4 w-4 shrink-0"
+        fill="currentColor"
+      >
+        <path d="M21.6 7.2s-.2-1.5-.8-2.1c-.8-.8-1.7-.8-2.1-.9C15.8 4 12 4 12 4s-3.8 0-6.7.2c-.4.1-1.3.1-2.1.9-.6.6-.8 2.1-.8 2.1S2.2 9 2.2 10.8v1.7c0 1.8.2 3.6.2 3.6s.2 1.5.8 2.1c.8.8 1.8.8 2.3.9 1.7.2 6.5.2 6.5.2s3.8 0 6.7-.2c.4-.1 1.3-.1 2.1-.9.6-.6.8-2.1.8-2.1s.2-1.8.2-3.6v-1.7c0-1.8-.2-3.6-.2-3.6zM10.2 14.6V8.5l5.8 3.1-5.8 3z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className="h-4 w-4 shrink-0"
+      fill="currentColor"
+    >
+      <path d="M16.6 3c.4 2.8 2 4.4 4.4 4.6v3c-1.4 0-2.7-.4-4-1.2v5.9c0 3.1-2 5.7-5.5 5.7-3.2 0-5.5-2.2-5.5-5.2 0-3.2 2.5-5.4 5.8-5.2v3.1c-1.5-.2-2.5.7-2.5 2 0 1.2.9 2 2.1 2 1.4 0 2.1-.8 2.1-2.5V3h3.1z" />
+    </svg>
+  );
+}
 
 export function LightPublicFooter() {
   return (
@@ -85,13 +136,13 @@ export function LightPublicFooter() {
                 <a
                   key={item.label}
                   href={item.href}
-                  className="hover:text-white"
-                  aria-label={`${item.label} kommer senere`}
+                  className="inline-flex items-center gap-2 hover:text-white"
+                  aria-label={`Åpne PresseSjekk på ${item.label}`}
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  {item.label}
-                  <span className="ml-2 text-xs font-bold text-slate-400">
-                    kommer
-                  </span>
+                  <SocialIcon icon={item.icon} />
+                  <span>{item.label}</span>
                 </a>
               ))}
             </nav>
