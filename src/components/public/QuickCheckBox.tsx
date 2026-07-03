@@ -182,7 +182,7 @@ export function QuickCheckBox() {
           value={url}
           onChange={(event) => setUrl(event.target.value)}
           placeholder="https://avis.no/artikkel/..."
-          className="mt-3 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-950 outline-none focus:border-blue-500"
+          className="mt-3 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-950 outline-none focus:border-red-500"
         />
 
         <label
@@ -196,7 +196,7 @@ export function QuickCheckBox() {
           id="quick-check-role"
           value={role}
           onChange={(event) => setRole(event.target.value)}
-          className="mt-3 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-950 outline-none focus:border-blue-500"
+          className="mt-3 w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-950 outline-none focus:border-red-500"
         >
           {roleOptions.map((option) => (
             <option key={option.value} value={option.value}>
@@ -208,7 +208,7 @@ export function QuickCheckBox() {
         <button
           type="submit"
           disabled={isChecking}
-          className="mt-4 block w-full rounded-xl bg-red-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-4 block w-full rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isChecking
             ? "Sjekker..."
@@ -356,6 +356,47 @@ export function QuickCheckBox() {
               </p>
             </div>
           ) : null}
+
+          <div className="mt-5 rounded-3xl border border-slate-950 bg-slate-950 p-5 text-white">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-orange-300">
+              Gå videre
+            </p>
+            <h3 className="mt-3 text-2xl font-black">
+              Vil du ha full rapport?
+            </h3>
+            <p className="mt-3 text-sm leading-7 text-slate-300">
+              Rask sjekk gir en foreløpig vurdering. Rapportpakken gir deg et
+              ryddigere dokumentgrunnlag du kan lagre på Min Side, laste ned og
+              bygge videre på.
+            </p>
+
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+              <p className="text-sm font-black text-white">
+                Rapportpakke – 490 kr
+              </p>
+              <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-300">
+                <li>✓ Strukturert vurdering av saken</li>
+                <li>✓ Mulige presseetiske problemområder</li>
+                <li>✓ Dokumentasjon og anbefalte neste steg</li>
+                <li>✓ Kan bygges videre til PFU-klage eller annen oppfølging</li>
+              </ul>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <Link
+                href={`/min-side/pakker/kjop?plan=report_pack&url=${encodedQuickUrl}`}
+                className="rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600"
+              >
+                Kjøp rapportpakke
+              </Link>
+              <Link
+                href="/priser"
+                className="rounded-xl border border-white/15 bg-white/[0.04] px-5 py-4 text-center font-black text-white hover:bg-white/10"
+              >
+                Se alle pakker
+              </Link>
+            </div>
+          </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <Link
