@@ -269,7 +269,7 @@ export async function POST(request: NextRequest) {
         : `${origin}/min-side?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: caseId
         ? `${origin}/min-side/saker/${caseId}/pakke?checkout=cancelled`
-        : `${origin}/checkout?plan=${packageId}&checkout=cancelled`,
+        : `${origin}/min-side/pakker/kjop?plan=${packageId}&checkout=cancelled`,
       customer_email: user.email ?? undefined,
       client_reference_id: user.id,
       metadata: {
