@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { FormEvent, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { allPackagePlans, type PackagePlan, type PackagePlanId } from "@/data/packagePlans";
 import { supabase } from "@/lib/supabase/client";
+import { StripePaymentElementBox } from "@/components/checkout/StripePaymentElementBox";
 
 type ProfileRow = {
   id: string;
@@ -41,6 +44,20 @@ const checkoutPlanIds: PackagePlanId[] = [
   "monthly_start",
   "monthly_pro",
   "monthly_agency",
+];
+
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
+const stripePromise = stripePublishableKey
+  ? loadStripe(stripePublishableKey)
+  : null;
+
+const paymentElementPlanIds: PackagePlanId[] = [
+  "report_pack",
+  "pfu_pack",
+  "full_pack",
+  "case_bundle_3",
+  "case_bundle_5",
+  "case_bundle_10",
 ];
 
 const checkoutPlans = allPackagePlans.filter((plan) =>
@@ -107,12 +124,21 @@ function UtsjekkContent() {
   const [authMessage, setAuthMessage] = useState("");
   const [authErrorMessage, setAuthErrorMessage] = useState("");
 
+  const [clientSecret, setClientSecret] = useState("");
+  const [paymentErrorMessage, setPaymentErrorMessage] = useState("");
+  const [isPreparingPayment, setIsPreparingPayment] = useState(false);
+
   const selectedPlan =
     checkoutPlans.find((plan) => plan.id === selectedPlanId) ??
     checkoutPlans[0];
 
   const amount = planAmounts[selectedPlan.id];
   const isMonthly = selectedPlan.type === "monthly";
+  const canUsePaymentElement = paymentElementPlanIds.includes(selectedPlan.id);
+  const returnUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/min-side?payment=success`
+      : "/min-side?payment=success";
   const nextPath = `/utsjekk?plan=${selectedPlan.id}${
     incomingUrl ? `&url=${encodeURIComponent(incomingUrl)}` : ""
   }`;
@@ -148,6 +174,75 @@ function UtsjekkContent() {
   useEffect(() => {
     loadUserAndProfile();
   }, [loadUserAndProfile]);
+
+  useEffect(() => {
+    async function createPaymentIntent() {
+      setClientSecret("");
+      setPaymentErrorMessage("");
+
+      if (!userEmail || !canUsePaymentElement) {
+        return;
+      }
+
+      if (!stripePromise) {
+        setPaymentErrorMessage(
+          "Stripe publishable key mangler. Legg inn NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY."
+        );
+        return;
+      }
+
+      setIsPreparingPayment(true);
+
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          setPaymentErrorMessage("Du må være innlogget før betaling.");
+          return;
+        }
+
+        const response = await fetch("/api/stripe/create-payment-intent", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            packageId: selectedPlan.id,
+            url: incomingUrl,
+          }),
+        });
+
+        const payload = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          setPaymentErrorMessage(
+            payload?.error ?? "Kunne ikke klargjøre betaling."
+          );
+          return;
+        }
+
+        if (!payload?.clientSecret) {
+          setPaymentErrorMessage("Stripe svarte ikke med betalingsnøkkel.");
+          return;
+        }
+
+        setClientSecret(payload.clientSecret);
+      } catch (error) {
+        setPaymentErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "Kunne ikke klargjøre betaling."
+        );
+      } finally {
+        setIsPreparingPayment(false);
+      }
+    }
+
+    createPaymentIntent();
+  }, [canUsePaymentElement, incomingUrl, selectedPlan.id, userEmail]);
 
   async function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -645,19 +740,41 @@ function UtsjekkContent() {
               </div>
             </div>
 
-            <div className="mt-5 rounded-2xl border border-orange-300/20 bg-orange-300/10 p-4 text-sm leading-7 text-orange-50">
-              Betalingsfeltet kobles i neste steg med Stripe Payment Element.
-              For engangskjøp kan vi senere vise kort og Vipps her. For
-              abonnement bruker vi kort først.
-            </div>
-
-            <button
-              type="button"
-              disabled
-              className="mt-5 w-full cursor-not-allowed rounded-xl bg-slate-700 px-5 py-4 text-center font-black text-slate-300"
-            >
-              Betaling kobles i neste steg
-            </button>
+            {!userEmail ? (
+              <div className="mt-5 rounded-2xl border border-orange-300/20 bg-orange-300/10 p-4 text-sm font-semibold leading-7 text-orange-50">
+                Opprett konto eller logg inn i midtfeltet før betaling.
+              </div>
+            ) : isMonthly ? (
+              <div className="mt-5 rounded-2xl border border-orange-300/20 bg-orange-300/10 p-4 text-sm leading-7 text-orange-50">
+                Abonnement kobles i neste steg med Stripe subscription-flyt.
+                For abonnement bruker vi kort først.
+              </div>
+            ) : paymentErrorMessage ? (
+              <div className="mt-5 rounded-2xl border border-red-300/30 bg-red-500/10 p-4 text-sm font-semibold leading-7 text-red-100">
+                {paymentErrorMessage}
+              </div>
+            ) : isPreparingPayment ? (
+              <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold leading-7 text-slate-300">
+                Klargjør sikkert betalingsfelt...
+              </div>
+            ) : clientSecret && stripePromise ? (
+              <Elements
+                key={clientSecret}
+                stripe={stripePromise}
+                options={{
+                  clientSecret,
+                  appearance: {
+                    theme: "stripe",
+                  },
+                }}
+              >
+                <StripePaymentElementBox returnUrl={returnUrl} />
+              </Elements>
+            ) : (
+              <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold leading-7 text-slate-300">
+                Betalingsfeltet vises når pakken er valgt og konto er bekreftet.
+              </div>
+            )}
 
             <p className="mt-4 text-xs leading-6 text-slate-400">
               PresseSjekk lagrer ikke kortinformasjon. Betalingsopplysninger

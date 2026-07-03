@@ -148,6 +148,72 @@ async function activateUserEntitlement(session: Stripe.Checkout.Session) {
   }
 }
 
+async function activatePaymentIntentEntitlement(
+  paymentIntent: Stripe.PaymentIntent
+) {
+  const metadata = paymentIntent.metadata ?? {};
+  const userId = metadata.user_id;
+  const packageId = metadata.package_id as PackagePlanId | undefined;
+
+  if (!userId || !packageId) {
+    throw new Error("Stripe payment intent mangler user_id eller package_id");
+  }
+
+  const plan = getStripeCheckoutPlan(packageId);
+
+  if (!plan || !isEntitlementPackage(packageId)) {
+    throw new Error(`Ukjent entitlement package_id fra Stripe: ${packageId}`);
+  }
+
+  if (plan.mode !== "payment") {
+    throw new Error("PaymentIntent kan bare aktivere engangskjøp.");
+  }
+
+  const supabase = getSupabaseServiceClient();
+  const includedCases = includedCasesForPackage(packageId);
+
+  const { data: existingEntitlement, error: existingError } = await supabase
+    .from("user_case_entitlements")
+    .select("id")
+    .eq("stripe_checkout_session_id", paymentIntent.id)
+    .maybeSingle();
+
+  if (existingError) {
+    throw new Error(existingError.message);
+  }
+
+  if (existingEntitlement) {
+    console.log("PaymentIntent-entitlement finnes allerede", {
+      paymentIntentId: paymentIntent.id,
+      entitlementId: existingEntitlement.id,
+    });
+    return;
+  }
+
+  const { error } = await supabase.from("user_case_entitlements").insert({
+    user_id: userId,
+    package_id: packageId,
+    included_cases: includedCases,
+    used_cases: 0,
+    status: "active",
+    source: "stripe_payment_element",
+    stripe_checkout_session_id: paymentIntent.id,
+    stripe_customer_id:
+      typeof paymentIntent.customer === "string" ? paymentIntent.customer : null,
+    stripe_subscription_id: null,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  console.log("Lagret PaymentIntent-entitlement", {
+    paymentIntentId: paymentIntent.id,
+    userId,
+    packageId,
+  });
+}
+
 export async function POST(request: NextRequest) {
   const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -201,6 +267,22 @@ export async function POST(request: NextRequest) {
 
         await activateUserEntitlement(session);
       }
+    }
+
+    if (event.type === "payment_intent.succeeded") {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      const metadata = paymentIntent.metadata ?? {};
+
+      if (!metadata.user_id || !metadata.package_id) {
+        console.warn("Ignorerer payment_intent.succeeded uten PresseSjekk-metadata", {
+          paymentIntentId: paymentIntent.id,
+          metadata,
+        });
+
+        return NextResponse.json({ received: true, ignored: true });
+      }
+
+      await activatePaymentIntentEntitlement(paymentIntent);
     }
 
     return NextResponse.json({ received: true });
