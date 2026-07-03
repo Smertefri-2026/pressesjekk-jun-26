@@ -12,7 +12,7 @@ export default function LoginPage() {
         <div className="w-full max-w-[460px]">
           <Link
             href="/"
-            className="mb-5 inline-flex text-sm font-semibold text-blue-700 hover:text-blue-900"
+            className="mb-5 inline-flex text-sm font-semibold text-red-700 hover:text-red-900"
           >
             ← Tilbake til forsiden
           </Link>

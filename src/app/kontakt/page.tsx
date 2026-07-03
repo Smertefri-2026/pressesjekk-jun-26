@@ -63,26 +63,13 @@ export default function KontaktPage() {
 
           </section>
 
-          <aside className="hidden rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-7 lg:block">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
-              Raskeste vei
-            </p>
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              Gjelder det en konkret artikkel?
-            </h2>
-            <p className="mt-4 leading-8 text-slate-700">
-              Da bør du vanligvis starte med rask sjekk. Hvis saken gjelder deg
-              eller virksomheten din, kan du senere opprette en lagret sak og
-              samle artikkel, tilsvar og dokumentasjon på Min Side.
-            </p>
-
-            <Link
-              href="/pressesjekk"
-              className="mt-6 block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600"
-            >
-              Start rask sjekk
-            </Link>
-          </aside>
+          <figure className="hidden overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm lg:block">
+            <img
+              src="/images/kontakt2.png"
+              alt="Illustrasjon av kontaktdialog, dokumentkort og saksmappe i PresseSjekk."
+              className="h-full min-h-[390px] w-full object-cover"
+            />
+          </figure>
         </div>
 
         <section className="mt-16 grid gap-8 lg:grid-cols-[1fr_420px]">
@@ -193,24 +180,35 @@ export default function KontaktPage() {
               </p>
             </section>
 
-            <section className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
-                Proff og utredning
-              </p>
-              <h2 className="mt-3 text-2xl font-black">
-                For profesjonelle brukere
-              </h2>
+            <section className="overflow-hidden rounded-3xl bg-slate-950 text-white shadow-sm">
+              <figure className="border-b border-white/10 bg-white/[0.04]">
+                <img
+                  src="/images/kontakt1.png"
+                  alt="Illustrasjon av proffbrukere, saksmapper og dokumentflyt."
+                  className="h-48 w-full object-cover"
+                  loading="lazy"
+                />
+              </figure>
+
+              <div className="p-5 sm:p-7">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+                  Proff og utredning
+                </p>
+                <h2 className="mt-3 text-2xl font-black">
+                  For profesjonelle brukere
+                </h2>
               <p className="mt-4 leading-8 text-slate-300">
                 Proffbrukere kan jobbe med flere mediesaker, rapportpakker,
                 dokumentpakker, intern dokumentasjon og utredningsgrunnlag over
                 tid.
               </p>
-              <Link
-                href="/proff"
-                className="mt-6 inline-block rounded-xl bg-red-500 px-5 py-3 font-black text-white hover:bg-orange-600"
-              >
-                Les om proff
-              </Link>
+                <Link
+                  href="/proff"
+                  className="mt-6 inline-block rounded-xl bg-red-500 px-5 py-3 font-black text-white hover:bg-orange-600"
+                >
+                  Les om proff
+                </Link>
+              </div>
             </section>
           </aside>
         </section>
