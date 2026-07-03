@@ -384,7 +384,7 @@ export function QuickCheckBox() {
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <Link
-                href={`/min-side/pakker/kjop?plan=report_pack&url=${encodedQuickUrl}`}
+                href={`/checkout?plan=report_pack&url=${encodedQuickUrl}`}
                 className="rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600"
               >
                 Kjøp rapportpakke

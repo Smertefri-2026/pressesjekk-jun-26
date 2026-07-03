@@ -631,7 +631,7 @@ export default function CasePackagePage() {
                 </ul>
 
                 <Link
-                  href={`/min-side/pakker/kjop?plan=${bundle.id}`}
+                  href={`/checkout?plan=${bundle.id}`}
                   className="mt-auto block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-500"
                 >
                   {bundle.button}
@@ -682,7 +682,7 @@ export default function CasePackagePage() {
                     href={
                       plan.id === "monthly_enterprise"
                         ? "/kontakt"
-                        : `/min-side/pakker/kjop?plan=${plan.id}`
+                        : `/checkout?plan=${plan.id}`
                     }
                     className="mt-auto block rounded-xl bg-slate-950 px-5 py-4 text-center font-black text-white hover:bg-slate-800"
                   >

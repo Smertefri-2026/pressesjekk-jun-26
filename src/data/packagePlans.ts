@@ -118,7 +118,7 @@ export const caseBundles: PackagePlan[] = [
       "Hver sak kan oppgraderes ved behov",
       "Passer for privatpersoner og små virksomheter",
     ],
-    href: "/min-side/pakker/kjop?plan=case_bundle_3",
+    href: "/checkout?plan=case_bundle_3",
     button: "Kjøp 3 saker",
   },
   {
@@ -135,7 +135,7 @@ export const caseBundles: PackagePlan[] = [
       "Kan brukes over tid",
       "Oppgradering per sak ved behov",
     ],
-    href: "/min-side/pakker/kjop?plan=case_bundle_5",
+    href: "/checkout?plan=case_bundle_5",
     button: "Kjøp 5 saker",
   },
   {
@@ -152,7 +152,7 @@ export const caseBundles: PackagePlan[] = [
       "Passer for sporadisk proffbruk",
       "Proff-abonnement anbefales ved løpende behov",
     ],
-    href: "/min-side/pakker/kjop?plan=case_bundle_10",
+    href: "/checkout?plan=case_bundle_10",
     button: "Kjøp 10 saker",
   },
 ];

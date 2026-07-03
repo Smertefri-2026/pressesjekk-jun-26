@@ -23,7 +23,7 @@ const caseBundles = [
       "Passer for privatpersoner og små virksomheter",
     ],
     button: "Kjøp 3 saker",
-    href: "/min-side/pakker/kjop?plan=case_bundle_3",
+    href: "/checkout?plan=case_bundle_3",
   },
   {
     name: "5 saker",
@@ -39,7 +39,7 @@ const caseBundles = [
       "Oppgradering per sak ved behov",
     ],
     button: "Kjøp 5 saker",
-    href: "/min-side/pakker/kjop?plan=case_bundle_5",
+    href: "/checkout?plan=case_bundle_5",
   },
   {
     name: "10 saker",
@@ -55,7 +55,7 @@ const caseBundles = [
       "Proff-abonnement anbefales ved løpende behov",
     ],
     button: "Kjøp 10 saker",
-    href: "/min-side/pakker/kjop?plan=case_bundle_10",
+    href: "/checkout?plan=case_bundle_10",
   },
 ];
 
@@ -293,7 +293,7 @@ export default function PriserPage() {
                   href={
                     plan.id === "monthly_enterprise"
                       ? "/kontakt"
-                      : `/min-side/pakker/kjop?plan=${plan.id}`
+                      : `/checkout?plan=${plan.id}`
                   }
                   className="mt-auto block rounded-xl bg-slate-950 px-5 py-4 text-center font-black text-white hover:bg-slate-800"
                 >
