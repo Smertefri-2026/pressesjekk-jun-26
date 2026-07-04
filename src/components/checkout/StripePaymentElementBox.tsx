@@ -58,7 +58,7 @@ export function StripePaymentElementBox({
       </div>
 
       {errorMessage ? (
-        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
+        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-800">
           {errorMessage}
         </div>
       ) : null}
@@ -66,7 +66,7 @@ export function StripePaymentElementBox({
       <button
         type="submit"
         disabled={!stripe || !elements || isPaying}
-        className="mt-5 w-full rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 w-full rounded-xl bg-amber-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPaying ? "Fullfører betaling ..." : "Betal nå"}
       </button>

@@ -325,19 +325,19 @@ function UtsjekkContent() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-950">
+    <main className="min-h-screen bg-stone-50 text-slate-950">
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <Link
           href="/priser"
-          className="text-sm font-semibold text-red-700 hover:text-red-900"
+          className="text-sm font-semibold text-orange-700 hover:text-orange-900"
         >
           ← Tilbake til priser
         </Link>
 
         <div className="mt-8">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-orange-700">
             Utsjekk
           </p>
           <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
@@ -351,7 +351,7 @@ function UtsjekkContent() {
 
         <div className="mt-10 grid gap-6 xl:grid-cols-[1fr_1.05fr_0.95fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-700">
               1. Din pakke
             </p>
 
@@ -370,7 +370,7 @@ function UtsjekkContent() {
               id="checkout-plan"
               value={selectedPlan.id}
               onChange={(event) => handlePlanChange(event.target.value)}
-              className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-base font-bold text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+              className="mt-2 w-full rounded-2xl border border-slate-300 bg-stone-50 px-4 py-4 text-base font-bold text-slate-950 outline-none focus:border-orange-500 focus:bg-white"
             >
               <optgroup label="Enkeltkjøp">
                 {checkoutPlans
@@ -403,8 +403,8 @@ function UtsjekkContent() {
               </optgroup>
             </select>
 
-            <div className="mt-6 rounded-3xl border border-red-200 bg-red-50 p-5">
-              <p className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-red-800">
+            <div className="mt-6 rounded-3xl border border-amber-200 bg-amber-50 p-5">
+              <p className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-amber-800">
                 {planTypeTitle(selectedPlan.type)}
               </p>
 
@@ -423,7 +423,7 @@ function UtsjekkContent() {
               <ul className="mt-5 space-y-3 text-sm leading-6 text-slate-700">
                 {selectedPlan.features.slice(0, 5).map((feature) => (
                   <li key={feature} className="flex gap-2">
-                    <span className="font-black text-red-700">✓</span>
+                    <span className="font-black text-orange-700">✓</span>
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -431,7 +431,7 @@ function UtsjekkContent() {
             </div>
 
             {incomingUrl ? (
-              <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-stone-50 p-4">
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
                   URL fra rask sjekk
                 </p>
@@ -443,7 +443,7 @@ function UtsjekkContent() {
           </section>
 
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-700">
               2. Konto for Min Side
             </p>
 
@@ -457,7 +457,7 @@ function UtsjekkContent() {
             </p>
 
             {isCheckingUser ? (
-              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-stone-50 p-5">
                 <p className="font-bold text-slate-700">
                   Sjekker innlogging...
                 </p>
@@ -514,7 +514,7 @@ function UtsjekkContent() {
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                    className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-stone-100"
                   >
                     Logg ut
                   </button>
@@ -588,7 +588,7 @@ function UtsjekkContent() {
                             setAuthFullName(event.target.value)
                           }
                           placeholder="Ditt navn"
-                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-red-500"
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-orange-500"
                         />
                       </div>
 
@@ -605,7 +605,7 @@ function UtsjekkContent() {
                           onChange={(event) =>
                             setAuthRoleType(event.target.value)
                           }
-                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-red-500"
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-orange-500"
                         >
                           {roleOptions.map((role) => (
                             <option key={role.value} value={role.value}>
@@ -632,7 +632,7 @@ function UtsjekkContent() {
                       value={authEmail}
                       onChange={(event) => setAuthEmail(event.target.value)}
                       placeholder="din@epost.no"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-red-500"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-orange-500"
                     />
                   </div>
 
@@ -660,7 +660,7 @@ function UtsjekkContent() {
                           setAuthPassword(event.target.value)
                         }
                         placeholder="Minimum 6 tegn"
-                        className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 pr-16 text-slate-950 outline-none focus:border-red-500"
+                        className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 pr-16 text-slate-950 outline-none focus:border-orange-500"
                       />
 
                       <button
@@ -668,7 +668,7 @@ function UtsjekkContent() {
                         onClick={() =>
                           setAuthShowPassword((value) => !value)
                         }
-                        className="absolute inset-y-0 right-3 my-auto flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-950"
+                        className="absolute inset-y-0 right-3 my-auto flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-stone-100 hover:text-slate-950"
                         aria-label={
                           authShowPassword ? "Skjul passord" : "Vis passord"
                         }
@@ -682,7 +682,7 @@ function UtsjekkContent() {
                   </div>
 
                   {authErrorMessage ? (
-                    <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-800">
                       {authErrorMessage}
                     </div>
                   ) : null}
@@ -696,7 +696,7 @@ function UtsjekkContent() {
                   <button
                     type="submit"
                     disabled={authIsLoading}
-                    className="rounded-2xl bg-red-500 px-6 py-4 font-black text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-2xl bg-amber-500 px-6 py-4 font-black text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {authIsLoading
                       ? "Jobber..."
@@ -708,29 +708,29 @@ function UtsjekkContent() {
               </div>
             )}
 
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-600">
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-stone-50 p-4 text-sm leading-7 text-slate-600">
               Etter betaling får du pakken som ledig sak eller tilgang på Min
               Side. Der kan du opprette saken, legge til flere URL-er og bygge
               rapporten videre.
             </div>
           </section>
 
-          <aside className="rounded-3xl border border-slate-200 bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+          <aside className="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-white p-5 text-slate-950 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-700">
               3. Betaling
             </p>
 
             <h2 className="mt-3 text-3xl font-black">Ordresammendrag</h2>
 
-            <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-              <div className="flex justify-between gap-4 text-sm font-bold text-slate-300">
+            <div className="mt-6 rounded-3xl border border-amber-200 bg-white p-5">
+              <div className="flex justify-between gap-4 text-sm font-bold text-slate-700">
                 <span>{selectedPlan.name}</span>
                 <span>
                   {formatKrFromOre(amount)} kr{isMonthly ? "/mnd" : ""}
                 </span>
               </div>
 
-              <div className="mt-4 border-t border-white/15 pt-4">
+              <div className="mt-4 border-t border-amber-200 pt-4">
                 <div className="flex justify-between gap-4 text-xl font-black">
                   <span>Å betale nå</span>
                   <span>
@@ -741,20 +741,20 @@ function UtsjekkContent() {
             </div>
 
             {!userEmail ? (
-              <div className="mt-5 rounded-2xl border border-orange-300/20 bg-orange-300/10 p-4 text-sm font-semibold leading-7 text-orange-50">
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-100 p-4 text-sm font-semibold leading-7 text-slate-700">
                 Opprett konto eller logg inn i midtfeltet før betaling.
               </div>
             ) : isMonthly ? (
-              <div className="mt-5 rounded-2xl border border-orange-300/20 bg-orange-300/10 p-4 text-sm leading-7 text-orange-50">
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-100 p-4 text-sm leading-7 text-slate-700">
                 Abonnement kobles i neste steg med Stripe subscription-flyt.
                 For abonnement bruker vi kort først.
               </div>
             ) : paymentErrorMessage ? (
-              <div className="mt-5 rounded-2xl border border-red-300/30 bg-red-500/10 p-4 text-sm font-semibold leading-7 text-red-100">
+              <div className="mt-5 rounded-2xl border border-red-300/30 bg-amber-500/10 p-4 text-sm font-semibold leading-7 text-orange-100">
                 {paymentErrorMessage}
               </div>
             ) : isPreparingPayment ? (
-              <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold leading-7 text-slate-300">
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-white p-4 text-sm font-semibold leading-7 text-slate-700">
                 Klargjør sikkert betalingsfelt...
               </div>
             ) : clientSecret && stripePromise ? (
@@ -771,12 +771,12 @@ function UtsjekkContent() {
                 <StripePaymentElementBox returnUrl={returnUrl} />
               </Elements>
             ) : (
-              <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold leading-7 text-slate-300">
+              <div className="mt-5 rounded-2xl border border-amber-200 bg-white p-4 text-sm font-semibold leading-7 text-slate-700">
                 Betalingsfeltet vises når pakken er valgt og konto er bekreftet.
               </div>
             )}
 
-            <p className="mt-4 text-xs leading-6 text-slate-400">
+            <p className="mt-4 text-xs leading-6 text-slate-500">
               PresseSjekk lagrer ikke kortinformasjon. Betalingsopplysninger
               håndteres av Stripe.
             </p>
@@ -793,7 +793,7 @@ export default function UtsjekkPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-slate-50 text-slate-950">
+        <main className="min-h-screen bg-stone-50 text-slate-950">
           <LightPublicHeader />
           <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
