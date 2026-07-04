@@ -160,3 +160,29 @@ create trigger set_user_purchases_updated_at
 before update on public.user_purchases
 for each row
 execute function public.set_user_purchases_updated_at();
+
+-- Service role access for Stripe webhook purchase recording
+grant all on table public.user_purchases to service_role;
+grant usage on schema public to service_role;
+
+drop policy if exists "Service role can insert purchases" on public.user_purchases;
+create policy "Service role can insert purchases"
+on public.user_purchases
+for insert
+to service_role
+with check (true);
+
+drop policy if exists "Service role can update purchases" on public.user_purchases;
+create policy "Service role can update purchases"
+on public.user_purchases
+for update
+to service_role
+using (true)
+with check (true);
+
+drop policy if exists "Service role can select purchases" on public.user_purchases;
+create policy "Service role can select purchases"
+on public.user_purchases
+for select
+to service_role
+using (true);
