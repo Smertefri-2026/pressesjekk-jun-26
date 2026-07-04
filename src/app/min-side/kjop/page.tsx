@@ -152,6 +152,8 @@ export default function MinSideKjopPage() {
   const [caseAccess, setCaseAccess] = useState<CaseAccessRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [refundRequestId, setRefundRequestId] = useState<string | null>(null);
+  const [refundMessage, setRefundMessage] = useState("");
 
   useEffect(() => {
     async function loadPurchases() {
@@ -249,6 +251,59 @@ export default function MinSideKjopPage() {
       .reduce((sum, purchase) => sum + Number(purchase.amount_paid ?? 0), 0);
   }, [purchases]);
 
+  async function requestRefund(purchaseId: string) {
+    setRefundRequestId(purchaseId);
+    setRefundMessage("");
+    setErrorMessage("");
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const token = session?.access_token;
+
+    if (!token) {
+      setErrorMessage("Du må være innlogget for å be om refusjon.");
+      setRefundRequestId(null);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/purchases/request-refund", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ purchaseId }),
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setErrorMessage(
+          payload?.error ?? "Kunne ikke registrere refusjonsforespørsel."
+        );
+        return;
+      }
+
+      setPurchases((currentPurchases) =>
+        currentPurchases.map((purchase) =>
+          purchase.id === purchaseId
+            ? { ...purchase, refund_status: "requested" }
+            : purchase
+        )
+      );
+
+      setRefundMessage(
+        "Refusjonsforespørselen er registrert. Den behandles manuelt."
+      );
+    } finally {
+      setRefundRequestId(null);
+    }
+  }
+
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <LightPublicHeader />
@@ -271,9 +326,9 @@ export default function MinSideKjopPage() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/min-side"
-              className="rounded-xl border border-slate-300 bg-white px-5 py-3 font-bold text-slate-950 hover:bg-slate-100"
+              className="inline-flex items-center py-3 font-bold text-slate-700 hover:text-red-700"
             >
-              Til Min Side
+              ← Tilbake til Min Side
             </Link>
             <Link
               href="/priser"
@@ -288,6 +343,12 @@ export default function MinSideKjopPage() {
         {errorMessage ? (
           <div className="mt-8 rounded-3xl border border-red-200 bg-red-50 p-6 font-semibold text-red-800">
             {errorMessage}
+          </div>
+        ) : null}
+
+        {refundMessage ? (
+          <div className="mt-8 rounded-3xl border border-green-200 bg-green-50 p-6 font-semibold text-green-800">
+            {refundMessage}
           </div>
         ) : null}
 
@@ -364,7 +425,29 @@ export default function MinSideKjopPage() {
                             </span>
                           </td>
                           <td className="whitespace-nowrap px-5 py-4 text-slate-600">
-                            {refundLabel(purchase.refund_status)}
+                            <div className="space-y-2">
+                              {purchase.refund_status !== "none" ? (
+                                <div>{refundLabel(purchase.refund_status)}</div>
+                              ) : null}
+
+                              {purchase.status === "paid" &&
+                              purchase.refund_status === "none" ? (
+                                <button
+                                  type="button"
+                                  onClick={() => requestRefund(purchase.id)}
+                                  disabled={refundRequestId === purchase.id}
+                                  className="text-xs font-bold text-red-700 hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  {refundRequestId === purchase.id
+                                    ? "Sender..."
+                                    : "Be om refusjon"}
+                                </button>
+                              ) : purchase.refund_status === "requested" ? (
+                                <span className="inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+                                  Forespurt
+                                </span>
+                              ) : null}
+                            </div>
                           </td>
                           <td className="whitespace-nowrap px-5 py-4">
                             {purchase.stripe_receipt_url ? (
@@ -392,10 +475,10 @@ export default function MinSideKjopPage() {
                   Kvittering og refusjon
                 </p>
                 <p className="mt-2">
-                  Kvitteringslenke vises når Stripe har sendt den tilbake til
-                  PresseSjekk. Refusjon håndteres manuelt i første versjon.
-                  Ubrukte kjøp kan vurderes, mens brukte saker normalt ikke
-                  refunderes automatisk.
+                  Kvittering åpnes via lenken i tabellen når Stripe har sendt
+                  kvitteringslenke tilbake til PresseSjekk. Dersom du ber om
+                  refusjon, registreres forespørselen og behandles manuelt før
+                  eventuell tilbakebetaling.
                 </p>
               </div>
             </section>
