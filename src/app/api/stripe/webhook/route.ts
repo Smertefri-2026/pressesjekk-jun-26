@@ -166,7 +166,16 @@ async function recordPaymentIntentPurchase({
 
   const amountPaid = paymentIntent.amount_received || paymentIntent.amount || 0;
   const amountOriginal = Number(metadata.amount_to_pay || amountPaid) || amountPaid;
-  const currentAmount = Number(metadata.previous_package_id ? 0 : 0);
+
+  const previousPackageId = metadata.previous_package_id
+    ? (metadata.previous_package_id as PackagePlanId)
+    : null;
+
+  const previousPlan = previousPackageId
+    ? getStripeCheckoutPlan(previousPackageId)
+    : null;
+
+  const amountCredit = previousPlan?.amount ?? 0;
 
   let receiptUrl: string | null = null;
   let chargeId: string | null = null;
@@ -204,7 +213,7 @@ async function recordPaymentIntentPurchase({
       status: "paid",
       amount_paid: amountPaid,
       amount_original: amountOriginal,
-      amount_credit: currentAmount,
+      amount_credit: amountCredit,
       currency: paymentIntent.currency || "nok",
       included_cases: includedCases,
       used_cases: 0,
