@@ -174,6 +174,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       amount: amountToPay,
+      amountToPay,
+      originalAmount: plan.amount,
+      currentAmount: caseId ? getPackageAmount(currentPackageId) : 0,
+      currentPackageId,
+      isUpgrade: Boolean(caseId),
+      caseId,
       packageId: plan.packageId,
     });
   } catch (error) {

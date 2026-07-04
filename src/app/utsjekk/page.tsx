@@ -132,12 +132,18 @@ function UtsjekkContent() {
   const [clientSecret, setClientSecret] = useState("");
   const [paymentErrorMessage, setPaymentErrorMessage] = useState("");
   const [isPreparingPayment, setIsPreparingPayment] = useState(false);
+  const [paymentAmountToPay, setPaymentAmountToPay] = useState<number | null>(null);
+  const [paymentOriginalAmount, setPaymentOriginalAmount] = useState<number | null>(null);
+  const [paymentCurrentAmount, setPaymentCurrentAmount] = useState<number | null>(null);
 
   const selectedPlan =
     checkoutPlans.find((plan) => plan.id === selectedPlanId) ??
     checkoutPlans[0];
 
   const amount = planAmounts[selectedPlan.id];
+  const displayedOriginalAmount = paymentOriginalAmount ?? amount;
+  const displayedCurrentAmount = paymentCurrentAmount ?? 0;
+  const displayedAmountToPay = paymentAmountToPay ?? amount;
   const isMonthly = selectedPlan.type === "monthly";
   const canUsePaymentElement = paymentElementPlanIds.includes(selectedPlan.id);
   const returnUrl =
@@ -184,6 +190,9 @@ function UtsjekkContent() {
     async function createPaymentIntent() {
       setClientSecret("");
       setPaymentErrorMessage("");
+      setPaymentAmountToPay(null);
+      setPaymentOriginalAmount(null);
+      setPaymentCurrentAmount(null);
 
       if (!userEmail || !canUsePaymentElement) {
         return;
@@ -236,6 +245,15 @@ function UtsjekkContent() {
         }
 
         setClientSecret(payload.clientSecret);
+        setPaymentAmountToPay(
+          typeof payload.amountToPay === "number" ? payload.amountToPay : null
+        );
+        setPaymentOriginalAmount(
+          typeof payload.originalAmount === "number" ? payload.originalAmount : null
+        );
+        setPaymentCurrentAmount(
+          typeof payload.currentAmount === "number" ? payload.currentAmount : null
+        );
       } catch (error) {
         setPaymentErrorMessage(
           error instanceof Error
@@ -740,15 +758,22 @@ function UtsjekkContent() {
               <div className="flex justify-between gap-4 text-sm font-bold text-slate-700">
                 <span>{selectedPlan.name}</span>
                 <span>
-                  {formatKrFromOre(amount)} kr{isMonthly ? "/mnd" : ""}
+                  {formatKrFromOre(displayedOriginalAmount)} kr{isMonthly ? "/mnd" : ""}
                 </span>
               </div>
 
+              {isUpgradeMode && displayedCurrentAmount > 0 ? (
+                <div className="mt-3 flex justify-between gap-4 text-sm font-bold text-emerald-700">
+                  <span>Fradrag for aktiv pakke</span>
+                  <span>-{formatKrFromOre(displayedCurrentAmount)} kr</span>
+                </div>
+              ) : null}
+
               <div className="mt-4 border-t border-amber-200 pt-4">
                 <div className="flex justify-between gap-4 text-xl font-black">
-                  <span>Å betale nå</span>
+                  <span>{isUpgradeMode ? "Mellomlegg nå" : "Å betale nå"}</span>
                   <span>
-                    {formatKrFromOre(amount)} kr{isMonthly ? "/mnd" : ""}
+                    {formatKrFromOre(displayedAmountToPay)} kr{isMonthly ? "/mnd" : ""}
                   </span>
                 </div>
               </div>
