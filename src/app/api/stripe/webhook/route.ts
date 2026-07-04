@@ -374,6 +374,13 @@ async function activatePaymentIntentEntitlement(
   });
 }
 
+export async function GET() {
+  return NextResponse.json({
+    status: "ok",
+    message: "PresseSjekk Stripe webhook er aktiv. Stripe skal sende POST-kall hit.",
+  });
+}
+
 export async function POST(request: NextRequest) {
   const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
