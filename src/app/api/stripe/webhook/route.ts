@@ -148,6 +148,97 @@ async function activateUserEntitlement(session: Stripe.Checkout.Session) {
   }
 }
 
+async function recordPaymentIntentPurchase({
+  paymentIntent,
+  userId,
+  caseId,
+  packageId,
+  includedCases,
+}: {
+  paymentIntent: Stripe.PaymentIntent;
+  userId: string;
+  caseId: string | null;
+  packageId: PackagePlanId;
+  includedCases: number | null;
+}) {
+  const metadata = paymentIntent.metadata ?? {};
+  const supabase = getSupabaseServiceClient();
+
+  const amountPaid = paymentIntent.amount_received || paymentIntent.amount || 0;
+  const amountOriginal = Number(metadata.amount_to_pay || amountPaid) || amountPaid;
+  const currentAmount = Number(metadata.previous_package_id ? 0 : 0);
+
+  let receiptUrl: string | null = null;
+  let chargeId: string | null = null;
+
+  const latestCharge = paymentIntent.latest_charge;
+
+  if (typeof latestCharge === "string") {
+    chargeId = latestCharge;
+
+    try {
+      const stripe = getStripe();
+      const charge = await stripe.charges.retrieve(latestCharge);
+      receiptUrl = charge.receipt_url ?? null;
+    } catch (error) {
+      console.warn("Kunne ikke hente Stripe charge/receipt", {
+        paymentIntentId: paymentIntent.id,
+        latestCharge,
+        error,
+      });
+    }
+  }
+
+  const purchaseType = caseId
+    ? "case_upgrade"
+    : packageId === "investigation_pack"
+      ? "investigation"
+      : "new_purchase";
+
+  const { error } = await supabase.from("user_purchases").upsert(
+    {
+      user_id: userId,
+      case_id: caseId,
+      package_id: packageId,
+      purchase_type: purchaseType,
+      status: "paid",
+      amount_paid: amountPaid,
+      amount_original: amountOriginal,
+      amount_credit: currentAmount,
+      currency: paymentIntent.currency || "nok",
+      included_cases: includedCases,
+      used_cases: 0,
+      source: "stripe_payment_element",
+      stripe_payment_intent_id: paymentIntent.id,
+      stripe_charge_id: chargeId,
+      stripe_customer_id:
+        typeof paymentIntent.customer === "string" ? paymentIntent.customer : null,
+      stripe_receipt_url: receiptUrl,
+      refund_status: "none",
+      metadata: {
+        stripe_metadata: metadata,
+        payment_method_types: paymentIntent.payment_method_types,
+      },
+    },
+    {
+      onConflict: "stripe_payment_intent_id",
+    }
+  );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  console.log("Lagret kjøpshistorikk", {
+    paymentIntentId: paymentIntent.id,
+    userId,
+    caseId,
+    packageId,
+    purchaseType,
+    amountPaid,
+  });
+}
+
 async function activatePaymentIntentEntitlement(
   paymentIntent: Stripe.PaymentIntent
 ) {
@@ -220,6 +311,14 @@ async function activatePaymentIntentEntitlement(
       packageId,
     });
 
+    await recordPaymentIntentPurchase({
+      paymentIntent,
+      userId,
+      caseId,
+      packageId,
+      includedCases: 1,
+    });
+
     return;
   }
 
@@ -264,6 +363,14 @@ async function activatePaymentIntentEntitlement(
     paymentIntentId: paymentIntent.id,
     userId,
     packageId,
+  });
+
+  await recordPaymentIntentPurchase({
+    paymentIntent,
+    userId,
+    caseId: null,
+    packageId,
+    includedCases,
   });
 }
 
