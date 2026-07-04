@@ -153,6 +153,7 @@ async function activatePaymentIntentEntitlement(
 ) {
   const metadata = paymentIntent.metadata ?? {};
   const userId = metadata.user_id;
+  const caseId = metadata.case_id;
   const packageId = metadata.package_id as PackagePlanId | undefined;
 
   if (!userId || !packageId) {
@@ -170,6 +171,58 @@ async function activatePaymentIntentEntitlement(
   }
 
   const supabase = getSupabaseServiceClient();
+
+  if (caseId) {
+    const { data: existingAccess, error: existingError } = await supabase
+      .from("case_access")
+      .select("id, stripe_checkout_session_id")
+      .eq("case_id", caseId)
+      .maybeSingle();
+
+    if (existingError) {
+      throw new Error(existingError.message);
+    }
+
+    if (existingAccess?.stripe_checkout_session_id === paymentIntent.id) {
+      console.log("PaymentIntent-case_access finnes allerede", {
+        paymentIntentId: paymentIntent.id,
+        caseId,
+      });
+      return;
+    }
+
+    const { error } = await supabase.from("case_access").upsert(
+      {
+        case_id: caseId,
+        user_id: userId,
+        package_id: plan.packageId,
+        status: "active",
+        source: "stripe_payment_element",
+        stripe_checkout_session_id: paymentIntent.id,
+        stripe_customer_id:
+          typeof paymentIntent.customer === "string" ? paymentIntent.customer : null,
+        stripe_subscription_id: null,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        onConflict: "case_id",
+      }
+    );
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    console.log("Oppgraderte sak via PaymentIntent", {
+      paymentIntentId: paymentIntent.id,
+      userId,
+      caseId,
+      packageId,
+    });
+
+    return;
+  }
+
   const includedCases = includedCasesForPackage(packageId);
 
   const { data: existingEntitlement, error: existingError } = await supabase

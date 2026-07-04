@@ -5,7 +5,6 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
-import { StripeCheckoutButton } from "@/components/stripe/StripeCheckoutButton";
 import {
   caseBundles,
   monthlyPackages,
@@ -553,15 +552,14 @@ export default function CasePackagePage() {
 
                     <div className="mt-6">
                       {canUpgrade ? (
-                        <StripeCheckoutButton
-                          packageId={option.id}
-                          caseId={params.id}
-                          className="w-full rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        <Link
+                          href={`/utsjekk?plan=${option.id}&caseId=${params.id}&mode=upgrade`}
+                          className="block w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800"
                         >
                           {currentPackageId
                             ? `Oppgrader for ${formatKr(upgradeAmount)} kr`
                             : `Velg ${displayOption.name}`}
-                        </StripeCheckoutButton>
+                        </Link>
                       ) : isCurrent ? (
                         <div className="rounded-2xl bg-emerald-100 px-5 py-4 text-center text-sm font-black text-emerald-900">
                           Aktiv pakke

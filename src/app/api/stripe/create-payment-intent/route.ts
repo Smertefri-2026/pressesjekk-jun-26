@@ -8,10 +8,26 @@ const paymentIntentPackageIds: PackagePlanId[] = [
   "report_pack",
   "pfu_pack",
   "full_pack",
+  "investigation_pack",
   "case_bundle_3",
   "case_bundle_5",
   "case_bundle_10",
 ];
+
+function packageRank(packageId: PackagePlanId | null) {
+  if (!packageId) return 0;
+  if (packageId === "report_pack") return 1;
+  if (packageId === "pfu_pack") return 2;
+  if (packageId === "full_pack") return 3;
+  if (packageId === "investigation_pack") return 4;
+  return 1;
+}
+
+function getPackageAmount(packageId: PackagePlanId | null) {
+  if (!packageId) return 0;
+  const plan = getStripeCheckoutPlan(packageId);
+  return plan?.amount ?? 0;
+}
 
 function isPaymentIntentPackage(packageId: PackagePlanId) {
   return paymentIntentPackageIds.includes(packageId);
@@ -22,6 +38,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const packageId = String(body.packageId || "") as PackagePlanId;
     const url = body.url ? String(body.url) : "";
+    const caseId = body.caseId ? String(body.caseId) : "";
 
     const plan = getStripeCheckoutPlan(packageId);
 
@@ -78,10 +95,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let amountToPay = plan.amount;
+    let currentPackageId: PackagePlanId | null = null;
+    let caseTitle = "PresseSjekk-sak";
+
+    if (caseId) {
+      const { data: caseItem, error: caseError } = await supabase
+        .from("cases")
+        .select("id,user_id,title")
+        .eq("id", caseId)
+        .maybeSingle();
+
+      if (caseError || !caseItem) {
+        return NextResponse.json({ error: "Fant ikke saken." }, { status: 404 });
+      }
+
+      if (caseItem.user_id !== user.id) {
+        return NextResponse.json(
+          { error: "Du har ikke tilgang til denne saken." },
+          { status: 403 }
+        );
+      }
+
+      caseTitle = caseItem.title || caseTitle;
+
+      const { data: accessData } = await supabase
+        .from("case_access")
+        .select("package_id,status")
+        .eq("case_id", caseId)
+        .eq("status", "active")
+        .maybeSingle();
+
+      currentPackageId = (accessData?.package_id as PackagePlanId | null) ?? null;
+
+      if (packageRank(packageId) <= packageRank(currentPackageId)) {
+        return NextResponse.json(
+          {
+            error:
+              "Denne saken har allerede samme eller høyere pakke. Kontakt oss ved behov for endring.",
+          },
+          { status: 400 }
+        );
+      }
+
+      amountToPay = Math.max(plan.amount - getPackageAmount(currentPackageId), 0);
+
+      if (amountToPay <= 0) {
+        return NextResponse.json(
+          { error: "Det er ikke noe mellomlegg å betale." },
+          { status: 400 }
+        );
+      }
+    }
+
     const stripe = getStripe();
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: plan.amount,
+      amount: amountToPay,
       currency: plan.currency,
       automatic_payment_methods: {
         enabled: true,
@@ -90,15 +160,20 @@ export async function POST(request: NextRequest) {
       metadata: {
         user_id: user.id,
         package_id: plan.packageId,
+        case_id: caseId,
+        previous_package_id: currentPackageId ?? "",
+        amount_to_pay: String(amountToPay),
         source: "stripe_payment_element",
         url,
       },
-      description: plan.description,
+      description: caseId
+        ? `Oppgradering av ${caseTitle}: ${plan.description}`
+        : plan.description,
     });
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
-      amount: plan.amount,
+      amount: amountToPay,
       packageId: plan.packageId,
     });
   } catch (error) {

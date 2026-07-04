@@ -38,6 +38,7 @@ const checkoutPlanIds: PackagePlanId[] = [
   "report_pack",
   "pfu_pack",
   "full_pack",
+  "investigation_pack",
   "case_bundle_3",
   "case_bundle_5",
   "case_bundle_10",
@@ -55,6 +56,7 @@ const paymentElementPlanIds: PackagePlanId[] = [
   "report_pack",
   "pfu_pack",
   "full_pack",
+  "investigation_pack",
   "case_bundle_3",
   "case_bundle_5",
   "case_bundle_10",
@@ -106,6 +108,9 @@ function UtsjekkContent() {
 
   const initialPlan = searchParams.get("plan");
   const incomingUrl = searchParams.get("url") ?? "";
+  const caseId = searchParams.get("caseId") ?? "";
+  const checkoutMode = searchParams.get("mode") ?? "";
+  const isUpgradeMode = Boolean(caseId) || checkoutMode === "upgrade";
 
   const [selectedPlanId, setSelectedPlanId] = useState<PackagePlanId>(
     isPackagePlanId(initialPlan) ? initialPlan : "report_pack"
@@ -141,7 +146,7 @@ function UtsjekkContent() {
       : "/min-side?payment=success";
   const nextPath = `/utsjekk?plan=${selectedPlan.id}${
     incomingUrl ? `&url=${encodeURIComponent(incomingUrl)}` : ""
-  }`;
+  }${caseId ? `&caseId=${encodeURIComponent(caseId)}&mode=upgrade` : ""}`;
 
   const loadUserAndProfile = useCallback(async () => {
     setIsCheckingUser(true);
@@ -212,6 +217,7 @@ function UtsjekkContent() {
           body: JSON.stringify({
             packageId: selectedPlan.id,
             url: incomingUrl,
+            caseId,
           }),
         });
 
@@ -321,6 +327,11 @@ function UtsjekkContent() {
     const params = new URLSearchParams(searchParams.toString());
     params.set("plan", value);
 
+    if (caseId) {
+      params.set("caseId", caseId);
+      params.set("mode", "upgrade");
+    }
+
     router.replace(`/utsjekk?${params.toString()}`, { scroll: false });
   }
 
@@ -341,11 +352,14 @@ function UtsjekkContent() {
             Utsjekk
           </p>
           <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
-            Velg pakke, bekreft konto og betal.
+            {isUpgradeMode
+              ? "Oppgrader saken, bekreft konto og betal."
+              : "Velg pakke, bekreft konto og betal."}
           </h1>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-700">
-            Kjøpet knyttes til Min Side, slik at du kan lagre saken, laste ned
-            rapporter og bygge videre med dokumentasjon senere.
+            {isUpgradeMode
+              ? "Oppgraderingen knyttes til den valgte saken på Min Side. Etter betaling får saken tilgang til den nye pakken."
+              : "Kjøpet knyttes til Min Side, slik at du kan lagre saken, laste ned rapporter og bygge videre med dokumentasjon senere."}
           </p>
         </div>
 

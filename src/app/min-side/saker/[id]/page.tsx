@@ -7,7 +7,6 @@ import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
-import { StripeCheckoutButton } from "@/components/stripe/StripeCheckoutButton";
 import { supabase } from "@/lib/supabase/client";
 import type { PackagePlanId } from "@/data/packagePlans";
 import { isV1Purchasable, upgradePaths } from "@/data/packagePlans";
@@ -1140,13 +1139,12 @@ export default function CaseDetailPage() {
                   </p>
 
                   <div className="mt-4">
-                    <StripeCheckoutButton
-                      packageId={primaryOption.id}
-                      caseId={params.id}
+                    <Link
+                      href={`/utsjekk?plan=${primaryOption.id}&caseId=${params.id}&mode=upgrade`}
                       className={primaryButtonClass}
                     >
                       {`Betal ${primaryOption.price} – ${primaryOption.name}`}
-                    </StripeCheckoutButton>
+                    </Link>
                   </div>
                 </div>
               ) : null}
@@ -1205,14 +1203,13 @@ export default function CaseDetailPage() {
                     (opt) => !isOwned(opt.id) && opt.id !== primaryPackage
                   )
                   .map((opt) => (
-                    <StripeCheckoutButton
+                    <Link
                       key={opt.id}
-                      packageId={opt.id}
-                      caseId={params.id}
+                      href={`/utsjekk?plan=${opt.id}&caseId=${params.id}&mode=upgrade`}
                       className={opt.buttonClass}
                     >
                       {opt.label}
-                    </StripeCheckoutButton>
+                    </Link>
                   ))}
 
                 {!isJournalistWorkflow ? (
