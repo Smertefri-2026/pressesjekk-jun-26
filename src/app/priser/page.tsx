@@ -195,7 +195,7 @@ export default function PriserPage() {
                   href={
                     plan.id === "investigation_pack"
                       ? "/kontakt"
-                      : `/min-side/saker/ny?package=${plan.id}`
+                      : `/utsjekk?plan=${plan.id}`
                   }
                   className="mt-auto block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-500"
                 >
