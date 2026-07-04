@@ -308,15 +308,15 @@ export default function MinSideKjopPage() {
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <LightPublicHeader />
 
-      <section className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="mb-8 inline-flex text-sm font-bold uppercase tracking-[0.25em] text-red-700"
+          className="text-sm font-bold uppercase tracking-[0.25em] text-red-700"
         >
           ← Tilbake til Min Side
         </Link>
 
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               Min Side
