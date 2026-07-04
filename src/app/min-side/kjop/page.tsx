@@ -309,6 +309,13 @@ export default function MinSideKjopPage() {
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+        <Link
+          href="/min-side"
+          className="mb-8 inline-flex text-sm font-bold uppercase tracking-[0.25em] text-red-700"
+        >
+          ← Tilbake til Min Side
+        </Link>
+
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
@@ -324,12 +331,6 @@ export default function MinSideKjopPage() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
-              href="/min-side"
-              className="inline-flex items-center py-3 font-bold text-slate-700 hover:text-red-700"
-            >
-              ← Tilbake til Min Side
-            </Link>
             <Link
               href="/priser"
               className="rounded-xl bg-red-500 px-5 py-3 font-bold text-white hover:bg-red-600"
@@ -426,7 +427,8 @@ export default function MinSideKjopPage() {
                           </td>
                           <td className="whitespace-nowrap px-5 py-4 text-slate-600">
                             <div className="space-y-2">
-                              {purchase.refund_status !== "none" ? (
+                              {purchase.refund_status !== "none" &&
+                              purchase.refund_status !== "requested" ? (
                                 <div>{refundLabel(purchase.refund_status)}</div>
                               ) : null}
 
