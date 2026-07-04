@@ -386,9 +386,21 @@ export default function MinSideKjopPage() {
                   </table>
                 )}
               </div>
+
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-700">
+                <p className="font-black text-slate-950">
+                  Kvittering og refusjon
+                </p>
+                <p className="mt-2">
+                  Kvitteringslenke vises når Stripe har sendt den tilbake til
+                  PresseSjekk. Refusjon håndteres manuelt i første versjon.
+                  Ubrukte kjøp kan vurderes, mens brukte saker normalt ikke
+                  refunderes automatisk.
+                </p>
+              </div>
             </section>
 
-            <section className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px]">
+            <section className="mt-10">
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
@@ -489,30 +501,6 @@ export default function MinSideKjopPage() {
                   )}
                 </div>
               </div>
-
-              <aside className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
-                  Refusjon og kvittering
-                </p>
-                <h2 className="mt-3 text-3xl font-black text-slate-950">
-                  Kvitteringer ligger på kjøpene
-                </h2>
-                <p className="mt-4 leading-8 text-slate-700">
-                  Når Stripe sender kvitteringslenke, vises den i
-                  kjøpshistorikken. Refusjon håndteres manuelt i første versjon,
-                  slik at ubrukte kjøp og sakspakker kan vurderes riktig.
-                </p>
-
-                <div className="mt-6 rounded-2xl border border-red-200 bg-white p-5 text-sm leading-7 text-slate-700">
-                  <p className="font-black text-slate-950">
-                    Foreløpig refusjonsregel
-                  </p>
-                  <p className="mt-2">
-                    Ubrukte enkeltsaker kan normalt vurderes for refusjon.
-                    Brukte saker og dokumentpakker vurderes manuelt.
-                  </p>
-                </div>
-              </aside>
             </section>
 
             <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
