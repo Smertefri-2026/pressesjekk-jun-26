@@ -56,6 +56,11 @@ type CaseAccessRow = {
         media_name: string | null;
         article_title: string | null;
       }
+    | {
+        title: string | null;
+        media_name: string | null;
+        article_title: string | null;
+      }[]
     | null;
 };
 
@@ -119,6 +124,25 @@ function refundLabel(status: string) {
   if (status === "refunded") return "Refundert";
   if (status === "partially_refunded") return "Delvis refundert";
   return status;
+}
+
+function relatedCase(access: CaseAccessRow) {
+  if (Array.isArray(access.cases)) return access.cases[0] ?? null;
+  return access.cases;
+}
+
+function caseTitle(access: CaseAccessRow) {
+  const item = relatedCase(access);
+
+  return item?.title ?? item?.article_title ?? "Sak uten tittel";
+}
+
+function caseSubtitle(access: CaseAccessRow) {
+  const item = relatedCase(access);
+
+  return item?.media_name
+    ? `Medium: ${item.media_name}`
+    : "Aktiv sak i PresseSjekk";
 }
 
 export default function MinSideKjopPage() {
@@ -197,7 +221,7 @@ export default function MinSideKjopPage() {
 
       setPurchases((purchaseResult.data ?? []) as PurchaseRow[]);
       setEntitlements((entitlementResult.data ?? []) as EntitlementRow[]);
-      setCaseAccess((accessResult.data ?? []) as CaseAccessRow[]);
+      setCaseAccess((accessResult.data ?? []) as unknown as CaseAccessRow[]);
       setIsLoading(false);
     }
 
@@ -273,222 +297,6 @@ export default function MinSideKjopPage() {
           </div>
         ) : (
           <>
-            <section className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">
-                  Ledige saker
-                </p>
-                <p className="mt-4 text-4xl font-black text-slate-950">
-                  {availableCases}
-                </p>
-                <p className="mt-3 leading-7 text-slate-600">
-                  Saker du kan opprette fra aktive pakker.
-                </p>
-              </article>
-
-              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">
-                  Brukte pakkesaker
-                </p>
-                <p className="mt-4 text-4xl font-black text-slate-950">
-                  {usedEntitlementCases}
-                </p>
-                <p className="mt-3 leading-7 text-slate-600">
-                  Saker brukt fra sakspakker eller kjøpte enkeltsaker.
-                </p>
-              </article>
-
-              <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">
-                  Aktive saker
-                </p>
-                <p className="mt-4 text-4xl font-black text-slate-950">
-                  {caseAccess.length}
-                </p>
-                <p className="mt-3 leading-7 text-slate-600">
-                  Saker med aktiv rapportpakke, PFU-pakke eller dokumentpakke.
-                </p>
-              </article>
-
-              <article className="rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
-                <p className="text-sm font-bold uppercase tracking-[0.2em] text-amber-700">
-                  Betalt totalt
-                </p>
-                <p className="mt-4 text-4xl font-black text-slate-950">
-                  {formatAmount(totalPaid)}
-                </p>
-                <p className="mt-3 leading-7 text-slate-700">
-                  Sum registrerte Stripe-kjøp i kjøpshistorikken.
-                </p>
-              </article>
-            </section>
-
-            <section className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px]">
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
-                      Aktive pakker
-                    </p>
-                    <h2 className="mt-3 text-3xl font-black text-slate-950">
-                      Ledige og brukte saker
-                    </h2>
-                  </div>
-
-                  <Link
-                    href="/min-side/saker/ny"
-                    className="rounded-xl bg-red-500 px-5 py-3 font-bold text-white hover:bg-red-600"
-                  >
-                    Opprett ny sak
-                  </Link>
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  {entitlements.length === 0 ? (
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-slate-700">
-                      Du har ingen aktive sakspakker akkurat nå.
-                    </div>
-                  ) : (
-                    entitlements.map((entitlement) => {
-                      const included = Number(entitlement.included_cases ?? 0);
-                      const used = Number(entitlement.used_cases ?? 0);
-                      const available = Math.max(0, included - used);
-
-                      return (
-                        <article
-                          key={entitlement.id}
-                          className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
-                        >
-                          <div className="flex flex-wrap items-start justify-between gap-4">
-                            <div>
-                              <h3 className="text-xl font-black text-slate-950">
-                                {packageName(entitlement.package_id)}
-                              </h3>
-                              <p className="mt-2 max-w-2xl leading-7 text-slate-600">
-                                {packageDescription(entitlement.package_id)}
-                              </p>
-                            </div>
-
-                            <span className="rounded-full bg-green-100 px-4 py-2 text-sm font-bold text-green-800">
-                              {statusLabel(entitlement.status)}
-                            </span>
-                          </div>
-
-                          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                            <div className="rounded-2xl bg-white p-4">
-                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                                Inkludert
-                              </p>
-                              <p className="mt-2 text-2xl font-black">
-                                {included}
-                              </p>
-                            </div>
-                            <div className="rounded-2xl bg-white p-4">
-                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                                Brukt
-                              </p>
-                              <p className="mt-2 text-2xl font-black">{used}</p>
-                            </div>
-                            <div className="rounded-2xl bg-white p-4">
-                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                                Ledig
-                              </p>
-                              <p className="mt-2 text-2xl font-black">
-                                {available}
-                              </p>
-                            </div>
-                          </div>
-                        </article>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
-              <aside className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
-                  Refusjon og kvittering
-                </p>
-                <h2 className="mt-3 text-3xl font-black text-slate-950">
-                  Kvitteringer ligger på kjøpene
-                </h2>
-                <p className="mt-4 leading-8 text-slate-700">
-                  Når Stripe sender kvitteringslenke, vises den i
-                  kjøpshistorikken. Refusjon håndteres manuelt i første versjon,
-                  slik at ubrukte kjøp og sakspakker kan vurderes riktig.
-                </p>
-
-                <div className="mt-6 rounded-2xl border border-red-200 bg-white p-5 text-sm leading-7 text-slate-700">
-                  <p className="font-black text-slate-950">
-                    Foreløpig refusjonsregel
-                  </p>
-                  <p className="mt-2">
-                    Ubrukte enkeltsaker kan normalt vurderes for refusjon.
-                    Brukte saker og dokumentpakker vurderes manuelt.
-                  </p>
-                </div>
-              </aside>
-            </section>
-
-            <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
-                    Saker med aktiv tilgang
-                  </p>
-                  <h2 className="mt-3 text-3xl font-black text-slate-950">
-                    Aktive dokumentpakker
-                  </h2>
-                </div>
-              </div>
-
-              <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
-                {caseAccess.length === 0 ? (
-                  <div className="bg-slate-50 p-5 text-slate-700">
-                    Ingen saker med aktiv tilgang ennå.
-                  </div>
-                ) : (
-                  <div className="divide-y divide-slate-200">
-                    {caseAccess.map((access) => (
-                      <article
-                        key={access.id}
-                        className="grid gap-4 bg-white p-5 md:grid-cols-[1fr_180px_140px]"
-                      >
-                        <div>
-                          <h3 className="font-black text-slate-950">
-                            {access.cases?.title ??
-                              access.cases?.article_title ??
-                              "Sak uten tittel"}
-                          </h3>
-                          <p className="mt-2 text-sm leading-6 text-slate-600">
-                            {access.cases?.media_name
-                              ? `Medium: ${access.cases.media_name}`
-                              : "Aktiv sak i PresseSjekk"}
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                            Pakke
-                          </p>
-                          <p className="mt-1 font-bold">
-                            {packageName(access.package_id)}
-                          </p>
-                        </div>
-
-                        <Link
-                          href={`/min-side/saker/${access.case_id}`}
-                          className="self-start rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100"
-                        >
-                          Åpne sak
-                        </Link>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
-
             <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div>
                 <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
@@ -579,6 +387,189 @@ export default function MinSideKjopPage() {
                 )}
               </div>
             </section>
+
+            <section className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px]">
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
+                      Aktive pakker
+                    </p>
+                    <h2 className="mt-3 text-3xl font-black text-slate-950">
+                      Pakker som kan brukes nå
+                    </h2>
+                    <p className="mt-3 max-w-3xl leading-8 text-slate-700">
+                      Her ser du aktive pakker, hvor mange saker som er inkludert,
+                      hvor mange som er brukt, og hvor mange som fortsatt kan
+                      opprettes.
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/min-side/saker/ny"
+                    className="rounded-xl bg-red-500 px-5 py-3 font-bold text-white hover:bg-red-600"
+                  >
+                    Opprett ny sak
+                  </Link>
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  {entitlements.length === 0 ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-slate-700">
+                      Du har ingen aktive sakspakker akkurat nå.
+                    </div>
+                  ) : (
+                    entitlements.map((entitlement) => {
+                      const included = Number(entitlement.included_cases ?? 0);
+                      const used = Number(entitlement.used_cases ?? 0);
+                      const available = Math.max(0, included - used);
+
+                      return (
+                        <article
+                          key={entitlement.id}
+                          className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-4">
+                            <div>
+                              <h3 className="text-xl font-black text-slate-950">
+                                {packageName(entitlement.package_id)}
+                              </h3>
+                              <p className="mt-2 max-w-2xl leading-7 text-slate-600">
+                                {packageDescription(entitlement.package_id)}
+                              </p>
+                            </div>
+
+                            <span className="rounded-full bg-green-100 px-4 py-2 text-sm font-bold text-green-800">
+                              {statusLabel(entitlement.status)}
+                            </span>
+                          </div>
+
+                          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-2xl bg-white p-4">
+                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                                Inkludert
+                              </p>
+                              <p className="mt-2 text-2xl font-black">
+                                {included}
+                              </p>
+                            </div>
+                            <div className="rounded-2xl bg-white p-4">
+                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                                Brukt
+                              </p>
+                              <p className="mt-2 text-2xl font-black">{used}</p>
+                            </div>
+                            <div className="rounded-2xl bg-white p-4">
+                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                                Ledig
+                              </p>
+                              <p className="mt-2 text-2xl font-black">
+                                {available}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                            <p>
+                              <span className="font-bold text-slate-950">
+                                Kilde:
+                              </span>{" "}
+                              {entitlement.source}
+                            </p>
+                            <p>
+                              <span className="font-bold text-slate-950">
+                                Opprettet:
+                              </span>{" "}
+                              {formatDate(entitlement.created_at)}
+                            </p>
+                          </div>
+                        </article>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              <aside className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
+                  Refusjon og kvittering
+                </p>
+                <h2 className="mt-3 text-3xl font-black text-slate-950">
+                  Kvitteringer ligger på kjøpene
+                </h2>
+                <p className="mt-4 leading-8 text-slate-700">
+                  Når Stripe sender kvitteringslenke, vises den i
+                  kjøpshistorikken. Refusjon håndteres manuelt i første versjon,
+                  slik at ubrukte kjøp og sakspakker kan vurderes riktig.
+                </p>
+
+                <div className="mt-6 rounded-2xl border border-red-200 bg-white p-5 text-sm leading-7 text-slate-700">
+                  <p className="font-black text-slate-950">
+                    Foreløpig refusjonsregel
+                  </p>
+                  <p className="mt-2">
+                    Ubrukte enkeltsaker kan normalt vurderes for refusjon.
+                    Brukte saker og dokumentpakker vurderes manuelt.
+                  </p>
+                </div>
+              </aside>
+            </section>
+
+            <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
+                    Saker med aktiv tilgang
+                  </p>
+                  <h2 className="mt-3 text-3xl font-black text-slate-950">
+                    Aktive dokumentpakker
+                  </h2>
+                </div>
+              </div>
+
+              <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+                {caseAccess.length === 0 ? (
+                  <div className="bg-slate-50 p-5 text-slate-700">
+                    Ingen saker med aktiv tilgang ennå.
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-200">
+                    {caseAccess.map((access) => (
+                      <article
+                        key={access.id}
+                        className="grid gap-4 bg-white p-5 md:grid-cols-[1fr_180px_140px]"
+                      >
+                        <div>
+                          <h3 className="font-black text-slate-950">
+                            {caseTitle(access)}
+                          </h3>
+                          <p className="mt-2 text-sm leading-6 text-slate-600">
+                            {caseSubtitle(access)}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                            Pakke
+                          </p>
+                          <p className="mt-1 font-bold">
+                            {packageName(access.package_id)}
+                          </p>
+                        </div>
+
+                        <Link
+                          href={`/min-side/saker/${access.case_id}`}
+                          className="self-start rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-bold text-slate-950 hover:bg-slate-100"
+                        >
+                          Åpne sak
+                        </Link>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </section>
+
           </>
         )}
       </section>
