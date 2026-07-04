@@ -288,6 +288,15 @@ async function activatePaymentIntentEntitlement(
         paymentIntentId: paymentIntent.id,
         caseId,
       });
+
+      await recordPaymentIntentPurchase({
+        paymentIntent,
+        userId,
+        caseId,
+        packageId,
+        includedCases: 1,
+      });
+
       return;
     }
 
@@ -348,6 +357,15 @@ async function activatePaymentIntentEntitlement(
       paymentIntentId: paymentIntent.id,
       entitlementId: existingEntitlement.id,
     });
+
+    await recordPaymentIntentPurchase({
+      paymentIntent,
+      userId,
+      caseId: null,
+      packageId,
+      includedCases,
+    });
+
     return;
   }
 
