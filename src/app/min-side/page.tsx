@@ -883,81 +883,81 @@ export default function MinSidePage() {
           </aside>
         </div>
 
-        <section className="mt-10 md:hidden">
+        <section className="mt-8 grid grid-cols-2 gap-3 md:hidden">
           <Link
             href={packageHref}
-            className="block rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-red-800">Tilgang / pakker</p>
-            <p className="mt-4 text-4xl font-black text-slate-950">
+            <p className="text-xs font-bold text-red-800">Tilgang / pakker</p>
+            <p className="mt-3 text-3xl font-black text-slate-950">
               {packageStatusLabel}
             </p>
-            <p className="mt-3 text-sm font-semibold text-red-800">
+            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-800">
               {packageCtaLabel}
             </p>
           </Link>
 
           <Link
             href="/min-side/kjop"
-            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-red-800">Kjøpshistorikk</p>
-            <p className="mt-4 text-4xl font-black text-slate-950">
+            <p className="text-xs font-bold text-red-800">Kjøpshistorikk</p>
+            <p className="mt-3 text-3xl font-black text-slate-950">
               Kjøp
             </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
-              Se betalinger og kvitteringer
+            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
+              Betalinger og kvitteringer
             </p>
           </Link>
 
           <Link
             href="/min-side/rapporter"
-            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-slate-500">Rapporter</p>
-            <p className="mt-4 text-4xl font-black text-slate-950">
+            <p className="text-xs font-bold text-slate-500">Rapporter</p>
+            <p className="mt-3 text-3xl font-black text-slate-950">
               {reportCount}
             </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
+            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
               Se rapporter
             </p>
           </Link>
 
           <Link
             href="/min-side/pfu-klager"
-            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-slate-500">PFU-klager</p>
-            <p className="mt-4 text-4xl font-black text-slate-950">
+            <p className="text-xs font-bold text-slate-500">PFU-klager</p>
+            <p className="mt-3 text-3xl font-black text-slate-950">
               {pfuDraftCount}
             </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
+            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
               Se PFU-klager
             </p>
           </Link>
 
           <Link
             href="/min-side/politianmeldelser"
-            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-slate-500">Politianmeldelser</p>
-            <p className="mt-4 text-4xl font-black text-slate-950">
+            <p className="text-xs font-bold text-slate-500">Politianmeldelser</p>
+            <p className="mt-3 text-3xl font-black text-slate-950">
               {policeDraftCount}
             </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
-              Se politianmeldelser
+            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
+              Se anmeldelser
             </p>
           </Link>
 
           <Link
             href="/min-side/utredninger"
-            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-slate-500">Utredninger</p>
-            <p className="mt-4 text-4xl font-black text-slate-950">
+            <p className="text-xs font-bold text-slate-500">Utredninger</p>
+            <p className="mt-3 text-3xl font-black text-slate-950">
               {investigationDraftCount}
             </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
+            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
               Se utredninger
             </p>
           </Link>
@@ -1601,6 +1601,15 @@ export default function MinSidePage() {
               >
                 Profil
               </Link>
+
+              {profile?.is_admin ? (
+                <Link
+                  href="/admin"
+                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Admin
+                </Link>
+              ) : null}
 
               <SignOutButton />
             </div>
