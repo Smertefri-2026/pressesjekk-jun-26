@@ -133,6 +133,8 @@ export default function MinSidePage() {
   const [folderCount, setFolderCount] = useState(0);
   const [reportCount, setReportCount] = useState(0);
   const [pfuDraftCount, setPfuDraftCount] = useState(0);
+  const [policeDraftCount, setPoliceDraftCount] = useState(0);
+  const [investigationDraftCount, setInvestigationDraftCount] = useState(0);
   const [activePackageCount, setActivePackageCount] = useState(0);
   const [availableCaseCount, setAvailableCaseCount] = useState(0);
   const [activePackageCaseId, setActivePackageCaseId] = useState<string | null>(
@@ -295,9 +297,24 @@ export default function MinSidePage() {
       }
       setCaseCount(caseRows.filter((caseItem) => !caseItem.deleted_at).length);
       setFolderCount(folderRows.filter((folder) => !folder.deleted_at).length);
-      setReportCount(reportRows.length);
+      setReportCount(
+        reportRows.filter(
+          (report) =>
+            report.report_type === "free_check" ||
+            report.report_type === "full_report"
+        ).length
+      );
       setPfuDraftCount(
         reportRows.filter((report) => report.report_type === "pfu_draft").length
+      );
+      setPoliceDraftCount(
+        reportRows.filter((report) => report.report_type === "police_draft")
+          .length
+      );
+      setInvestigationDraftCount(
+        reportRows.filter(
+          (report) => report.report_type === "investigation_draft"
+        ).length
       );
 
       setIsLoading(false);
@@ -813,7 +830,7 @@ export default function MinSidePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               Dashboard
             </p>
 
@@ -828,8 +845,8 @@ export default function MinSidePage() {
             </p>
           </section>
 
-          <aside className="hidden rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7 lg:block">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
+          <aside className="hidden rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-7 lg:block">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
               Konto
             </p>
 
@@ -855,7 +872,7 @@ export default function MinSidePage() {
               {profile?.is_admin ? (
                 <Link
                   href="/admin"
-                  className="rounded-xl border border-blue-300 bg-blue-100 px-5 py-3 text-center text-sm font-black text-cyan-950 hover:bg-blue-200"
+                  className="rounded-xl border border-red-300 bg-red-100 px-5 py-3 text-center text-sm font-black text-red-950 hover:bg-red-100"
                 >
                   Admin
                 </Link>
@@ -869,91 +886,171 @@ export default function MinSidePage() {
         <section className="mt-10 md:hidden">
           <Link
             href={packageHref}
-            className="block rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="block rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-blue-800">Tilgang / pakker</p>
+            <p className="font-bold text-red-800">Tilgang / pakker</p>
             <p className="mt-4 text-4xl font-black text-slate-950">
               {packageStatusLabel}
             </p>
-            <p className="mt-3 text-sm font-semibold text-blue-800">
+            <p className="mt-3 text-sm font-semibold text-red-800">
               {packageCtaLabel}
+            </p>
+          </Link>
+
+          <Link
+            href="/min-side/kjop"
+            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-red-800">Kjøpshistorikk</p>
+            <p className="mt-4 text-4xl font-black text-slate-950">
+              Kjøp
+            </p>
+            <p className="mt-3 text-sm font-semibold text-red-700">
+              Se betalinger og kvitteringer
+            </p>
+          </Link>
+
+          <Link
+            href="/min-side/rapporter"
+            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-slate-500">Rapporter</p>
+            <p className="mt-4 text-4xl font-black text-slate-950">
+              {reportCount}
+            </p>
+            <p className="mt-3 text-sm font-semibold text-red-700">
+              Se rapporter
+            </p>
+          </Link>
+
+          <Link
+            href="/min-side/pfu-klager"
+            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-slate-500">PFU-klager</p>
+            <p className="mt-4 text-4xl font-black text-slate-950">
+              {pfuDraftCount}
+            </p>
+            <p className="mt-3 text-sm font-semibold text-red-700">
+              Se PFU-klager
+            </p>
+          </Link>
+
+          <Link
+            href="/min-side/politianmeldelser"
+            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-slate-500">Politianmeldelser</p>
+            <p className="mt-4 text-4xl font-black text-slate-950">
+              {policeDraftCount}
+            </p>
+            <p className="mt-3 text-sm font-semibold text-red-700">
+              Se politianmeldelser
+            </p>
+          </Link>
+
+          <Link
+            href="/min-side/utredninger"
+            className="mt-4 block rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-slate-500">Utredninger</p>
+            <p className="mt-4 text-4xl font-black text-slate-950">
+              {investigationDraftCount}
+            </p>
+            <p className="mt-3 text-sm font-semibold text-red-700">
+              Se utredninger
             </p>
           </Link>
         </section>
 
         <section
-          className="mt-14 hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-5"
+          className="mt-14 hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-6"
           id="oversikt"
         >
           <Link
             href={packageHref}
-            className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-blue-800">Tilgang / pakker</p>
+            <p className="font-bold text-red-800">Tilgang / pakker</p>
             <p className="mt-4 text-3xl font-black text-slate-950">
               {packageStatusLabel}
             </p>
-            <p className="mt-3 text-sm font-semibold text-blue-800">
+            <p className="mt-3 text-sm font-semibold text-red-800">
               {packageCtaLabel}
             </p>
           </Link>
 
-          <a
-            href="#arkiv"
+          <Link
+            href="/min-side/kjop"
             className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-slate-500">Mapper</p>
-            <p className="mt-4 text-5xl font-black text-slate-950">
-              {folderCount}
+            <p className="font-bold text-red-800">Kjøpshistorikk</p>
+            <p className="mt-4 text-3xl font-black text-slate-950">
+              Kjøp
             </p>
-            <p className="mt-3 text-sm font-semibold text-blue-700">
-              Se arkiv
+            <p className="mt-3 text-sm font-semibold text-red-700">
+              Betalinger og kvitteringer
             </p>
-          </a>
+          </Link>
 
-          <a
-            href="#arkiv"
+          <Link
+            href="/min-side/rapporter"
             className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
           >
-            <p className="font-bold text-slate-500">Saker</p>
-            <p className="mt-4 text-5xl font-black text-slate-950">
-              {caseCount}
-            </p>
-            <p className="mt-3 text-sm font-semibold text-blue-700">
-              Se arkiv
-            </p>
-          </a>
-
-          <a
-            href="#arkiv"
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="font-bold text-slate-500">
-              {isJournalistWorkflow ? "Redaksjonelle rapporter" : "Rapporter"}
-            </p>
+            <p className="font-bold text-slate-500">Rapporter</p>
             <p className="mt-4 text-5xl font-black text-slate-950">
               {reportCount}
             </p>
-            <p className="mt-3 text-sm font-semibold text-blue-700">
+            <p className="mt-3 text-sm font-semibold text-red-700">
               Se rapporter
             </p>
-          </a>
+          </Link>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="font-bold text-slate-500">
-              {isJournalistWorkflow ? "Publiseringsgrunnlag" : "PFU-klage"}
-            </p>
+          <Link
+            href="/min-side/pfu-klager"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-slate-500">PFU-klager</p>
             <p className="mt-4 text-5xl font-black text-slate-950">
-              {isJournalistWorkflow ? caseCount : pfuDraftCount}
+              {pfuDraftCount}
             </p>
-          </div>
+            <p className="mt-3 text-sm font-semibold text-red-700">
+              Se PFU-klager
+            </p>
+          </Link>
+
+          <Link
+            href="/min-side/politianmeldelser"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-slate-500">Politianmeldelser</p>
+            <p className="mt-4 text-5xl font-black text-slate-950">
+              {policeDraftCount}
+            </p>
+            <p className="mt-3 text-sm font-semibold text-red-700">
+              Se politianmeldelser
+            </p>
+          </Link>
+
+          <Link
+            href="/min-side/utredninger"
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+          >
+            <p className="font-bold text-slate-500">Utredninger</p>
+            <p className="mt-4 text-5xl font-black text-slate-950">
+              {investigationDraftCount}
+            </p>
+            <p className="mt-3 text-sm font-semibold text-red-700">
+              Se utredninger
+            </p>
+          </Link>
         </section>
 
         <section id="arkiv" className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px]">
           <div className="rounded-3xl border border-slate-200 bg-white p-0 shadow-sm">
             <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div>
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
                   Saksarkiv
                 </p>
                 <h2 className="mt-2 text-3xl font-black text-slate-950">
@@ -978,7 +1075,7 @@ export default function MinSidePage() {
                     }}
                     className={
                       archiveMode === "active"
-                        ? "text-slate-950 underline decoration-blue-500 decoration-4 underline-offset-8"
+                        ? "text-slate-950 underline decoration-red-500 decoration-4 underline-offset-8"
                         : "text-slate-500 hover:text-slate-950"
                     }
                   >
@@ -994,7 +1091,7 @@ export default function MinSidePage() {
                     }}
                     className={
                       archiveMode === "trash"
-                        ? "text-slate-950 underline decoration-blue-500 decoration-4 underline-offset-8"
+                        ? "text-slate-950 underline decoration-red-500 decoration-4 underline-offset-8"
                         : "text-slate-500 hover:text-slate-950"
                     }
                   >
@@ -1008,7 +1105,7 @@ export default function MinSidePage() {
                       type="button"
                       onClick={createFolder}
                       disabled={isCreatingFolder}
-                      className="rounded-xl border border-blue-300 bg-blue-50 px-5 py-3 text-center text-sm font-black text-cyan-950 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-xl border border-red-300 bg-red-50 px-5 py-3 text-center text-sm font-black text-red-950 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isCreatingFolder
                         ? "Oppretter..."
@@ -1043,7 +1140,7 @@ export default function MinSidePage() {
                       sessionStorage.removeItem("pressesjekkSelectedFolderId");
                       setSelectedFolderId(null);
                     }}
-                    className="shrink-0 text-sm font-black text-blue-700 hover:text-blue-900"
+                    className="shrink-0 text-sm font-black text-red-700"
                   >
                     <span className="sm:hidden">← Tilbake</span>
                     <span className="hidden sm:inline">
@@ -1066,7 +1163,7 @@ export default function MinSidePage() {
                   }}
                   className={
                     viewMode === "list"
-                      ? "text-slate-950 underline decoration-blue-500 decoration-4 underline-offset-8"
+                      ? "text-slate-950 underline decoration-red-500 decoration-4 underline-offset-8"
                       : "text-slate-500 hover:text-slate-950"
                   }
                 >
@@ -1081,7 +1178,7 @@ export default function MinSidePage() {
                   }}
                   className={
                     viewMode === "grid"
-                      ? "text-slate-950 underline decoration-blue-500 decoration-4 underline-offset-8"
+                      ? "text-slate-950 underline decoration-red-500 decoration-4 underline-offset-8"
                       : "text-slate-500 hover:text-slate-950"
                   }
                 >
@@ -1114,7 +1211,7 @@ export default function MinSidePage() {
                         type="button"
                         onClick={createFolder}
                         disabled={isCreatingFolder}
-                        className="rounded-xl bg-blue-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-xl bg-red-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isCreatingFolder
                           ? "Oppretter..."
@@ -1143,7 +1240,7 @@ export default function MinSidePage() {
                   {archiveItems.map((item) => (
                     <article
                       key={item.id}
-                      className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-blue-50 hover:shadow-md"
+                      className="rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-1 hover:bg-red-50 hover:shadow-md"
                     >
                       {item.type === "Mappe" ? (
                         <button
@@ -1196,7 +1293,7 @@ export default function MinSidePage() {
                             <button
                               type="button"
                               onClick={() => restoreFromTrash(item)}
-                              className="rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-700 hover:bg-blue-50"
+                              className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-black text-red-700 hover:bg-red-50"
                             >
                               Gjenopprett
                             </button>
@@ -1279,28 +1376,28 @@ export default function MinSidePage() {
                   <button
                     type="button"
                     onClick={() => handleSort("name")}
-                    className="pl-12 text-left hover:text-blue-700"
+                    className="pl-12 text-left hover:text-red-700"
                   >
                     Navn{sortLabel("name")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSort("type")}
-                    className="text-left hover:text-blue-700"
+                    className="text-left hover:text-red-700"
                   >
                     Type{sortLabel("type")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSort("status")}
-                    className="text-left hover:text-blue-700"
+                    className="text-left hover:text-red-700"
                   >
                     Status{sortLabel("status")}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSort("date")}
-                    className="text-left hover:text-blue-700"
+                    className="text-left hover:text-red-700"
                   >
                     Dato{sortLabel("date")}
                   </button>
@@ -1311,7 +1408,7 @@ export default function MinSidePage() {
                   {archiveItems.map((item) => (
                     <div
                       key={item.id}
-                      className="grid grid-cols-[minmax(0,1fr)_116px] gap-3 px-5 py-4 transition hover:bg-blue-50 md:grid-cols-[1fr_110px_120px_120px_230px] md:items-center"
+                      className="grid grid-cols-[minmax(0,1fr)_116px] gap-3 px-5 py-4 transition hover:bg-red-50 md:grid-cols-[1fr_110px_120px_120px_230px] md:items-center"
                     >
                       {item.type === "Mappe" ? (
                         <button
@@ -1373,7 +1470,7 @@ export default function MinSidePage() {
                             <button
                               type="button"
                               onClick={() => restoreFromTrash(item)}
-                              className="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-50"
+                              className="rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-black text-red-700 hover:bg-red-50"
                             >
                               Gjenopprett
                             </button>
@@ -1447,7 +1544,7 @@ export default function MinSidePage() {
 
           <aside className="grid gap-6">
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                 Siste aktivitet
               </p>
 
@@ -1469,7 +1566,7 @@ export default function MinSidePage() {
                       <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-300">
                         {item.description}
                       </p>
-                      <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-blue-300">
+                      <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-red-300">
                         {formatActivityDate(item.created_at)}
                       </p>
                     </Link>
@@ -1481,8 +1578,8 @@ export default function MinSidePage() {
           </aside>
         </section>
         <section className="mt-8 lg:hidden">
-          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
+          <aside className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
               Konto
             </p>
 
