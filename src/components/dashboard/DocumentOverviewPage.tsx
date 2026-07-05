@@ -26,6 +26,8 @@ type DocumentOverviewPageProps = {
   primaryLabel: string;
 };
 
+const PAGE_SIZE = 10;
+
 type ReportRow = {
   id: string;
   case_id: string;
@@ -121,7 +123,10 @@ export function DocumentOverviewPage({
 }: DocumentOverviewPageProps) {
   const [user, setUser] = useState<User | null>(null);
   const [reports, setReports] = useState<ReportRow[]>([]);
+  const [caseIds, setCaseIds] = useState<string[]>([]);
+  const [hasMoreReports, setHasMoreReports] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
@@ -154,8 +159,11 @@ export function DocumentOverviewPage({
 
       const caseIds = (caseRows ?? []).map((caseItem) => caseItem.id);
 
+      setCaseIds(caseIds);
+
       if (caseIds.length === 0) {
         setReports([]);
+        setHasMoreReports(false);
         setIsLoading(false);
         return;
       }
@@ -168,7 +176,7 @@ export function DocumentOverviewPage({
         .in("case_id", caseIds)
         .in("report_type", reportTypes)
         .order("created_at", { ascending: false })
-        .limit(200);
+        .range(0, PAGE_SIZE - 1);
 
       if (error) {
         setErrorMessage(error.message);
@@ -176,7 +184,10 @@ export function DocumentOverviewPage({
         return;
       }
 
-      setReports((data ?? []) as unknown as ReportRow[]);
+      const rows = (data ?? []) as unknown as ReportRow[];
+
+      setReports(rows);
+      setHasMoreReports(rows.length === PAGE_SIZE);
       setIsLoading(false);
     }
 
@@ -184,6 +195,38 @@ export function DocumentOverviewPage({
   }, [reportTypes]);
 
   const latestDocuments = useMemo(() => reports.slice(0, 5), [reports]);
+
+  async function loadMoreReports() {
+    if (isLoadingMore || !hasMoreReports || caseIds.length === 0) return;
+
+    setIsLoadingMore(true);
+    setErrorMessage("");
+
+    const from = reports.length;
+    const to = from + PAGE_SIZE - 1;
+
+    const { data, error } = await supabase
+      .from("case_reports")
+      .select(
+        "id,case_id,version,report_type,status,created_at,cases(title,media_name,article_title)"
+      )
+      .in("case_id", caseIds)
+      .in("report_type", reportTypes)
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      setErrorMessage(error.message);
+      setIsLoadingMore(false);
+      return;
+    }
+
+    const rows = (data ?? []) as unknown as ReportRow[];
+
+    setReports((currentReports) => [...currentReports, ...rows]);
+    setHasMoreReports(rows.length === PAGE_SIZE);
+    setIsLoadingMore(false);
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -292,55 +335,70 @@ export function DocumentOverviewPage({
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-200">
-                {reports.map((report) => (
-                  <article
-                    key={report.id}
-                    className="grid gap-4 bg-white p-5 md:grid-cols-[1fr_170px_150px_140px]"
-                  >
-                    <div>
-                      <h3 className="font-black text-slate-950">
-                        {caseTitle(report)}
-                      </h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        {caseSubtitle(report)}
-                      </p>
-                    </div>
+              <div>
+                <div className="divide-y divide-slate-200">
+                  {reports.map((report) => (
+                    <article
+                      key={report.id}
+                      className="grid gap-4 bg-white p-5 md:grid-cols-[1fr_170px_150px_140px]"
+                    >
+                      <div>
+                        <h3 className="font-black text-slate-950">
+                          {caseTitle(report)}
+                        </h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          {caseSubtitle(report)}
+                        </p>
+                      </div>
 
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                        Type
-                      </p>
-                      <p className="mt-1 font-bold">
-                        {reportTypeLabel(report.report_type)}
-                      </p>
-                    </div>
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                          Type
+                        </p>
+                        <p className="mt-1 font-bold">
+                          {reportTypeLabel(report.report_type)}
+                        </p>
+                      </div>
 
-                    <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                        Dato
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-slate-700">
-                        {formatDate(report.created_at)}
-                      </p>
-                    </div>
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                          Dato
+                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-700">
+                          {formatDate(report.created_at)}
+                        </p>
+                      </div>
 
-                    <div className="flex flex-wrap gap-2 md:justify-end">
-                      <Link
-                        href={documentHref(report)}
-                        className="rounded-xl bg-red-500 px-4 py-3 text-sm font-bold text-white hover:bg-red-600"
-                      >
-                        Åpne
-                      </Link>
-                      <Link
-                        href={`/min-side/saker/${report.case_id}`}
-                        className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-slate-100"
-                      >
-                        Sak
-                      </Link>
-                    </div>
-                  </article>
-                ))}
+                      <div className="flex flex-wrap gap-2 md:justify-end">
+                        <Link
+                          href={documentHref(report)}
+                          className="rounded-xl bg-red-500 px-4 py-3 text-sm font-bold text-white hover:bg-red-600"
+                        >
+                          Åpne
+                        </Link>
+                        <Link
+                          href={`/min-side/saker/${report.case_id}`}
+                          className="rounded-xl border border-slate-300 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-slate-100"
+                        >
+                          Sak
+                        </Link>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+
+                {hasMoreReports ? (
+                  <div className="border-t border-slate-200 bg-slate-50 p-5 text-center">
+                    <button
+                      type="button"
+                      onClick={loadMoreReports}
+                      disabled={isLoadingMore}
+                      className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isLoadingMore ? "Laster flere..." : "Vis flere"}
+                    </button>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
