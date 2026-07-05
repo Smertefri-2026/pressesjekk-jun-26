@@ -910,57 +910,65 @@ export default function MinSidePage() {
             </p>
           </Link>
 
-          <Link
-            href="/min-side/rapporter"
-            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="text-xs font-bold text-slate-500">Rapporter</p>
-            <p className="mt-3 text-3xl font-black text-slate-950">
-              {reportCount}
-            </p>
-            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
-              Se rapporter
-            </p>
-          </Link>
+          {reportCount > 0 ? (
+            <Link
+              href="/min-side/rapporter"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <p className="text-xs font-bold text-slate-500">Rapporter</p>
+              <p className="mt-3 text-3xl font-black text-slate-950">
+                {reportCount}
+              </p>
+              <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
+                Se rapporter
+              </p>
+            </Link>
+          ) : null}
 
-          <Link
-            href="/min-side/pfu-klager"
-            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="text-xs font-bold text-slate-500">PFU-klager</p>
-            <p className="mt-3 text-3xl font-black text-slate-950">
-              {pfuDraftCount}
-            </p>
-            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
-              Se PFU-klager
-            </p>
-          </Link>
+          {pfuDraftCount > 0 ? (
+            <Link
+              href="/min-side/pfu-klager"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <p className="text-xs font-bold text-slate-500">PFU-klager</p>
+              <p className="mt-3 text-3xl font-black text-slate-950">
+                {pfuDraftCount}
+              </p>
+              <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
+                Se PFU-klager
+              </p>
+            </Link>
+          ) : null}
 
-          <Link
-            href="/min-side/politianmeldelser"
-            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="text-xs font-bold text-slate-500">Politianmeldelser</p>
-            <p className="mt-3 text-3xl font-black text-slate-950">
-              {policeDraftCount}
-            </p>
-            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
-              Se anmeldelser
-            </p>
-          </Link>
+          {policeDraftCount > 0 ? (
+            <Link
+              href="/min-side/politianmeldelser"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <p className="text-xs font-bold text-slate-500">Politianmeldelser</p>
+              <p className="mt-3 text-3xl font-black text-slate-950">
+                {policeDraftCount}
+              </p>
+              <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
+                Se anmeldelser
+              </p>
+            </Link>
+          ) : null}
 
-          <Link
-            href="/min-side/utredninger"
-            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="text-xs font-bold text-slate-500">Utredninger</p>
-            <p className="mt-3 text-3xl font-black text-slate-950">
-              {investigationDraftCount}
-            </p>
-            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
-              Se utredninger
-            </p>
-          </Link>
+          {investigationDraftCount > 0 ? (
+            <Link
+              href="/min-side/utredninger"
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <p className="text-xs font-bold text-slate-500">Utredninger</p>
+              <p className="mt-3 text-3xl font-black text-slate-950">
+                {investigationDraftCount}
+              </p>
+              <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
+                Se utredninger
+              </p>
+            </Link>
+          ) : null}
         </section>
 
         <section
@@ -993,57 +1001,65 @@ export default function MinSidePage() {
             </p>
           </Link>
 
-          <Link
-            href="/min-side/rapporter"
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="font-bold text-slate-500">Rapporter</p>
-            <p className="mt-4 text-5xl font-black text-slate-950">
-              {reportCount}
-            </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
-              Se rapporter
-            </p>
-          </Link>
+          {reportCount > 0 ? (
+            <Link
+              href="/min-side/rapporter"
+              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <p className="font-bold text-slate-500">Rapporter</p>
+              <p className="mt-4 text-5xl font-black text-slate-950">
+                {reportCount}
+              </p>
+              <p className="mt-3 text-sm font-semibold text-red-700">
+                Se rapporter
+              </p>
+            </Link>
+          ) : null}
 
-          <Link
-            href="/min-side/pfu-klager"
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="font-bold text-slate-500">PFU-klager</p>
-            <p className="mt-4 text-5xl font-black text-slate-950">
-              {pfuDraftCount}
-            </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
-              Se PFU-klager
-            </p>
-          </Link>
+          {pfuDraftCount > 0 ? (
+            <Link
+              href="/min-side/pfu-klager"
+              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <p className="font-bold text-slate-500">PFU-klager</p>
+              <p className="mt-4 text-5xl font-black text-slate-950">
+                {pfuDraftCount}
+              </p>
+              <p className="mt-3 text-sm font-semibold text-red-700">
+                Se PFU-klager
+              </p>
+            </Link>
+          ) : null}
 
-          <Link
-            href="/min-side/politianmeldelser"
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="font-bold text-slate-500">Politianmeldelser</p>
-            <p className="mt-4 text-5xl font-black text-slate-950">
-              {policeDraftCount}
-            </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
-              Se politianmeldelser
-            </p>
-          </Link>
+          {policeDraftCount > 0 ? (
+            <Link
+              href="/min-side/politianmeldelser"
+              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <p className="font-bold text-slate-500">Politianmeldelser</p>
+              <p className="mt-4 text-5xl font-black text-slate-950">
+                {policeDraftCount}
+              </p>
+              <p className="mt-3 text-sm font-semibold text-red-700">
+                Se politianmeldelser
+              </p>
+            </Link>
+          ) : null}
 
-          <Link
-            href="/min-side/utredninger"
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="font-bold text-slate-500">Utredninger</p>
-            <p className="mt-4 text-5xl font-black text-slate-950">
-              {investigationDraftCount}
-            </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
-              Se utredninger
-            </p>
-          </Link>
+          {investigationDraftCount > 0 ? (
+            <Link
+              href="/min-side/utredninger"
+              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <p className="font-bold text-slate-500">Utredninger</p>
+              <p className="mt-4 text-5xl font-black text-slate-950">
+                {investigationDraftCount}
+              </p>
+              <p className="mt-3 text-sm font-semibold text-red-700">
+                Se utredninger
+              </p>
+            </Link>
+          ) : null}
         </section>
 
         <section id="arkiv" className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px]">
