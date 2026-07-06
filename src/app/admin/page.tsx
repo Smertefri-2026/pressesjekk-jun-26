@@ -151,7 +151,7 @@ export default function AdminPage() {
         reportsCountResult,
         quickChecksCountResult,
         accessCountResult,
-        refundsCountResult,
+        refundsResult,
         profilesResult,
         casesResult,
         reportsResult,
@@ -165,8 +165,9 @@ export default function AdminPage() {
         supabase.from("case_access").select("id", { count: "exact", head: true }),
         supabase
           .from("user_purchases")
-          .select("id", { count: "exact", head: true })
-          .in("refund_status", ["requested", "processing"]),
+          .select("id,refund_status")
+          .in("refund_status", ["requested", "processing"])
+          .limit(100),
         supabase
           .from("profiles")
           .select("id,full_name,email,role_type,is_admin,created_at")
@@ -200,7 +201,7 @@ export default function AdminPage() {
         reportsCountResult.error ||
         quickChecksCountResult.error ||
         accessCountResult.error ||
-        refundsCountResult.error ||
+        refundsResult.error ||
         profilesResult.error ||
         casesResult.error ||
         reportsResult.error ||
@@ -218,7 +219,7 @@ export default function AdminPage() {
       setReportCount(reportsCountResult.count ?? 0);
       setQuickCheckCount(quickChecksCountResult.count ?? 0);
       setAccessCount(accessCountResult.count ?? 0);
-      setRefundCount(refundsCountResult.count ?? 0);
+      setRefundCount((refundsResult.data ?? []).length);
 
       setLatestProfiles((profilesResult.data ?? []) as AdminProfile[]);
       setLatestCases((casesResult.data ?? []) as AdminCase[]);
