@@ -165,7 +165,8 @@ async function recordPaymentIntentPurchase({
   const supabase = getSupabaseServiceClient();
 
   const amountPaid = paymentIntent.amount_received || paymentIntent.amount || 0;
-  const amountOriginal = Number(metadata.amount_to_pay || amountPaid) || amountPaid;
+  const plan = packageId ? getStripeCheckoutPlan(packageId) : null;
+  const amountOriginal = plan?.amount ?? Number(metadata.amount_to_pay || amountPaid) || amountPaid;
 
   const previousPackageId = metadata.previous_package_id
     ? (metadata.previous_package_id as PackagePlanId)
