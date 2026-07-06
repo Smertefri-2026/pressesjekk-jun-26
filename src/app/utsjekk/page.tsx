@@ -135,6 +135,8 @@ function UtsjekkContent() {
   const [paymentAmountToPay, setPaymentAmountToPay] = useState<number | null>(null);
   const [paymentOriginalAmount, setPaymentOriginalAmount] = useState<number | null>(null);
   const [paymentCurrentAmount, setPaymentCurrentAmount] = useState<number | null>(null);
+  const [isStartingSubscription, setIsStartingSubscription] = useState(false);
+  const [subscriptionCheckoutError, setSubscriptionCheckoutError] = useState("");
 
   const selectedPlan =
     checkoutPlans.find((plan) => plan.id === selectedPlanId) ??
@@ -267,6 +269,59 @@ function UtsjekkContent() {
 
     createPaymentIntent();
   }, [canUsePaymentElement, incomingUrl, selectedPlan.id, userEmail]);
+
+  async function handleStartSubscription() {
+    setSubscriptionCheckoutError("");
+    setPaymentErrorMessage("");
+
+    if (!userEmail) {
+      setSubscriptionCheckoutError("Du må være innlogget før abonnement kan startes.");
+      return;
+    }
+
+    setIsStartingSubscription(true);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        setSubscriptionCheckoutError("Du må være innlogget før abonnement kan startes.");
+        return;
+      }
+
+      const response = await fetch("/api/stripe/create-subscription-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          packageId: selectedPlan.id,
+        }),
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok || !payload?.url) {
+        setSubscriptionCheckoutError(
+          payload?.error ?? "Kunne ikke starte abonnement."
+        );
+        return;
+      }
+
+      window.location.href = payload.url;
+    } catch (error) {
+      setSubscriptionCheckoutError(
+        error instanceof Error
+          ? error.message
+          : "Kunne ikke starte abonnement."
+      );
+    } finally {
+      setIsStartingSubscription(false);
+    }
+  }
 
   async function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -784,9 +839,28 @@ function UtsjekkContent() {
                 Opprett konto eller logg inn i midtfeltet før betaling.
               </div>
             ) : isMonthly ? (
-              <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-100 p-4 text-sm leading-7 text-slate-700">
-                Abonnement kobles i neste steg med Stripe subscription-flyt.
-                For abonnement bruker vi kort først.
+              <div className="mt-5 grid gap-4">
+                {subscriptionCheckoutError ? (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-7 text-red-800">
+                    {subscriptionCheckoutError}
+                  </div>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={handleStartSubscription}
+                  disabled={isStartingSubscription}
+                  className="w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isStartingSubscription
+                    ? "Sender deg til sikker betaling..."
+                    : "Start abonnement"}
+                </button>
+
+                <div className="rounded-2xl border border-amber-200 bg-amber-100 p-4 text-sm font-semibold leading-7 text-slate-700">
+                  Du sendes videre til Stripe for sikker kortbetaling og
+                  månedlig abonnement. Etter betaling vises abonnementet på Min Side.
+                </div>
               </div>
             ) : paymentErrorMessage ? (
               <div className="mt-5 rounded-2xl border border-red-300/30 bg-amber-500/10 p-4 text-sm font-semibold leading-7 text-orange-100">
