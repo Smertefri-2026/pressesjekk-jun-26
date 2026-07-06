@@ -166,7 +166,9 @@ async function recordPaymentIntentPurchase({
 
   const amountPaid = paymentIntent.amount_received || paymentIntent.amount || 0;
   const plan = packageId ? getStripeCheckoutPlan(packageId) : null;
-  const amountOriginal = plan?.amount ?? Number(metadata.amount_to_pay || amountPaid) || amountPaid;
+  const fallbackAmountOriginal =
+    Number(metadata.amount_to_pay || amountPaid) || amountPaid;
+  const amountOriginal = plan?.amount ?? fallbackAmountOriginal;
 
   const previousPackageId = metadata.previous_package_id
     ? (metadata.previous_package_id as PackagePlanId)
