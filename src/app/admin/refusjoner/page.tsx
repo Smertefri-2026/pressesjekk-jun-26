@@ -52,6 +52,8 @@ const refundStatuses = [
   { id: "refunded", label: "Refundert" },
 ];
 
+const PAGE_SIZE = 10;
+
 function packageLabel(packageId: string) {
   if (packageId === "report_pack") return "Rapportpakke";
   if (packageId === "pfu_pack") return "PFU-pakke";
@@ -100,6 +102,9 @@ export default function AdminRefundsPage() {
   const [casesById, setCasesById] = useState<Record<string, CaseRow>>({});
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [activeTab, setActiveTab] = useState<"open" | "closed">("open");
+  const [search, setSearch] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   async function loadRefunds() {
     setErrorMessage("");
@@ -113,7 +118,7 @@ export default function AdminRefundsPage() {
       .neq("refund_status", "none")
       .order("refund_requested_at", { ascending: false, nullsFirst: false })
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(200);
 
     if (error) {
       setErrorMessage(error.message);
@@ -211,6 +216,48 @@ export default function AdminRefundsPage() {
 
     init();
   }, []);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [activeTab, search]);
+
+  const filteredPurchases = purchases.filter((purchase) => {
+    const isOpen =
+      purchase.refund_status === "requested" ||
+      purchase.refund_status === "processing";
+
+    if (activeTab === "open" && !isOpen) return false;
+    if (activeTab === "closed" && isOpen) return false;
+
+    const profile = profilesById[purchase.user_id];
+    const caseItem = purchase.case_id ? casesById[purchase.case_id] : null;
+    const cleanSearch = search.trim().toLowerCase();
+
+    if (!cleanSearch) return true;
+
+    const haystack = [
+      profile?.full_name,
+      profile?.email,
+      purchase.user_id,
+      packageLabel(purchase.package_id),
+      caseItem?.title,
+      purchase.stripe_payment_intent_id,
+      purchase.stripe_checkout_session_id,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return haystack.includes(cleanSearch);
+  });
+
+  const visiblePurchases = filteredPurchases.slice(0, visibleCount);
+  const openCount = purchases.filter(
+    (purchase) =>
+      purchase.refund_status === "requested" ||
+      purchase.refund_status === "processing"
+  ).length;
+  const closedCount = purchases.length - openCount;
 
   async function updateRefundStatus(purchase: PurchaseRow, nextStatus: string) {
     setIsUpdatingId(purchase.id);
@@ -356,13 +403,69 @@ export default function AdminRefundsPage() {
             </h2>
           </div>
 
-          {purchases.length === 0 ? (
+          <div className="border-b border-slate-200 p-6">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setActiveTab("open")}
+                className={`rounded-2xl px-5 py-4 text-left text-sm font-black ${
+                  activeTab === "open"
+                    ? "bg-slate-950 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                Til behandling
+                <span className="ml-2 rounded-full bg-white/20 px-2 py-1 text-xs">
+                  {openCount}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("closed")}
+                className={`rounded-2xl px-5 py-4 text-left text-sm font-black ${
+                  activeTab === "closed"
+                    ? "bg-slate-950 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                Ferdig behandlet
+                <span className="ml-2 rounded-full bg-white/20 px-2 py-1 text-xs">
+                  {closedCount}
+                </span>
+              </button>
+            </div>
+
+            <label
+              htmlFor="refund-search"
+              className="mt-6 block text-sm font-bold text-slate-800"
+            >
+              Søk
+            </label>
+            <input
+              id="refund-search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Søk på navn, e-post, pakke, sak eller Stripe-ID"
+              className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-base font-semibold text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+            />
+
+            <p className="mt-4 text-sm font-semibold text-slate-600">
+              Viser {Math.min(visibleCount, filteredPurchases.length)} av{" "}
+              {filteredPurchases.length} treff.
+            </p>
+          </div>
+
+          {filteredPurchases.length === 0 ? (
             <div className="p-6 text-slate-700">
-              Det finnes ingen refusjonsforespørsler akkurat nå.
+              {activeTab === "open"
+                ? "Det finnes ingen refusjoner til behandling akkurat nå."
+                : "Det finnes ingen ferdig behandlede refusjoner akkurat nå."}
             </div>
           ) : (
-            <div className="divide-y divide-slate-200">
-              {purchases.map((purchase) => {
+            <>
+              <div className="divide-y divide-slate-200">
+                {visiblePurchases.map((purchase) => {
                 const profile = profilesById[purchase.user_id];
                 const caseItem = purchase.case_id
                   ? casesById[purchase.case_id]
@@ -462,8 +565,23 @@ export default function AdminRefundsPage() {
                     </div>
                   </article>
                 );
-              })}
-            </div>
+                })}
+              </div>
+
+              {visibleCount < filteredPurchases.length ? (
+                <div className="border-t border-slate-200 p-6">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleCount((current) => current + PAGE_SIZE)
+                    }
+                    className="w-full rounded-2xl border border-slate-300 bg-white px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
+                  >
+                    Vis flere
+                  </button>
+                </div>
+              ) : null}
+            </>
           )}
         </section>
       </section>
