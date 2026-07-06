@@ -99,6 +99,7 @@ export default function AdminPage() {
   const [reportCount, setReportCount] = useState(0);
   const [quickCheckCount, setQuickCheckCount] = useState(0);
   const [accessCount, setAccessCount] = useState(0);
+  const [refundCount, setRefundCount] = useState(0);
 
   const [latestProfiles, setLatestProfiles] = useState<AdminProfile[]>([]);
   const [latestCases, setLatestCases] = useState<AdminCase[]>([]);
@@ -150,6 +151,7 @@ export default function AdminPage() {
         reportsCountResult,
         quickChecksCountResult,
         accessCountResult,
+        refundsCountResult,
         profilesResult,
         casesResult,
         reportsResult,
@@ -161,6 +163,10 @@ export default function AdminPage() {
         supabase.from("case_reports").select("id", { count: "exact", head: true }),
         supabase.from("quick_checks").select("id", { count: "exact", head: true }),
         supabase.from("case_access").select("id", { count: "exact", head: true }),
+        supabase
+          .from("user_purchases")
+          .select("id", { count: "exact", head: true })
+          .in("refund_status", ["requested", "processing"]),
         supabase
           .from("profiles")
           .select("id,full_name,email,role_type,is_admin,created_at")
@@ -194,6 +200,7 @@ export default function AdminPage() {
         reportsCountResult.error ||
         quickChecksCountResult.error ||
         accessCountResult.error ||
+        refundsCountResult.error ||
         profilesResult.error ||
         casesResult.error ||
         reportsResult.error ||
@@ -211,6 +218,7 @@ export default function AdminPage() {
       setReportCount(reportsCountResult.count ?? 0);
       setQuickCheckCount(quickChecksCountResult.count ?? 0);
       setAccessCount(accessCountResult.count ?? 0);
+      setRefundCount(refundsCountResult.count ?? 0);
 
       setLatestProfiles((profilesResult.data ?? []) as AdminProfile[]);
       setLatestCases((casesResult.data ?? []) as AdminCase[]);
@@ -265,6 +273,12 @@ export default function AdminPage() {
     { label: "Rapporter", value: reportCount, href: "/admin/rapporter" },
     { label: "Raske sjekker", value: quickCheckCount, href: "/admin/raske-sjekker" },
     { label: "Aktive pakker", value: accessCount, href: "/admin/pakker" },
+    {
+      label: "Refusjoner",
+      value: refundCount,
+      href: "/admin/refusjoner",
+      note: refundCount > 0 ? "Til behandling" : "Ingen åpne",
+    },
     { label: "Dagens omsetning", value: "0 kr", href: "/admin/stripe", note: "Stripe senere" },
     { label: "Mnd. omsetning", value: "0 kr", href: "/admin/stripe", note: "Stripe senere" },
     { label: "Årsomsetning", value: "0 kr", href: "/admin/stripe", note: "Stripe senere" },
