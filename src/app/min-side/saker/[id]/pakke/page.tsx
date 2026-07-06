@@ -362,7 +362,7 @@ export default function CasePackagePage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <Link
             href="/min-side"
-            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+            className="text-sm font-bold text-red-700"
           >
             ← Tilbake til Min Side
           </Link>
@@ -388,7 +388,7 @@ export default function CasePackagePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href={`/min-side/saker/${params.id}`}
-          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          className="text-sm font-bold text-red-700"
         >
           ← Tilbake til saken
         </Link>
@@ -411,7 +411,7 @@ export default function CasePackagePage() {
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               {pageEyebrow}
             </p>
 
@@ -426,8 +426,8 @@ export default function CasePackagePage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
+          <aside className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
               {isJournalistWorkflow ? "Nåværende tilgang" : "Nåværende pakke"}
             </p>
 
@@ -485,7 +485,7 @@ export default function CasePackagePage() {
         </section>
 
         <section className="mt-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
             {tabIntro.eyebrow}
           </p>
           <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
@@ -510,15 +510,9 @@ export default function CasePackagePage() {
                 return (
                   <article
                     key={option.id}
-                    className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
-                      option.id === "investigation_pack"
-                        ? "border-amber-300 bg-amber-50"
-                        : option.id === "full_pack"
-                          ? "border-blue-300 bg-blue-50"
-                          : "border-slate-200 bg-white"
-                    }`}
+                    className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
                   >
-                    <p className="text-sm font-bold uppercase tracking-[0.22em] text-blue-700">
+                    <p className="text-sm font-bold uppercase tracking-[0.22em] text-red-700">
                       {displayOption.tag}
                     </p>
                     <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -550,25 +544,65 @@ export default function CasePackagePage() {
                       ))}
                     </ul>
 
-                    <div className="mt-6">
-                      {canUpgrade ? (
-                        <Link
-                          href={`/utsjekk?plan=${option.id}&caseId=${params.id}&mode=upgrade`}
-                          className="block w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800"
-                        >
-                          {currentPackageId
-                            ? `Oppgrader for ${formatKr(upgradeAmount)} kr`
-                            : `Velg ${displayOption.name}`}
-                        </Link>
-                      ) : isCurrent ? (
-                        <div className="rounded-2xl bg-emerald-100 px-5 py-4 text-center text-sm font-black text-emerald-900">
-                          Aktiv pakke
-                        </div>
-                      ) : isIncluded ? (
-                        <div className="rounded-2xl bg-slate-100 px-5 py-4 text-center text-sm font-black text-slate-600">
-                          Inkludert
+                    <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      {currentPackageId ? (
+                        <div className="mb-4 rounded-xl bg-white p-3 text-sm font-semibold text-slate-700">
+                          Du har nå:{" "}
+                          <span className="font-black text-slate-950">
+                            {currentPackageLabel}
+                          </span>
                         </div>
                       ) : null}
+
+                      <div className="grid gap-2 text-sm font-semibold text-slate-700">
+                        <div className="flex items-center justify-between gap-4">
+                          <span>Ordinær pris</span>
+                          <span className="font-black text-slate-950">
+                            {formatKr(option.price)} kr
+                          </span>
+                        </div>
+
+                        {currentPackageId && canUpgrade ? (
+                          <div className="flex items-center justify-between gap-4">
+                            <span>Fradrag</span>
+                            <span className="font-black text-emerald-700">
+                              -{formatKr(currentPrice)} kr
+                            </span>
+                          </div>
+                        ) : null}
+
+                        {canUpgrade ? (
+                          <div className="mt-2 flex items-center justify-between gap-4 border-t border-slate-200 pt-3">
+                            <span className="font-black text-slate-950">
+                              {currentPackageId ? "Mellomlegg" : "Pris"}
+                            </span>
+                            <span className="text-lg font-black text-slate-950">
+                              {formatKr(upgradeAmount)} kr
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-4">
+                        {canUpgrade ? (
+                          <Link
+                            href={`/utsjekk?plan=${option.id}&caseId=${params.id}&mode=upgrade`}
+                            className="block w-full rounded-2xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800"
+                          >
+                            {currentPackageId
+                              ? `Oppgrader for ${formatKr(upgradeAmount)} kr`
+                              : `Velg ${displayOption.name}`}
+                          </Link>
+                        ) : isCurrent ? (
+                          <div className="rounded-2xl bg-emerald-100 px-5 py-4 text-center text-sm font-black text-emerald-900">
+                            Aktiv pakke
+                          </div>
+                        ) : isIncluded ? (
+                          <div className="rounded-2xl bg-slate-100 px-5 py-4 text-center text-sm font-black text-slate-600">
+                            Inkludert
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   </article>
                 );
@@ -577,10 +611,10 @@ export default function CasePackagePage() {
 
             <div className="mt-8 rounded-3xl border border-amber-200 bg-amber-50 p-6 shadow-sm">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-amber-800">
-                Nedgradering / endring
+                Endre eller justere pakke
               </p>
               <h2 className="mt-3 text-2xl font-black text-slate-950">
-                Endringer vurderes manuelt
+                Vi hjelper deg med endringer
               </h2>
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
                 Nedgradering eller endring etter at en pakke er brukt må
@@ -603,7 +637,7 @@ export default function CasePackagePage() {
                 key={bundle.id}
                 className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
               >
-                <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
+                <p className="inline-flex w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-red-800">
                   {bundle.tag}
                 </p>
 
@@ -622,7 +656,7 @@ export default function CasePackagePage() {
                 <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                   {bundle.features.map((feature) => (
                     <li key={feature} className="flex gap-2">
-                      <span className="text-blue-700">✓</span>
+                      <span className="text-red-700">✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -630,7 +664,7 @@ export default function CasePackagePage() {
 
                 <Link
                   href={`/utsjekk?plan=${bundle.id}`}
-                  className="mt-auto block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-500"
+                  className="mt-auto block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-red-500"
                 >
                   {bundle.button}
                 </Link>
@@ -647,11 +681,11 @@ export default function CasePackagePage() {
                   key={plan.id}
                   className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
                     plan.id === "monthly_pro"
-                      ? "border-blue-300 bg-blue-50"
+                      ? "border-red-300 bg-red-50"
                       : "border-slate-200 bg-white"
                   }`}
                 >
-                  <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
+                  <p className="inline-flex w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-red-800">
                     {plan.tag}
                   </p>
 
@@ -670,7 +704,7 @@ export default function CasePackagePage() {
                   <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex gap-2">
-                        <span className="text-blue-700">✓</span>
+                        <span className="text-red-700">✓</span>
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -693,7 +727,7 @@ export default function CasePackagePage() {
             </div>
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
                 Administrer abonnement
               </p>
               <h2 className="mt-3 text-2xl font-black text-slate-950">
