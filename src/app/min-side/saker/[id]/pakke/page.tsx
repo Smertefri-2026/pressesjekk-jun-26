@@ -617,8 +617,9 @@ export default function CasePackagePage() {
                 Vi hjelper deg med endringer
               </h2>
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-                Nedgradering eller endring etter at en pakke er brukt må
-                vurderes manuelt, slik at tilgang og dokumenter ikke blir feil.
+                Har du valgt feil pakke, eller ønsker du å endre noe etter kjøp,
+                kan du ta kontakt. Vi vurderer endringen manuelt slik at tilgang,
+                dokumenter og eventuell betaling blir riktig.
               </p>
               <Link
                 href="/kontakt"
