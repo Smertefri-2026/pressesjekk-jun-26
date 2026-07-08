@@ -267,6 +267,26 @@ async function activateUserEntitlement(session: Stripe.Checkout.Session) {
   const supabase = getSupabaseServiceClient();
   const includedCases = includedCasesForPackage(packageId);
 
+  const { data: existingEntitlement, error: existingEntitlementError } =
+    await supabase
+      .from("user_case_entitlements")
+      .select("id")
+      .eq("stripe_checkout_session_id", session.id)
+      .maybeSingle();
+
+  if (existingEntitlementError) {
+    throw new Error(existingEntitlementError.message);
+  }
+
+  if (existingEntitlement) {
+    console.log("Checkout-entitlement finnes allerede", {
+      sessionId: session.id,
+      entitlementId: existingEntitlement.id,
+    });
+
+    return;
+  }
+
   const { error } = await supabase.from("user_case_entitlements").insert({
     user_id: userId,
     package_id: packageId,
