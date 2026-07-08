@@ -127,8 +127,34 @@ function statusLabel(status: string) {
   if (status === "refunded") return "Refundert";
   if (status === "partially_refunded") return "Delvis refundert";
   if (status === "active") return "Aktiv";
+  if (status === "trialing") return "Prøveperiode";
+  if (status === "past_due") return "Betaling mangler";
+  if (status === "unpaid") return "Ubetalt";
   if (status === "expired") return "Utløpt";
   return status;
+}
+
+function subscriptionStatusLabel(subscription: SubscriptionRow) {
+  if (subscription.cancel_at_period_end) {
+    return "Kanselleres";
+  }
+
+  return statusLabel(subscription.status);
+}
+
+function subscriptionStatusDescription(subscription: SubscriptionRow) {
+  if (subscription.cancel_at_period_end) {
+    return subscription.current_period_end
+      ? `Avsluttes ${formatDate(subscription.current_period_end)}`
+      : "Avsluttes ved periodens slutt";
+  }
+
+  if (subscription.status === "active") return "Løpende abonnement";
+  if (subscription.status === "past_due") return "Betaling mangler";
+  if (subscription.status === "unpaid") return "Ubetalt";
+  if (subscription.status === "trialing") return "Prøveperiode";
+
+  return statusLabel(subscription.status);
 }
 
 function refundLabel(status: string) {
@@ -566,9 +592,9 @@ export default function MinSideKjopPage() {
                       Månedsavtale
                     </h2>
                     <p className="mt-3 max-w-3xl leading-8 text-slate-700">
-                      Her ser du aktive abonnementer og hvor mange saker som er
-                      inkludert i inneværende periode. Administrasjon av
-                      abonnement gjøres manuelt foreløpig.
+                      Her ser du abonnement, inkluderte saker og om avtalen er
+                      aktiv, kansellert ved periodens slutt eller trenger ny
+                      betaling.
                     </p>
                   </div>
 
@@ -615,8 +641,17 @@ export default function MinSideKjopPage() {
                             </p>
                           </div>
 
-                          <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-800">
-                            {statusLabel(subscription.status)}
+                          <span
+                            className={`rounded-full px-4 py-2 text-sm font-bold ${
+                              subscription.cancel_at_period_end
+                                ? "bg-amber-100 text-amber-900"
+                                : subscription.status === "past_due" ||
+                                    subscription.status === "unpaid"
+                                  ? "bg-red-100 text-red-900"
+                                  : "bg-emerald-100 text-emerald-800"
+                            }`}
+                          >
+                            {subscriptionStatusLabel(subscription)}
                           </span>
                         </div>
 
@@ -650,11 +685,9 @@ export default function MinSideKjopPage() {
                         <div className="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
                           <p>
                             <span className="font-bold text-slate-950">
-                              Neste periode:
+                              Status:
                             </span>{" "}
-                            {subscription.current_period_end
-                              ? formatDate(subscription.current_period_end)
-                              : "Ikke satt ennå"}
+                            {subscriptionStatusDescription(subscription)}
                           </p>
                           <p>
                             <span className="font-bold text-slate-950">
