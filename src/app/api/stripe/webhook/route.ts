@@ -202,14 +202,21 @@ async function activateSubscription(session: Stripe.Checkout.Session) {
     subscription = await stripe.subscriptions.retrieve(session.subscription);
   }
 
+  const subscriptionWithPeriod = subscription as
+    | (Stripe.Subscription & {
+        current_period_start?: number;
+        current_period_end?: number;
+      })
+    | null;
+
   const currentPeriodStart =
-    subscription?.current_period_start
-      ? new Date(subscription.current_period_start * 1000).toISOString()
+    subscriptionWithPeriod?.current_period_start
+      ? new Date(subscriptionWithPeriod.current_period_start * 1000).toISOString()
       : null;
 
   const currentPeriodEnd =
-    subscription?.current_period_end
-      ? new Date(subscription.current_period_end * 1000).toISOString()
+    subscriptionWithPeriod?.current_period_end
+      ? new Date(subscriptionWithPeriod.current_period_end * 1000).toISOString()
       : null;
 
   const { error } = await supabase.from("user_subscriptions").upsert(
