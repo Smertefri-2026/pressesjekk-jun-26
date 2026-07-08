@@ -219,33 +219,64 @@ async function activateSubscription(session: Stripe.Checkout.Session) {
       ? new Date(subscriptionWithPeriod.current_period_end * 1000).toISOString()
       : null;
 
-  const { error } = await supabase.from("user_subscriptions").upsert(
-    {
-      user_id: userId,
-      package_id: packageId,
-      status: subscription?.status ?? "active",
-      included_cases_per_month: includedCases,
-      used_cases_current_period: 0,
-      current_period_start: currentPeriodStart,
-      current_period_end: currentPeriodEnd,
-      cancel_at_period_end: subscription?.cancel_at_period_end ?? false,
-      stripe_customer_id:
-        typeof session.customer === "string" ? session.customer : null,
-      stripe_subscription_id:
-        typeof session.subscription === "string" ? session.subscription : null,
-      stripe_checkout_session_id: session.id,
-      metadata: {
-        stripe_metadata: metadata,
-        stripe_subscription_status: subscription?.status ?? null,
-      },
-    },
-    {
-      onConflict: "stripe_subscription_id",
-    }
-  );
+  const stripeSubscriptionId =
+    typeof session.subscription === "string" ? session.subscription : null;
 
-  if (error) {
-    throw new Error(error.message);
+  const subscriptionPayload = {
+    user_id: userId,
+    package_id: packageId,
+    status: subscription?.status ?? "active",
+    included_cases_per_month: includedCases,
+    used_cases_current_period: 0,
+    current_period_start: currentPeriodStart,
+    current_period_end: currentPeriodEnd,
+    cancel_at_period_end: subscription?.cancel_at_period_end ?? false,
+    stripe_customer_id:
+      typeof session.customer === "string" ? session.customer : null,
+    stripe_subscription_id: stripeSubscriptionId,
+    stripe_checkout_session_id: session.id,
+    metadata: {
+      stripe_metadata: metadata,
+      stripe_subscription_status: subscription?.status ?? null,
+    },
+  };
+
+  const { data: existingSubscription, error: existingSubscriptionError } =
+    stripeSubscriptionId
+      ? await supabase
+          .from("user_subscriptions")
+          .select("id")
+          .eq("stripe_subscription_id", stripeSubscriptionId)
+          .maybeSingle()
+      : await supabase
+          .from("user_subscriptions")
+          .select("id")
+          .eq("stripe_checkout_session_id", session.id)
+          .maybeSingle();
+
+  if (existingSubscriptionError) {
+    throw new Error(existingSubscriptionError.message);
+  }
+
+  if (existingSubscription?.id) {
+    const { error: updateError } = await supabase
+      .from("user_subscriptions")
+      .update(subscriptionPayload)
+      .eq("id", existingSubscription.id);
+
+    if (updateError) {
+      throw new Error(updateError.message);
+    }
+
+    return;
+  }
+
+  const { error: insertError } = await supabase
+    .from("user_subscriptions")
+    .insert(subscriptionPayload);
+
+  if (insertError) {
+    throw new Error(insertError.message);
   }
 }
 
