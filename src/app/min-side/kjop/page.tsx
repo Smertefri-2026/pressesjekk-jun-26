@@ -52,6 +52,7 @@ type SubscriptionRow = {
   current_period_start: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
+  stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   stripe_checkout_session_id: string | null;
   created_at: string;
@@ -169,6 +170,8 @@ export default function MinSideKjopPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [refundRequestId, setRefundRequestId] = useState<string | null>(null);
   const [refundMessage, setRefundMessage] = useState("");
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+  const [portalMessage, setPortalMessage] = useState("");
 
   useEffect(() => {
     async function loadPurchases() {
@@ -210,7 +213,7 @@ export default function MinSideKjopPage() {
         supabase
           .from("user_subscriptions")
           .select(
-            "id,package_id,status,included_cases_per_month,used_cases_current_period,current_period_start,current_period_end,cancel_at_period_end,stripe_subscription_id,stripe_checkout_session_id,created_at"
+            "id,package_id,status,included_cases_per_month,used_cases_current_period,current_period_start,current_period_end,cancel_at_period_end,stripe_customer_id,stripe_subscription_id,stripe_checkout_session_id,created_at"
           )
           .eq("user_id", user.id)
           .in("status", ["active", "trialing", "past_due"])
@@ -282,6 +285,41 @@ export default function MinSideKjopPage() {
       .filter((purchase) => purchase.status === "paid")
       .reduce((sum, purchase) => sum + Number(purchase.amount_paid ?? 0), 0);
   }, [purchases]);
+
+  async function openCustomerPortal() {
+    setIsOpeningPortal(true);
+    setPortalMessage("");
+    setErrorMessage("");
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      setErrorMessage("Du må være innlogget for å administrere abonnement.");
+      setIsOpeningPortal(false);
+      return;
+    }
+
+    const response = await fetch("/api/stripe/create-customer-portal", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok || !payload?.url) {
+      setPortalMessage(
+        payload?.error ?? "Kunne ikke åpne abonnementportalen akkurat nå."
+      );
+      setIsOpeningPortal(false);
+      return;
+    }
+
+    window.location.href = payload.url;
+  }
 
   async function requestRefund(purchaseId: string) {
     setRefundRequestId(purchaseId);
@@ -534,13 +572,23 @@ export default function MinSideKjopPage() {
                     </p>
                   </div>
 
-                  <Link
-                    href="/kontakt"
-                    className="rounded-xl border border-emerald-300 bg-white px-5 py-3 font-bold text-slate-950 hover:bg-emerald-100"
+                  <button
+                    type="button"
+                    onClick={openCustomerPortal}
+                    disabled={isOpeningPortal}
+                    className="rounded-xl border border-emerald-300 bg-white px-5 py-3 font-bold text-slate-950 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Endre abonnement
-                  </Link>
+                    {isOpeningPortal
+                      ? "Åpner portal ..."
+                      : "Administrer abonnement"}
+                  </button>
                 </div>
+
+                {portalMessage ? (
+                  <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+                    {portalMessage}
+                  </div>
+                ) : null}
 
                 <div className="mt-6 grid gap-4">
                   {subscriptions.map((subscription) => {
