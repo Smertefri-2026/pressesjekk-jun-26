@@ -111,6 +111,137 @@ async function activateCaseAccess(session: Stripe.Checkout.Session) {
   }
 }
 
+async function recordCheckoutSessionPurchase(session: Stripe.Checkout.Session) {
+  const metadata = session.metadata ?? {};
+  const userId = metadata.user_id;
+  const packageId = metadata.package_id as PackagePlanId | undefined;
+
+  if (!userId || !packageId) {
+    throw new Error("Stripe session mangler user_id eller package_id");
+  }
+
+  const plan = getStripeCheckoutPlan(packageId);
+
+  if (!plan) {
+    throw new Error(`Ukjent package_id fra Stripe: ${packageId}`);
+  }
+
+  const supabase = getSupabaseServiceClient();
+  const includedCases = includedCasesForPackage(packageId);
+  const amountPaid = session.amount_total ?? plan.amount;
+  const currency = session.currency ?? plan.currency;
+
+  const receiptUrl =
+    typeof session.invoice === "string"
+      ? null
+      : session.invoice?.hosted_invoice_url ?? null;
+
+  const { error } = await supabase.from("user_purchases").upsert(
+    {
+      user_id: userId,
+      case_id: null,
+      package_id: packageId,
+      purchase_type: plan.mode === "subscription" ? "subscription" : "new_purchase",
+      status: "paid",
+      amount_paid: amountPaid,
+      amount_original: plan.amount,
+      amount_credit: 0,
+      currency,
+      included_cases: includedCases,
+      used_cases: 0,
+      source:
+        plan.mode === "subscription"
+          ? "stripe_checkout_subscription"
+          : "stripe_checkout",
+      stripe_checkout_session_id: session.id,
+      stripe_customer_id:
+        typeof session.customer === "string" ? session.customer : null,
+      stripe_subscription_id:
+        typeof session.subscription === "string" ? session.subscription : null,
+      stripe_receipt_url: receiptUrl,
+      refund_status: "none",
+      metadata: {
+        stripe_metadata: metadata,
+        stripe_mode: session.mode,
+        stripe_invoice:
+          typeof session.invoice === "string" ? session.invoice : null,
+      },
+    },
+    {
+      onConflict: "stripe_checkout_session_id",
+    }
+  );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+async function activateSubscription(session: Stripe.Checkout.Session) {
+  const metadata = session.metadata ?? {};
+  const userId = metadata.user_id;
+  const packageId = metadata.package_id as PackagePlanId | undefined;
+
+  if (!userId || !packageId) {
+    throw new Error("Stripe session mangler user_id eller package_id");
+  }
+
+  const plan = getStripeCheckoutPlan(packageId);
+
+  if (!plan || plan.mode !== "subscription") {
+    return;
+  }
+
+  const stripe = getStripe();
+  const supabase = getSupabaseServiceClient();
+  const includedCases = includedCasesForPackage(packageId);
+
+  let subscription: Stripe.Subscription | null = null;
+
+  if (typeof session.subscription === "string") {
+    subscription = await stripe.subscriptions.retrieve(session.subscription);
+  }
+
+  const currentPeriodStart =
+    subscription?.current_period_start
+      ? new Date(subscription.current_period_start * 1000).toISOString()
+      : null;
+
+  const currentPeriodEnd =
+    subscription?.current_period_end
+      ? new Date(subscription.current_period_end * 1000).toISOString()
+      : null;
+
+  const { error } = await supabase.from("user_subscriptions").upsert(
+    {
+      user_id: userId,
+      package_id: packageId,
+      status: subscription?.status ?? "active",
+      included_cases_per_month: includedCases,
+      used_cases_current_period: 0,
+      current_period_start: currentPeriodStart,
+      current_period_end: currentPeriodEnd,
+      cancel_at_period_end: subscription?.cancel_at_period_end ?? false,
+      stripe_customer_id:
+        typeof session.customer === "string" ? session.customer : null,
+      stripe_subscription_id:
+        typeof session.subscription === "string" ? session.subscription : null,
+      stripe_checkout_session_id: session.id,
+      metadata: {
+        stripe_metadata: metadata,
+        stripe_subscription_status: subscription?.status ?? null,
+      },
+    },
+    {
+      onConflict: "stripe_subscription_id",
+    }
+  );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 async function activateUserEntitlement(session: Stripe.Checkout.Session) {
   const metadata = session.metadata ?? {};
   const userId = metadata.user_id;
@@ -463,6 +594,8 @@ export async function POST(request: NextRequest) {
         }
 
         await activateUserEntitlement(session);
+        await recordCheckoutSessionPurchase(session);
+        await activateSubscription(session);
       }
     }
 
