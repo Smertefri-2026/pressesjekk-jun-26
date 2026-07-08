@@ -626,15 +626,40 @@ async function updateSubscriptionFromStripe(
   const subscriptionWithPeriod = subscription as Stripe.Subscription & {
     current_period_start?: number;
     current_period_end?: number;
+    cancel_at?: number | null;
+    canceled_at?: number | null;
+    items?: {
+      data?: Array<{
+        current_period_start?: number;
+        current_period_end?: number;
+      }>;
+    };
   };
 
-  const currentPeriodStart = subscriptionWithPeriod.current_period_start
-    ? new Date(subscriptionWithPeriod.current_period_start * 1000).toISOString()
+  const itemPeriod = subscriptionWithPeriod.items?.data?.[0] ?? null;
+
+  const currentPeriodStartTimestamp =
+    subscriptionWithPeriod.current_period_start ??
+    itemPeriod?.current_period_start ??
+    null;
+
+  const currentPeriodEndTimestamp =
+    subscriptionWithPeriod.current_period_end ??
+    itemPeriod?.current_period_end ??
+    subscriptionWithPeriod.cancel_at ??
+    null;
+
+  const currentPeriodStart = currentPeriodStartTimestamp
+    ? new Date(currentPeriodStartTimestamp * 1000).toISOString()
     : null;
 
-  const currentPeriodEnd = subscriptionWithPeriod.current_period_end
-    ? new Date(subscriptionWithPeriod.current_period_end * 1000).toISOString()
+  const currentPeriodEnd = currentPeriodEndTimestamp
+    ? new Date(currentPeriodEndTimestamp * 1000).toISOString()
     : null;
+
+  const cancelAtPeriodEnd =
+    Boolean(subscription.cancel_at_period_end) ||
+    Boolean(subscriptionWithPeriod.cancel_at);
 
   const { error } = await supabase
     .from("user_subscriptions")
@@ -642,12 +667,16 @@ async function updateSubscriptionFromStripe(
       status: forcedStatus ?? normalizeStripeSubscriptionStatus(subscription.status),
       current_period_start: currentPeriodStart,
       current_period_end: currentPeriodEnd,
-      cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+      cancel_at_period_end: cancelAtPeriodEnd,
       stripe_customer_id:
         typeof subscription.customer === "string" ? subscription.customer : null,
       metadata: {
         stripe_subscription_status: subscription.status,
         stripe_cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+        stripe_cancel_at: subscriptionWithPeriod.cancel_at ?? null,
+        stripe_canceled_at: subscriptionWithPeriod.canceled_at ?? null,
+        stripe_current_period_start: currentPeriodStartTimestamp,
+        stripe_current_period_end: currentPeriodEndTimestamp,
       },
     })
     .eq("stripe_subscription_id", subscription.id);
