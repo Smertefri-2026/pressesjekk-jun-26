@@ -225,7 +225,7 @@ async function activateSubscription(session: Stripe.Checkout.Session) {
   const subscriptionPayload = {
     user_id: userId,
     package_id: packageId,
-    status: subscription?.status ?? "active",
+    status: normalizeStripeSubscriptionStatus(subscription?.status),
     included_cases_per_month: includedCases,
     used_cases_current_period: 0,
     current_period_start: currentPeriodStart,
@@ -600,6 +600,102 @@ export async function GET() {
   });
 }
 
+function normalizeStripeSubscriptionStatus(status: string | null | undefined) {
+  if (status === "active") return "active";
+  if (status === "trialing") return "trialing";
+  if (status === "past_due") return "past_due";
+  if (status === "unpaid") return "unpaid";
+  if (status === "canceled") return "cancelled";
+  if (status === "cancelled") return "cancelled";
+
+  // Stripe kan også sende f.eks. incomplete, incomplete_expired eller paused.
+  // I v1 holder vi disse utenfor aktiv bruk.
+  if (status === "paused") return "past_due";
+  if (status === "incomplete") return "past_due";
+  if (status === "incomplete_expired") return "cancelled";
+
+  return "active";
+}
+
+async function updateSubscriptionFromStripe(
+  subscription: Stripe.Subscription,
+  forcedStatus?: string
+) {
+  const supabase = getSupabaseServiceClient();
+
+  const subscriptionWithPeriod = subscription as Stripe.Subscription & {
+    current_period_start?: number;
+    current_period_end?: number;
+  };
+
+  const currentPeriodStart = subscriptionWithPeriod.current_period_start
+    ? new Date(subscriptionWithPeriod.current_period_start * 1000).toISOString()
+    : null;
+
+  const currentPeriodEnd = subscriptionWithPeriod.current_period_end
+    ? new Date(subscriptionWithPeriod.current_period_end * 1000).toISOString()
+    : null;
+
+  const { error } = await supabase
+    .from("user_subscriptions")
+    .update({
+      status: forcedStatus ?? normalizeStripeSubscriptionStatus(subscription.status),
+      current_period_start: currentPeriodStart,
+      current_period_end: currentPeriodEnd,
+      cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+      stripe_customer_id:
+        typeof subscription.customer === "string" ? subscription.customer : null,
+      metadata: {
+        stripe_subscription_status: subscription.status,
+        stripe_cancel_at_period_end: subscription.cancel_at_period_end ?? false,
+      },
+    })
+    .eq("stripe_subscription_id", subscription.id);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
+async function updateSubscriptionStatusFromInvoice(
+  invoice: Stripe.Invoice,
+  status: string
+) {
+  const invoiceWithSubscription = invoice as Stripe.Invoice & {
+    subscription?: string | Stripe.Subscription | null;
+  };
+
+  const stripeSubscriptionId =
+    typeof invoiceWithSubscription.subscription === "string"
+      ? invoiceWithSubscription.subscription
+      : invoiceWithSubscription.subscription?.id ?? null;
+
+  if (!stripeSubscriptionId) {
+    console.warn("Ignorerer invoice-event uten subscription-id", {
+      invoiceId: invoice.id,
+      status,
+    });
+    return;
+  }
+
+  const supabase = getSupabaseServiceClient();
+
+  const { error } = await supabase
+    .from("user_subscriptions")
+    .update({
+      status,
+      metadata: {
+        stripe_invoice_id: invoice.id,
+        stripe_invoice_status: invoice.status,
+      },
+    })
+    .eq("stripe_subscription_id", stripeSubscriptionId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
 export async function POST(request: NextRequest) {
   const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -655,6 +751,26 @@ export async function POST(request: NextRequest) {
         await recordCheckoutSessionPurchase(session);
         await activateSubscription(session);
       }
+    }
+
+    if (event.type === "customer.subscription.updated") {
+      const subscription = event.data.object as Stripe.Subscription;
+      await updateSubscriptionFromStripe(subscription);
+    }
+
+    if (event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object as Stripe.Subscription;
+      await updateSubscriptionFromStripe(subscription, "cancelled");
+    }
+
+    if (event.type === "invoice.payment_failed") {
+      const invoice = event.data.object as Stripe.Invoice;
+      await updateSubscriptionStatusFromInvoice(invoice, "past_due");
+    }
+
+    if (event.type === "invoice.payment_succeeded") {
+      const invoice = event.data.object as Stripe.Invoice;
+      await updateSubscriptionStatusFromInvoice(invoice, "active");
     }
 
     if (event.type === "payment_intent.succeeded") {
