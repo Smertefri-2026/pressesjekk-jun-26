@@ -43,6 +43,20 @@ type EntitlementRow = {
   updated_at: string;
 };
 
+type SubscriptionRow = {
+  id: string;
+  package_id: string;
+  status: string;
+  included_cases_per_month: number;
+  used_cases_current_period: number;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean;
+  stripe_subscription_id: string | null;
+  stripe_checkout_session_id: string | null;
+  created_at: string;
+};
+
 type CaseAccessRow = {
   id: string;
   case_id: string;
@@ -149,6 +163,7 @@ export default function MinSideKjopPage() {
   const [user, setUser] = useState<User | null>(null);
   const [purchases, setPurchases] = useState<PurchaseRow[]>([]);
   const [entitlements, setEntitlements] = useState<EntitlementRow[]>([]);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionRow[]>([]);
   const [caseAccess, setCaseAccess] = useState<CaseAccessRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -172,7 +187,7 @@ export default function MinSideKjopPage() {
 
       setUser(user);
 
-      const [purchaseResult, entitlementResult, accessResult] = await Promise.all([
+      const [purchaseResult, entitlementResult, subscriptionResult, accessResult] = await Promise.all([
         supabase
           .from("user_purchases")
           .select(
@@ -191,6 +206,16 @@ export default function MinSideKjopPage() {
           .eq("status", "active")
           .order("created_at", { ascending: false })
           .limit(100),
+
+        supabase
+          .from("user_subscriptions")
+          .select(
+            "id,package_id,status,included_cases_per_month,used_cases_current_period,current_period_start,current_period_end,cancel_at_period_end,stripe_subscription_id,stripe_checkout_session_id,created_at"
+          )
+          .eq("user_id", user.id)
+          .in("status", ["active", "trialing", "past_due"])
+          .order("created_at", { ascending: false })
+          .limit(20),
 
         supabase
           .from("case_access")
@@ -215,6 +240,12 @@ export default function MinSideKjopPage() {
         return;
       }
 
+      if (subscriptionResult.error) {
+        setErrorMessage(subscriptionResult.error.message);
+        setIsLoading(false);
+        return;
+      }
+
       if (accessResult.error) {
         setErrorMessage(accessResult.error.message);
         setIsLoading(false);
@@ -223,6 +254,7 @@ export default function MinSideKjopPage() {
 
       setPurchases((purchaseResult.data ?? []) as PurchaseRow[]);
       setEntitlements((entitlementResult.data ?? []) as EntitlementRow[]);
+      setSubscriptions((subscriptionResult.data ?? []) as SubscriptionRow[]);
       setCaseAccess((accessResult.data ?? []) as unknown as CaseAccessRow[]);
       setIsLoading(false);
     }
@@ -484,6 +516,111 @@ export default function MinSideKjopPage() {
                 </p>
               </div>
             </section>
+
+            {subscriptions.length > 0 ? (
+              <section className="mt-10 rounded-3xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-bold text-emerald-700">
+                      Aktivt abonnement
+                    </p>
+                    <h2 className="mt-3 text-3xl font-black text-slate-950">
+                      Månedsavtale
+                    </h2>
+                    <p className="mt-3 max-w-3xl leading-8 text-slate-700">
+                      Her ser du aktive abonnementer og hvor mange saker som er
+                      inkludert i inneværende periode. Administrasjon av
+                      abonnement gjøres manuelt foreløpig.
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/kontakt"
+                    className="rounded-xl border border-emerald-300 bg-white px-5 py-3 font-bold text-slate-950 hover:bg-emerald-100"
+                  >
+                    Endre abonnement
+                  </Link>
+                </div>
+
+                <div className="mt-6 grid gap-4">
+                  {subscriptions.map((subscription) => {
+                    const included = Number(
+                      subscription.included_cases_per_month ?? 0
+                    );
+                    const used = Number(
+                      subscription.used_cases_current_period ?? 0
+                    );
+                    const available = Math.max(0, included - used);
+
+                    return (
+                      <article
+                        key={subscription.id}
+                        className="rounded-2xl border border-emerald-200 bg-white p-5"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <div>
+                            <h3 className="text-xl font-black text-slate-950">
+                              {packageName(subscription.package_id)}
+                            </h3>
+                            <p className="mt-2 max-w-2xl leading-7 text-slate-600">
+                              {packageDescription(subscription.package_id)}
+                            </p>
+                          </div>
+
+                          <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-800">
+                            {statusLabel(subscription.status)}
+                          </span>
+                        </div>
+
+                        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                          <div className="rounded-2xl bg-emerald-50 p-4">
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                              Inkludert per måned
+                            </p>
+                            <p className="mt-2 text-2xl font-black">
+                              {included}
+                            </p>
+                          </div>
+
+                          <div className="rounded-2xl bg-emerald-50 p-4">
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                              Brukt denne perioden
+                            </p>
+                            <p className="mt-2 text-2xl font-black">{used}</p>
+                          </div>
+
+                          <div className="rounded-2xl bg-emerald-50 p-4">
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                              Ledig denne perioden
+                            </p>
+                            <p className="mt-2 text-2xl font-black">
+                              {available}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                          <p>
+                            <span className="font-bold text-slate-950">
+                              Neste periode:
+                            </span>{" "}
+                            {subscription.current_period_end
+                              ? formatDate(subscription.current_period_end)
+                              : "Ikke satt ennå"}
+                          </p>
+                          <p>
+                            <span className="font-bold text-slate-950">
+                              Stripe:
+                            </span>{" "}
+                            {subscription.stripe_subscription_id ?? "Ikke satt"}
+                          </p>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
 
             <section className="mt-10">
               <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
