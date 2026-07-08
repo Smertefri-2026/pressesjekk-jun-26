@@ -173,6 +173,8 @@ export default function CasePackagePage() {
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [currentPackageId, setCurrentPackageId] =
     useState<PackagePlanId | null>(null);
+  const [activeSubscriptionPackageId, setActiveSubscriptionPackageId] =
+    useState<PackagePlanId | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -232,6 +234,19 @@ export default function CasePackagePage() {
 
       const access = accessData as CaseAccessRow | null;
       setCurrentPackageId(access?.package_id ?? null);
+
+      const { data: subscriptionData } = await supabase
+        .from("user_subscriptions")
+        .select("package_id,status")
+        .eq("user_id", user.id)
+        .in("status", ["active", "trialing", "past_due"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      setActiveSubscriptionPackageId(
+        (subscriptionData?.package_id as PackagePlanId | null) ?? null
+      );
 
       setIsLoading(false);
     }
@@ -677,15 +692,21 @@ export default function CasePackagePage() {
         {activeTab === "monthly" ? (
           <section className="mt-8">
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {monthlyPackages.map((plan) => (
-                <article
-                  key={plan.id}
-                  className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
-                    plan.id === "monthly_pro"
-                      ? "border-red-300 bg-red-50"
-                      : "border-slate-200 bg-white"
-                  }`}
-                >
+              {monthlyPackages.map((plan) => {
+                const isActiveSubscription =
+                  activeSubscriptionPackageId === plan.id;
+
+                return (
+                  <article
+                    key={plan.id}
+                    className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
+                      isActiveSubscription
+                        ? "border-emerald-300 bg-emerald-50"
+                        : plan.id === "monthly_pro"
+                          ? "border-red-300 bg-red-50"
+                          : "border-slate-200 bg-white"
+                    }`}
+                  >
                   <p className="inline-flex w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-red-800">
                     {plan.tag}
                   </p>
@@ -711,20 +732,27 @@ export default function CasePackagePage() {
                     ))}
                   </ul>
 
-                  <Link
-                    href={
-                      plan.id === "monthly_enterprise"
-                        ? "/kontakt"
-                        : `/utsjekk?plan=${plan.id}`
-                    }
-                    className="mt-auto block rounded-xl bg-slate-950 px-5 py-4 text-center font-black text-white hover:bg-slate-800"
-                  >
-                    {plan.id === "monthly_enterprise"
-                      ? "Be om tilbud"
-                      : "Start abonnement"}
-                  </Link>
+                  {isActiveSubscription ? (
+                    <div className="mt-auto rounded-xl bg-emerald-100 px-5 py-4 text-center font-black text-emerald-900">
+                      Aktiv avtale
+                    </div>
+                  ) : (
+                    <Link
+                      href={
+                        plan.id === "monthly_enterprise"
+                          ? "/kontakt"
+                          : `/utsjekk?plan=${plan.id}`
+                      }
+                      className="mt-auto block rounded-xl bg-slate-950 px-5 py-4 text-center font-black text-white hover:bg-slate-800"
+                    >
+                      {plan.id === "monthly_enterprise"
+                        ? "Be om tilbud"
+                        : "Start abonnement"}
+                    </Link>
+                  )}
                 </article>
-              ))}
+                );
+              })}
             </div>
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -735,8 +763,9 @@ export default function CasePackagePage() {
                 Pause, stopp og endring
               </h2>
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-                Neste steg er å koble til Stripe kundeportal, slik at du kan
-                endre, pause eller stoppe abonnement direkte fra Min Side.
+                Aktiv avtale vises på abonnementskortene. Pause, stopp,
+                oppgradering eller nedgradering håndteres manuelt foreløpig,
+                frem til Stripe kundeportal kobles på.
               </p>
             </div>
           </section>
