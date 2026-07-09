@@ -5,6 +5,23 @@ import { getStripeCheckoutPlan } from "@/lib/stripe/plans";
 import { getSupabaseServiceClient } from "@/lib/supabase/service";
 import type { PackagePlanId } from "@/data/packagePlans";
 
+function entitlementExpiresAt(packageId: PackagePlanId) {
+  const expiringPackages: PackagePlanId[] = [
+    "case_bundle_3",
+    "case_bundle_5",
+    "case_bundle_10",
+  ];
+
+  if (!expiringPackages.includes(packageId)) {
+    return null;
+  }
+
+  const expiresAt = new Date();
+  expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+  return expiresAt.toISOString();
+}
+
 function includedCasesForPackage(packageId: PackagePlanId) {
   if (packageId === "case_bundle_3") return 3;
   if (packageId === "case_bundle_5") return 5;

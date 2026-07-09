@@ -39,6 +39,7 @@ type EntitlementRow = {
   used_cases: number;
   source: string;
   stripe_checkout_session_id: string | null;
+  expires_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -130,6 +131,14 @@ function formatDate(date: string) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  }).format(new Date(date));
+}
+
+function formatDateOnly(date: string) {
+  return new Intl.DateTimeFormat("nb-NO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
   }).format(new Date(date));
 }
 
@@ -282,7 +291,7 @@ export default function MinSideKjopPage() {
         supabase
           .from("user_case_entitlements")
           .select(
-            "id,package_id,status,included_cases,used_cases,source,stripe_checkout_session_id,created_at,updated_at"
+            "id,package_id,status,included_cases,used_cases,source,stripe_checkout_session_id,expires_at,created_at,updated_at"
           )
           .eq("user_id", user.id)
           .eq("status", "active")
@@ -915,7 +924,7 @@ export default function MinSideKjopPage() {
                             </span>
                           </div>
 
-                          <div className="mt-5 grid gap-3 md:grid-cols-5">
+                          <div className="mt-5 grid gap-3 md:grid-cols-6">
                             <div className="rounded-2xl bg-white p-4">
                               <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
                                 Kjøpt
@@ -925,6 +934,17 @@ export default function MinSideKjopPage() {
                                   relatedPurchase?.created_at ??
                                     entitlement.created_at
                                 )}
+                              </p>
+                            </div>
+
+                            <div className="rounded-2xl bg-white p-4">
+                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                                Gyldig til
+                              </p>
+                              <p className="mt-2 text-sm font-black leading-6">
+                                {entitlement.expires_at
+                                  ? formatDateOnly(entitlement.expires_at)
+                                  : "Ingen utløpsdato"}
                               </p>
                             </div>
 
