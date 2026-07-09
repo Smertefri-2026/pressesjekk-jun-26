@@ -58,6 +58,21 @@ type SubscriptionRow = {
   created_at: string;
 };
 
+type SubscriptionPeriodRow = {
+  id: string;
+  subscription_id: string;
+  package_id: string;
+  period_start: string;
+  period_end: string;
+  included_cases: number;
+  rollover_cases: number;
+  used_cases: number;
+  rollover_expires_at: string | null;
+  status: string;
+  stripe_subscription_id: string | null;
+  created_at: string;
+};
+
 type CaseAccessRow = {
   id: string;
   case_id: string;
@@ -215,6 +230,9 @@ export default function MinSideKjopPage() {
   const [purchases, setPurchases] = useState<PurchaseRow[]>([]);
   const [entitlements, setEntitlements] = useState<EntitlementRow[]>([]);
   const [subscriptions, setSubscriptions] = useState<SubscriptionRow[]>([]);
+  const [subscriptionPeriods, setSubscriptionPeriods] = useState<
+    SubscriptionPeriodRow[]
+  >([]);
   const [cases, setCases] = useState<CaseRow[]>([]);
   const [caseAccess, setCaseAccess] = useState<CaseAccessRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -248,6 +266,7 @@ export default function MinSideKjopPage() {
         purchaseResult,
         entitlementResult,
         subscriptionResult,
+        subscriptionPeriodResult,
         casesResult,
         accessResult,
       ] = await Promise.all([
@@ -279,6 +298,16 @@ export default function MinSideKjopPage() {
           .in("status", ["active", "trialing", "past_due"])
           .order("created_at", { ascending: false })
           .limit(20),
+
+        supabase
+          .from("subscription_case_periods")
+          .select(
+            "id,subscription_id,package_id,period_start,period_end,included_cases,rollover_cases,used_cases,rollover_expires_at,status,stripe_subscription_id,created_at"
+          )
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .order("period_start", { ascending: false })
+          .limit(50),
 
         supabase
           .from("cases")
@@ -317,6 +346,12 @@ export default function MinSideKjopPage() {
         return;
       }
 
+      if (subscriptionPeriodResult.error) {
+        setErrorMessage(subscriptionPeriodResult.error.message);
+        setIsLoading(false);
+        return;
+      }
+
       if (casesResult.error) {
         setErrorMessage(casesResult.error.message);
         setIsLoading(false);
@@ -332,6 +367,9 @@ export default function MinSideKjopPage() {
       setPurchases((purchaseResult.data ?? []) as PurchaseRow[]);
       setEntitlements((entitlementResult.data ?? []) as EntitlementRow[]);
       setSubscriptions((subscriptionResult.data ?? []) as SubscriptionRow[]);
+      setSubscriptionPeriods(
+        (subscriptionPeriodResult.data ?? []) as SubscriptionPeriodRow[]
+      );
       setCases((casesResult.data ?? []) as CaseRow[]);
       setCaseAccess((accessResult.data ?? []) as unknown as CaseAccessRow[]);
       setIsLoading(false);
@@ -392,6 +430,12 @@ export default function MinSideKjopPage() {
   const caseAccessByCaseId = useMemo(() => {
     return new Map(caseAccess.map((access) => [access.case_id, access]));
   }, [caseAccess]);
+
+  const activePeriodBySubscriptionId = useMemo(() => {
+    return new Map(
+      subscriptionPeriods.map((period) => [period.subscription_id, period])
+    );
+  }, [subscriptionPeriods]);
 
   const totalPaid = useMemo(() => {
     return purchases
@@ -560,13 +604,21 @@ export default function MinSideKjopPage() {
               {subscriptions.length > 0 ? (
                 <div className="grid gap-6">
                   {subscriptions.map((subscription) => {
+                    const activePeriod = activePeriodBySubscriptionId.get(
+                      subscription.id
+                    );
                     const included = Number(
-                      subscription.included_cases_per_month ?? 0
+                      activePeriod?.included_cases ??
+                        subscription.included_cases_per_month ??
+                        0
                     );
+                    const rollover = Number(activePeriod?.rollover_cases ?? 0);
                     const used = Number(
-                      subscription.used_cases_current_period ?? 0
+                      activePeriod?.used_cases ??
+                        subscription.used_cases_current_period ??
+                        0
                     );
-                    const available = Math.max(0, included - used);
+                    const available = Math.max(0, included + rollover - used);
 
                     return (
                       <article
@@ -619,13 +671,22 @@ export default function MinSideKjopPage() {
                           </div>
                         ) : null}
 
-                        <div className="mt-6 grid gap-3 md:grid-cols-4">
+                        <div className="mt-6 grid gap-3 md:grid-cols-5">
                           <div className="rounded-2xl bg-emerald-50 p-4">
                             <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
                               Inkludert per måned
                             </p>
                             <p className="mt-2 text-3xl font-black text-slate-950">
                               {included}
+                            </p>
+                          </div>
+
+                          <div className="rounded-2xl bg-emerald-50 p-4">
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+                              Rollover
+                            </p>
+                            <p className="mt-2 text-3xl font-black text-slate-950">
+                              {rollover}
                             </p>
                           </div>
 
@@ -779,9 +840,13 @@ export default function MinSideKjopPage() {
                         </div>
 
                         <p className="mt-5 text-sm leading-7 text-slate-600">
-                          Rollover-plan: ubrukte saker skal kunne rulles videre
-                          i en begrenset periode, for eksempel inntil 3 måneder,
-                          så lenge abonnementet er aktivt.
+                          Rollover: ubrukte saker kan rulles videre i inntil 3
+                          måneder så lenge abonnementet er aktivt.
+                          {activePeriod?.rollover_expires_at
+                            ? ` Rollover for denne perioden utløper ${formatDate(
+                                activePeriod.rollover_expires_at
+                              )}.`
+                            : ""}
                         </p>
                       </article>
                     );
