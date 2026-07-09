@@ -306,6 +306,12 @@ export default function MinSideKjopPage() {
     }, 0);
   }, [entitlements]);
 
+  const visibleEntitlements = useMemo(() => {
+    return entitlements.filter(
+      (entitlement) => !entitlement.package_id.startsWith("monthly_")
+    );
+  }, [entitlements]);
+
   const totalPaid = useMemo(() => {
     return purchases
       .filter((purchase) => purchase.status === "paid")
@@ -714,9 +720,8 @@ export default function MinSideKjopPage() {
                       Pakker som kan brukes nå
                     </h2>
                     <p className="mt-3 max-w-3xl leading-8 text-slate-700">
-                      Her ser du aktive pakker, hvor mange saker som er inkludert,
-                      hvor mange som er brukt, og hvor mange som fortsatt kan
-                      opprettes.
+                      Her ser du engangspakker, klippekort og andre tilganger som
+                      kan brukes utenom løpende abonnement.
                     </p>
                   </div>
 
@@ -729,12 +734,13 @@ export default function MinSideKjopPage() {
                 </div>
 
                 <div className="mt-6 space-y-4">
-                  {entitlements.length === 0 ? (
+                  {visibleEntitlements.length === 0 ? (
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 text-slate-700">
-                      Du har ingen aktive sakspakker akkurat nå.
+                      Du har ingen aktive engangspakker akkurat nå. Har du
+                      abonnement, vises det i abonnementsboksen over.
                     </div>
                   ) : (
-                    entitlements.map((entitlement) => {
+                    visibleEntitlements.map((entitlement) => {
                       const included = Number(entitlement.included_cases ?? 0);
                       const used = Number(entitlement.used_cases ?? 0);
                       const available = Math.max(0, included - used);
