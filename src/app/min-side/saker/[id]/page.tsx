@@ -9,7 +9,6 @@ import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 import type { PackagePlanId } from "@/data/packagePlans";
-import { isV1Purchasable, upgradePaths } from "@/data/packagePlans";
 
 type CaseRow = {
   id: string;
@@ -180,8 +179,6 @@ export default function CaseDetailPage() {
   const [workflowType, setWorkflowType] = useState<"standard" | "journalist">("standard");
   const [caseAccessPackageId, setCaseAccessPackageId] =
     useState<PackagePlanId | null>(null);
-  const [selectedPackage, setSelectedPackage] =
-    useState<PackagePlanId | null>(null);
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
@@ -323,21 +320,6 @@ export default function CaseDetailPage() {
       loadCase();
     }
   }, [params.id]);
-
-  useEffect(() => {
-    const pkg = new URLSearchParams(window.location.search).get("package");
-    if (pkg && isV1Purchasable(pkg)) {
-      setSelectedPackage(pkg as PackagePlanId);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (selectedPackage && !isLoading) {
-      document
-        .getElementById("betaling")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [selectedPackage, isLoading]);
 
   async function handleBasicInfoSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -535,90 +517,7 @@ export default function CaseDetailPage() {
     (report) => report.report_type === "investigation_draft"
   );
 
-  const recommendedNext: PackagePlanId | null =
-    workflowType === "journalist"
-      ? !caseAccessPackageId
-        ? "report_pack"
-        : null
-      : !caseAccessPackageId
-        ? "report_pack"
-        : ((upgradePaths as Record<string, PackagePlanId>)[caseAccessPackageId] ??
-          null);
-
-  const selectedAlreadyCovered =
-    selectedPackage !== null &&
-    hasPackageAccess(caseAccessPackageId, selectedPackage);
-
-  const checkoutOptions: {
-    id: PackagePlanId;
-    name: string;
-    price: string;
-    label: string;
-    buttonClass: string;
-  }[] = [
-    {
-      id: "report_pack",
-      name: "Rapportpakke",
-      price: "490 kr",
-      label: "Kjøp rapportpakke – 490 kr",
-      buttonClass:
-        "w-full rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60",
-    },
-    {
-      id: "pfu_pack",
-      name: "PFU-pakke",
-      price: "1 490 kr",
-      label: "Oppgrader til PFU-pakke – 1 490 kr",
-      buttonClass:
-        "w-full rounded-xl bg-blue-700 px-5 py-4 text-sm font-black text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60",
-    },
-    {
-      id: "full_pack",
-      name: "Full dokumentpakke",
-      price: "2 990 kr",
-      label: "Oppgrader til full dokumentpakke – 2 990 kr",
-      buttonClass:
-        "w-full rounded-xl bg-blue-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60",
-    },
-  ];
-
-  const visibleCheckoutOptions =
-    workflowType === "journalist"
-      ? checkoutOptions.filter((option) => option.id === "report_pack")
-      : checkoutOptions;
-
   const isJournalistWorkflow = workflowType === "journalist";
-
-  const isOwned = (id: PackagePlanId) =>
-    hasPackageAccess(caseAccessPackageId, id);
-
-  const primaryPackage: PackagePlanId | null =
-    selectedPackage && !selectedAlreadyCovered
-      ? selectedPackage
-      : recommendedNext &&
-          visibleCheckoutOptions.some((opt) => opt.id === recommendedNext) &&
-          !isOwned(recommendedNext)
-        ? recommendedNext
-        : null;
-
-  const primaryIsSelected =
-    primaryPackage !== null && primaryPackage === selectedPackage;
-
-  const primaryOption = visibleCheckoutOptions.find(
-    (opt) => opt.id === primaryPackage
-  );
-
-  const primaryButtonClass =
-    "w-full rounded-xl bg-slate-950 px-5 py-5 text-base font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
-
-
-  const paymentTitle = isJournalistWorkflow
-    ? "Tilgang og redaksjonell sjekk"
-    : "Tilgang og betaling";
-
-  const unlockedTitle = isJournalistWorkflow
-    ? "Hva er tilgjengelig for redaksjonen"
-    : "Hva er låst opp for saken";
 
   const nextDocumentsTitle = isJournalistWorkflow
     ? "Videre redaksjonelt arbeid"
@@ -661,7 +560,7 @@ export default function CaseDetailPage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <Link
             href="/min-side"
-            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+            className="text-sm font-semibold text-red-700 hover:text-red-900"
           >
             ← Tilbake til Min Side
           </Link>
@@ -691,14 +590,14 @@ export default function CaseDetailPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          className="text-sm font-semibold text-red-700 hover:text-red-900"
         >
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               PresseSjekk-sak
             </p>
 
@@ -713,7 +612,7 @@ export default function CaseDetailPage() {
             </p>
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
                 Grunninformasjon
               </p>
 
@@ -753,7 +652,7 @@ export default function CaseDetailPage() {
                       type="text"
                       value={editTitle}
                       onChange={(event) => setEditTitle(event.target.value)}
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
 
@@ -770,7 +669,7 @@ export default function CaseDetailPage() {
                       onChange={(event) =>
                         setEditStatus(event.target.value as CaseRow["status"])
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     >
                       <option value="draft">Utkast</option>
                       <option value="in_progress">Under arbeid</option>
@@ -792,7 +691,7 @@ export default function CaseDetailPage() {
                         type="text"
                         value={editMediaName}
                         onChange={(event) => setEditMediaName(event.target.value)}
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                       />
                     </div>
 
@@ -810,7 +709,7 @@ export default function CaseDetailPage() {
                         onChange={(event) =>
                           setEditPublishedDate(event.target.value)
                         }
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -827,7 +726,7 @@ export default function CaseDetailPage() {
                       type="text"
                       value={editArticleTitle}
                       onChange={(event) => setEditArticleTitle(event.target.value)}
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
 
@@ -843,7 +742,7 @@ export default function CaseDetailPage() {
                       type="url"
                       value={editArticleUrl}
                       onChange={(event) => setEditArticleUrl(event.target.value)}
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
 
@@ -861,7 +760,7 @@ export default function CaseDetailPage() {
                       onChange={(event) =>
                         setEditShortDescription(event.target.value)
                       }
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
 
@@ -924,7 +823,7 @@ export default function CaseDetailPage() {
                         href={caseItem.article_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="block break-words text-lg font-bold text-blue-700 hover:text-blue-900"
+                        className="block break-words text-lg font-bold text-red-700 hover:text-red-900"
                       >
                         {caseItem.article_url}
                       </a>
@@ -961,7 +860,7 @@ export default function CaseDetailPage() {
                           >
                             <div className="flex flex-wrap items-start justify-between gap-3">
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">
+                                <p className="text-xs font-black uppercase tracking-[0.16em] text-red-700">
                                   {link.is_primary ? "Hovedartikkel" : "Relatert artikkel"}
                                 </p>
                                 {link.title ? (
@@ -973,7 +872,7 @@ export default function CaseDetailPage() {
                                   href={link.url}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="mt-2 block break-words text-sm font-bold text-blue-700 hover:text-blue-900"
+                                  className="mt-2 block break-words text-sm font-bold text-red-700 hover:text-red-900"
                                 >
                                   {link.url}
                                 </a>
@@ -998,9 +897,9 @@ export default function CaseDetailPage() {
                     {articleLinks.length < 5 ? (
                       <form
                         onSubmit={handleAddArticleLink}
-                        className="mt-5 grid gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4"
+                        className="mt-5 grid gap-3 rounded-xl border border-red-200 bg-red-50 p-4"
                       >
-                        <p className="text-sm font-black text-blue-900">
+                        <p className="text-sm font-black text-red-900">
                           Legg til flere URL-er om samme mediesituasjon
                         </p>
 
@@ -1009,7 +908,7 @@ export default function CaseDetailPage() {
                           value={newArticleUrl}
                           onChange={(event) => setNewArticleUrl(event.target.value)}
                           placeholder="https://..."
-                          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-blue-500"
+                          className="w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-red-500"
                         />
 
                         <input
@@ -1017,7 +916,7 @@ export default function CaseDetailPage() {
                           value={newArticleTitle}
                           onChange={(event) => setNewArticleTitle(event.target.value)}
                           placeholder="Valgfri tittel / kort navn på lenken"
-                          className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-blue-500"
+                          className="w-full rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-slate-950 outline-none focus:border-red-500"
                         />
 
                         <button
@@ -1084,149 +983,8 @@ export default function CaseDetailPage() {
             }}
           />
 
-            <div
-              id="betaling"
-              className="scroll-mt-24 rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm ring-2 ring-blue-100 sm:p-7"
-            >
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
-                {paymentTitle}
-              </p>
-
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-sm font-bold text-slate-600">
-                  Aktiv pakke:
-                </span>
-                <span
-                  className={`inline-flex rounded-full px-3 py-1 text-sm font-black ${
-                    caseAccessPackageId
-                      ? "bg-emerald-100 text-emerald-800"
-                      : "bg-slate-200 text-slate-600"
-                  }`}
-                >
-                  {caseAccessPackageId
-                    ? packageLabel(caseAccessPackageId)
-                    : "Ingen"}
-                </span>
-              </div>
-
-              {primaryOption ? (
-                <div
-                  className={`mt-5 rounded-2xl border-2 p-5 ${
-                    primaryIsSelected
-                      ? "border-amber-400 bg-amber-50"
-                      : "border-blue-500 bg-blue-50"
-                  }`}
-                >
-                  <p
-                    className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.15em] ${
-                      primaryIsSelected
-                        ? "bg-amber-200 text-amber-900"
-                        : "bg-blue-200 text-blue-900"
-                    }`}
-                  >
-                    {primaryIsSelected
-                      ? "Valgt fra priser"
-                      : "Anbefalt neste steg"}
-                  </p>
-
-                  <h3 className="mt-3 text-2xl font-black text-slate-950">
-                    {primaryIsSelected
-                      ? `Du valgte ${primaryOption.name} fra priser`
-                      : primaryOption.name}
-                  </h3>
-                  <p className="mt-1 text-3xl font-black text-slate-950">
-                    {primaryOption.price}
-                  </p>
-
-                  <div className="mt-4">
-                    <Link
-                      href={`/utsjekk?plan=${primaryOption.id}&caseId=${params.id}&mode=upgrade`}
-                      className={primaryButtonClass}
-                    >
-                      {`Betal ${primaryOption.price} – ${primaryOption.name}`}
-                    </Link>
-                  </div>
-                </div>
-              ) : null}
-
-              {selectedAlreadyCovered ? (
-                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold leading-6 text-emerald-800">
-                  Denne saken har allerede {packageLabel(selectedPackage)} eller
-                  bedre. Ingen ny betaling er nødvendig.
-                </div>
-              ) : null}
-
-              <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-slate-500">
-                {unlockedTitle}
-              </p>
-              <div className="mt-3 grid gap-2">
-                {unlockedCapabilities.map((cap) => {
-                  const unlocked = hasPackageAccess(caseAccessPackageId, cap.id);
-                  return (
-                    <div
-                      key={cap.id}
-                      className={`flex items-center justify-between rounded-xl border px-4 py-3 ${
-                        unlocked
-                          ? "border-emerald-200 bg-emerald-50"
-                          : "border-slate-200 bg-slate-50"
-                      }`}
-                    >
-                      <span className="flex items-center gap-2 text-sm font-bold text-slate-800">
-                        <span aria-hidden>{unlocked ? "✓" : "🔒"}</span>
-                        {cap.label}
-                      </span>
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.15em] ${
-                          unlocked
-                            ? "bg-emerald-200 text-emerald-900"
-                            : "bg-slate-200 text-slate-600"
-                        }`}
-                      >
-                        {unlocked ? "Låst opp" : "Låst"}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {visibleCheckoutOptions.filter(
-                (opt) => !isOwned(opt.id) && opt.id !== primaryPackage
-              ).length > 0 ? (
-                <p className="mt-6 text-sm font-black uppercase tracking-[0.18em] text-slate-500">
-                  Andre pakker
-                </p>
-              ) : null}
-
-              <div className="mt-3 grid gap-3">
-                {visibleCheckoutOptions
-                  .filter(
-                    (opt) => !isOwned(opt.id) && opt.id !== primaryPackage
-                  )
-                  .map((opt) => (
-                    <Link
-                      key={opt.id}
-                      href={`/utsjekk?plan=${opt.id}&caseId=${params.id}&mode=upgrade`}
-                      className={opt.buttonClass}
-                    >
-                      {opt.label}
-                    </Link>
-                  ))}
-
-                {!isJournalistWorkflow ? (
-                  <Link
-                    href="/kontakt"
-                    className="rounded-xl border border-blue-200 bg-white px-5 py-4 text-center text-sm font-black text-blue-900 hover:bg-blue-100"
-                  >
-                    {caseAccessPackageId === "full_pack"
-                      ? "Neste steg: spør om utredning eller proffhjelp"
-                      : "Spør om utredningspakke"}
-                  </Link>
-                ) : null}
-              </div>
-            </div>
-
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                 Rapport
               </p>
               <h2 className="mt-3 text-3xl font-black">
@@ -1244,14 +1002,14 @@ export default function CaseDetailPage() {
 
               <Link
                 href={`/min-side/saker/${params.id}/rapport`}
-                className="mt-6 inline-flex rounded-xl bg-blue-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-blue-300"
+                className="mt-6 inline-flex rounded-xl bg-orange-400 px-5 py-4 text-sm font-black text-slate-950 hover:bg-orange-500"
               >
                 {reportDrafts.length > 0 ? "Åpne rapport" : "Lag rapport"}
               </Link>
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
                 {isJournalistWorkflow ? "Redaksjonelt arbeid" : "Videre dokumenter"}
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -1282,7 +1040,7 @@ export default function CaseDetailPage() {
 
                     <Link
                       href={`/min-side/saker/${params.id}/pakke`}
-                      className="rounded-xl border border-blue-300 bg-blue-50 px-5 py-4 text-sm font-black text-blue-900 hover:bg-blue-100"
+                      className="rounded-xl border border-red-300 bg-red-50 px-5 py-4 text-sm font-black text-red-900 hover:bg-red-50"
                     >
                       Se redaksjonelle pakker
                     </Link>
@@ -1319,8 +1077,8 @@ export default function CaseDetailPage() {
             </div>
 
             {!isJournalistWorkflow ? (
-              <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
+              <div className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-7">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
                   Status
                 </p>
                 <h2 className="mt-3 text-3xl font-black text-slate-950">
