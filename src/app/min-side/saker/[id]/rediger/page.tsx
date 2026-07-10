@@ -232,7 +232,7 @@ export default function EditCasePage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <Link
             href="/min-side"
-            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+            className="text-sm font-semibold text-red-700 hover:text-red-900"
           >
             ← Tilbake til Min Side
           </Link>
@@ -260,14 +260,14 @@ export default function EditCasePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href={`/min-side/saker/${params.id}`}
-          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          className="text-sm font-semibold text-red-700 hover:text-red-900"
         >
           ← Tilbake til saken
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               {workflowType === "journalist" ? "Rediger redaksjonell sak" : "Rediger sak"}
             </p>
 
@@ -322,7 +322,7 @@ export default function EditCasePage() {
             onSubmit={handleSubmit}
             className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
           >
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               {workflowType === "journalist" ? "Publiseringsinformasjon" : "Saksinformasjon"}
             </p>
             <h2 className="mt-3 text-4xl font-black text-slate-950">
@@ -342,7 +342,7 @@ export default function EditCasePage() {
                   type="text"
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                 />
               </div>
 
@@ -359,7 +359,7 @@ export default function EditCasePage() {
                   onChange={(event) =>
                     setStatus(event.target.value as CaseStatus)
                   }
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                 >
                   <option value="draft">Utkast</option>
                   <option value="in_progress">Under arbeid</option>
@@ -381,7 +381,7 @@ export default function EditCasePage() {
                     type="text"
                     value={mediaName}
                     onChange={(event) => setMediaName(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                   />
                 </div>
 
@@ -397,7 +397,7 @@ export default function EditCasePage() {
                     type="date"
                     value={publishedDate}
                     onChange={(event) => setPublishedDate(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                   />
                 </div>
               </div>
@@ -414,7 +414,7 @@ export default function EditCasePage() {
                   type="text"
                   value={articleTitle}
                   onChange={(event) => setArticleTitle(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                 />
               </div>
 
@@ -430,7 +430,7 @@ export default function EditCasePage() {
                   type="url"
                   value={articleUrl}
                   onChange={(event) => setArticleUrl(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                 />
               </div>
 
@@ -446,7 +446,7 @@ export default function EditCasePage() {
                   rows={6}
                   value={shortDescription}
                   onChange={(event) => setShortDescription(event.target.value)}
-                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                 />
               </div>
 
@@ -476,8 +476,8 @@ export default function EditCasePage() {
           </form>
 
           <aside className="grid content-start gap-6">
-            <div className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
+            <div className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
                 {workflowType === "journalist" ? "Oppdatert publiseringsgrunnlag" : "Oppdatert grunnlag"}
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -491,7 +491,7 @@ export default function EditCasePage() {
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                 {workflowType === "journalist" ? "Videre redaksjonelt arbeid" : "Videre arbeid"}
               </p>
               <h2 className="mt-3 text-3xl font-black">
