@@ -287,14 +287,14 @@ export default function ProfilePage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          className="text-sm font-semibold text-red-700 hover:text-red-900"
         >
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               Profil
             </p>
 
@@ -309,8 +309,8 @@ export default function ProfilePage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
+          <aside className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
               Konto og dokumentasjon
             </p>
 
@@ -331,7 +331,7 @@ export default function ProfilePage() {
             onSubmit={handleSubmit}
             className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
           >
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               Kontoinformasjon
             </p>
 
@@ -366,7 +366,7 @@ export default function ProfilePage() {
                       value={firstName}
                       onChange={(event) => setFirstName(event.target.value)}
                       placeholder="Fornavn"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
 
@@ -383,7 +383,7 @@ export default function ProfilePage() {
                       value={lastName}
                       onChange={(event) => setLastName(event.target.value)}
                       placeholder="Etternavn"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
                 </div>
@@ -421,7 +421,7 @@ export default function ProfilePage() {
                       value={phone}
                       onChange={(event) => setPhone(event.target.value)}
                       placeholder="+47 00 00 00 00"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
                 </div>
@@ -437,7 +437,7 @@ export default function ProfilePage() {
                     id="roleType"
                     value={roleType}
                     onChange={(event) => setRoleType(event.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                   >
                     <option value="private_person">Privatperson</option>
                     <option value="advisor">Rådgiver</option>
@@ -474,7 +474,7 @@ export default function ProfilePage() {
                     value={addressLine1}
                     onChange={(event) => setAddressLine1(event.target.value)}
                     placeholder="Gateadresse"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                   />
                 </div>
 
@@ -492,7 +492,7 @@ export default function ProfilePage() {
                       value={postalCode}
                       onChange={(event) => setPostalCode(event.target.value)}
                       placeholder="0000"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
 
@@ -509,7 +509,7 @@ export default function ProfilePage() {
                       value={city}
                       onChange={(event) => setCity(event.target.value)}
                       placeholder="Sted"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
                 </div>
@@ -527,7 +527,7 @@ export default function ProfilePage() {
                     value={country}
                     onChange={(event) => setCountry(event.target.value)}
                     placeholder="Norge"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                   />
                 </div>
               </section>
@@ -560,7 +560,7 @@ export default function ProfilePage() {
                           setOrganizationName(event.target.value)
                         }
                         placeholder="Firmanavn"
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                       />
                     </div>
 
@@ -579,7 +579,7 @@ export default function ProfilePage() {
                           setOrganizationNumber(event.target.value)
                         }
                         placeholder="000 000 000"
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -599,7 +599,7 @@ export default function ProfilePage() {
                         setContactPersonName(event.target.value)
                       }
                       placeholder="Navn på kontaktperson"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
 
@@ -619,7 +619,7 @@ export default function ProfilePage() {
                           setContactPersonEmail(event.target.value)
                         }
                         placeholder="kontakt@firma.no"
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                       />
                     </div>
 
@@ -638,7 +638,7 @@ export default function ProfilePage() {
                           setContactPersonPhone(event.target.value)
                         }
                         placeholder="+47 00 00 00 00"
-                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                       />
                     </div>
                   </div>
@@ -670,7 +670,7 @@ export default function ProfilePage() {
                     value={billingEmail}
                     onChange={(event) => setBillingEmail(event.target.value)}
                     placeholder="Samme som konto hvis tom"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                   />
                 </div>
 
@@ -689,7 +689,7 @@ export default function ProfilePage() {
                       setDeliveryAddressLine1(event.target.value)
                     }
                     placeholder="Samme som adresse hvis tom"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                   />
                 </div>
 
@@ -709,7 +709,7 @@ export default function ProfilePage() {
                         setDeliveryPostalCode(event.target.value)
                       }
                       placeholder="0000"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
 
@@ -726,7 +726,7 @@ export default function ProfilePage() {
                       value={deliveryCity}
                       onChange={(event) => setDeliveryCity(event.target.value)}
                       placeholder="Sted"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                     />
                   </div>
                 </div>
@@ -744,7 +744,7 @@ export default function ProfilePage() {
                     value={deliveryCountry}
                     onChange={(event) => setDeliveryCountry(event.target.value)}
                     placeholder="Norge"
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-blue-500 focus:bg-white"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
                   />
                 </div>
               </section>
@@ -773,7 +773,7 @@ export default function ProfilePage() {
 
           <aside className="grid content-start gap-6">
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                 Konto
               </p>
 
@@ -786,7 +786,7 @@ export default function ProfilePage() {
               </p>
 
               <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm font-bold text-blue-200">Rolle</p>
+                <p className="text-sm font-bold text-red-200">Rolle</p>
                 <p className="mt-1 text-lg font-black">
                   {roleLabel(roleType)}
                 </p>
@@ -794,7 +794,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
                 Profilstatus
               </p>
 
