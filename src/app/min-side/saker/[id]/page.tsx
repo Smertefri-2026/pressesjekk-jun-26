@@ -1010,114 +1010,26 @@ export default function CaseDetailPage() {
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
               <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
-                {isJournalistWorkflow ? "Redaksjonelt arbeid" : "Videre dokumenter"}
+                Status og dokumentpakker
               </p>
+
               <h2 className="mt-3 text-3xl font-black text-slate-950">
-                {nextDocumentsTitle}
+                Se hva saken har tilgang til
               </h2>
+
               <p className="mt-4 leading-8 text-slate-700">
-                {nextDocumentsText}
+                Se hva som er låst opp for saken, hva som kan oppgraderes, og
+                hvilke dokumenter som kan lages videre.
               </p>
 
-              <div className="mt-5 grid gap-3">
-                {isJournalistWorkflow ? (
-                  <>
-                    <Link
-                      href={`/min-side/saker/${params.id}/opplysninger`}
-                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
-                    >
-                      Åpne publiseringsgrunnlag
-                    </Link>
-
-                    <Link
-                      href={`/min-side/saker/${params.id}/rapport`}
-                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
-                    >
-                      {reportDrafts.length > 0
-                        ? "Åpne redaksjonell rapport"
-                        : "Lag redaksjonell rapport"}
-                    </Link>
-
-                    <Link
-                      href={`/min-side/saker/${params.id}/pakke`}
-                      className="rounded-xl border border-red-300 bg-red-50 px-5 py-4 text-sm font-black text-red-900 hover:bg-red-50"
-                    >
-                      Se redaksjonelle pakker
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href={`/min-side/saker/${params.id}/pfu`}
-                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
-                    >
-                      {pfuDrafts.length > 0 ? "Åpne PFU-klage" : "Lag PFU-klage"}
-                    </Link>
-
-                    <Link
-                      href={`/min-side/saker/${params.id}/politianmeldelse`}
-                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
-                    >
-                      {policeDrafts.length > 0
-                        ? "Åpne politianmeldelse"
-                        : "Lag politianmeldelse"}
-                    </Link>
-
-                    <Link
-                      href={`/min-side/saker/${params.id}/utredning`}
-                      className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-slate-100"
-                    >
-                      {investigationDrafts.length > 0
-                        ? "Åpne utredning"
-                        : "Åpne utredning"}
-                    </Link>
-                  </>
-                )}
-              </div>
+              <Link
+                href={`/min-side/saker/${params.id}/pakke`}
+                className="mt-6 block rounded-xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800"
+              >
+                Se status og pakker
+              </Link>
             </div>
 
-            {!isJournalistWorkflow ? (
-              <div className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
-                  Status
-                </p>
-                <h2 className="mt-3 text-3xl font-black text-slate-950">
-                  {pfuDecision?.decision_received
-                    ? pfuDecisionResultLabel(pfuDecision.decision_result)
-                    : pfuDecision?.pfu_complaint_sent
-                      ? "PFU-klage sendt"
-                      : "Ikke registrert"}
-                </h2>
-
-                <div className="mt-5 grid gap-3 text-sm font-semibold text-slate-700">
-                  <p>
-                    Klage sendt:{" "}
-                    <span className="font-black text-slate-950">
-                      {pfuDecision?.pfu_complaint_sent ? "Ja" : "Nei / ikke satt"}
-                    </span>
-                  </p>
-                  <p>
-                    Avgjørelse mottatt:{" "}
-                    <span className="font-black text-slate-950">
-                      {pfuDecision?.decision_received ? "Ja" : "Nei / ikke satt"}
-                    </span>
-                  </p>
-                  <p>
-                    Opplastet fil:{" "}
-                    <span className="font-black text-slate-950">
-                      {pfuDecision?.uploaded_file_name || "Ingen fil"}
-                    </span>
-                  </p>
-                </div>
-
-                <Link
-                  href={`/min-side/saker/${params.id}/pfu-avgjorelse`}
-                  className="mt-6 inline-flex rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800"
-                >
-                  Åpne PFU-avgjørelse
-                </Link>
-              </div>
-            ) : null}
           </aside>
         </div>
 
