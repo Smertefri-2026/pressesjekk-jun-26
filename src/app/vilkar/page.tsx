@@ -98,7 +98,7 @@ export default function VilkarPage() {
           </section>
 
           <aside className="hidden overflow-hidden rounded-3xl border border-red-200 bg-white shadow-sm lg:block">
-            <div className="relative min-h-[360px] bg-slate-950 p-7 text-white">
+            <div className="relative min-h-[280px] bg-slate-950 p-7 text-white">
               <div className="absolute right-6 top-6 h-24 w-24 rounded-full bg-red-500/20 blur-2xl" />
               <div className="absolute bottom-6 left-6 h-28 w-28 rounded-full bg-orange-400/20 blur-2xl" />
 
@@ -107,34 +107,16 @@ export default function VilkarPage() {
                   Vilkår og ansvar
                 </p>
 
-                <div className="mt-8 grid gap-4">
-                  <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                    <div className="h-3 w-28 rounded-full bg-white/70" />
-                    <div className="mt-4 grid gap-2">
-                      <div className="h-2 rounded-full bg-white/30" />
-                      <div className="h-2 w-4/5 rounded-full bg-white/20" />
-                    </div>
+                <div className="mt-8 rounded-2xl border border-white/10 bg-white/10 p-5">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-400 text-sm font-black text-slate-950">
+                      ✓
+                    </span>
+                    <div className="h-3 flex-1 rounded-full bg-white/60" />
                   </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-400 text-sm font-black text-slate-950">
-                        ✓
-                      </span>
-                      <div className="h-3 flex-1 rounded-full bg-white/60" />
-                    </div>
-                    <div className="mt-4 grid gap-2">
-                      <div className="h-2 rounded-full bg-white/25" />
-                      <div className="h-2 w-2/3 rounded-full bg-white/20" />
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                    <div className="flex items-center gap-3">
-                      <span className="h-3 w-3 rounded-full bg-red-400" />
-                      <div className="h-3 flex-1 rounded-full bg-white/50" />
-                    </div>
-                    <div className="mt-4 h-16 rounded-xl bg-white/10" />
+                  <div className="mt-5 grid gap-2">
+                    <div className="h-2 rounded-full bg-white/25" />
+                    <div className="h-2 w-2/3 rounded-full bg-white/20" />
                   </div>
                 </div>
 
