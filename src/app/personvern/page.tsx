@@ -83,13 +83,13 @@ export default function PersonvernPage() {
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link href="/" className="text-sm font-semibold text-blue-700 hover:text-blue-900">
+        <Link href="/" className="text-sm font-semibold text-red-700 hover:text-red-900">
           ← Tilbake til forsiden
         </Link>
 
-        <div className="mt-10">
+        <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_380px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               Personvern
             </p>
 
@@ -103,20 +103,42 @@ export default function PersonvernPage() {
               rask sjekk, raskrapport, Min Side, rapportpakker,
               dokumentpakker og senere betalingsfunksjoner.
             </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href="/kontakt"
-                className="rounded-xl bg-slate-950 px-6 py-4 font-bold text-white hover:bg-slate-800"
-              >
-                Kontakt oss
-              </Link>
-            </div>
           </section>
+
+          <aside className="hidden overflow-hidden rounded-3xl border border-red-200 bg-white shadow-sm lg:block">
+            <div className="relative min-h-[280px] bg-slate-950 p-7 text-white">
+              <div className="absolute right-6 top-6 h-24 w-24 rounded-full bg-red-500/20 blur-2xl" />
+              <div className="absolute bottom-6 left-6 h-28 w-28 rounded-full bg-orange-400/20 blur-2xl" />
+
+              <div className="relative">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
+                  Personvern og kontroll
+                </p>
+
+                <div className="mt-8 rounded-2xl border border-white/10 bg-white/10 p-5">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-400 text-sm font-black text-slate-950">
+                      ✓
+                    </span>
+                    <div className="h-3 flex-1 rounded-full bg-white/60" />
+                  </div>
+                  <div className="mt-5 grid gap-2">
+                    <div className="h-2 rounded-full bg-white/25" />
+                    <div className="h-2 w-2/3 rounded-full bg-white/20" />
+                  </div>
+                </div>
+
+                <p className="mt-7 text-sm leading-7 text-slate-300">
+                  Personvernerklæringen forklarer hvilke opplysninger som kan
+                  behandles, hvorfor de brukes, og hvilke rettigheter brukeren har.
+                </p>
+              </div>
+            </div>
+          </aside>
         </div>
 
         <section className="mt-16 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
             Erklæring
           </p>
           <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
