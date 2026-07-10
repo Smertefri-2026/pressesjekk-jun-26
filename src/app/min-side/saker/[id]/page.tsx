@@ -941,22 +941,6 @@ export default function CaseDetailPage() {
               )}
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                href={`/min-side/saker/${params.id}/opplysninger`}
-                className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
-              >
-                Gå til saksopplysninger
-              </Link>
-
-              <Link
-                href="/min-side"
-                className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
-              >
-                Til Min Side
-              </Link>
-            </div>
-
           </section>
 
           <aside className="grid content-start gap-6">
@@ -1031,6 +1015,22 @@ export default function CaseDetailPage() {
             </div>
 
           </aside>
+        </div>
+
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:hidden">
+          <Link
+            href={`/min-side/saker/${params.id}/opplysninger`}
+            className="rounded-2xl bg-slate-950 px-6 py-4 text-center font-black text-white hover:bg-slate-800"
+          >
+            Gå til saksopplysninger
+          </Link>
+
+          <Link
+            href="/min-side"
+            className="rounded-2xl border border-slate-300 bg-white px-6 py-4 text-center font-black text-slate-950 hover:bg-slate-100"
+          >
+            Til Min Side
+          </Link>
         </div>
 
       </section>
