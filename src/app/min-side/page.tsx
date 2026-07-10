@@ -1652,7 +1652,7 @@ export default function MinSidePage() {
                             <button
                               type="button"
                               onClick={() => moveToTrash(item)}
-                              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-xs font-black text-red-700 hover:bg-red-100"
+                              className="text-center text-xs font-black text-red-700 underline-offset-4 hover:underline"
                             >
                               Slett
                             </button>
