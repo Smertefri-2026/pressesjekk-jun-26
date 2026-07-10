@@ -327,14 +327,14 @@ export default function InvestigationPage() {
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
           <Link
             href={`/min-side/saker/${params.id}`}
-            className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+            className="text-sm font-semibold text-red-700 hover:text-red-900"
           >
             ← Tilbake til saken
           </Link>
 
           <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm sm:p-10">
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-800">
+            <section className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm sm:p-10">
+              <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-800">
                 Redaksjonell sjekk
               </p>
 
@@ -360,7 +360,7 @@ export default function InvestigationPage() {
 
                 <Link
                   href={`/min-side/saker/${params.id}/opplysninger`}
-                  className="rounded-2xl border border-blue-300 bg-white px-6 py-4 font-black text-blue-900 hover:bg-blue-100"
+                  className="rounded-2xl border border-red-300 bg-white px-6 py-4 font-black text-red-900 hover:bg-red-50"
                 >
                   Gå til publiseringsgrunnlag
                 </Link>
@@ -399,7 +399,7 @@ export default function InvestigationPage() {
               />
 
               <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                   Riktig arbeidsflyt
                 </p>
                 <h2 className="mt-3 text-3xl font-black">
@@ -427,14 +427,14 @@ export default function InvestigationPage() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link
           href="/min-side"
-          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          className="text-sm font-semibold text-red-700 hover:text-red-900"
         >
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               Utredningspakke
             </p>
 
@@ -449,7 +449,7 @@ export default function InvestigationPage() {
             </p>
 
             <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
                 Utredningspakke
               </p>
 
@@ -470,7 +470,7 @@ export default function InvestigationPage() {
                   type="button"
                   onClick={handleGenerateInvestigationDraft}
                   disabled={isGeneratingInvestigation}
-                  className="col-span-2 w-full rounded-2xl bg-blue-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
+                  className="col-span-2 w-full rounded-2xl bg-red-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
                 >
                   {isGeneratingInvestigation
                     ? "Genererer..."
@@ -481,7 +481,7 @@ export default function InvestigationPage() {
                   type="button"
                   onClick={handleDownloadPdf}
                   disabled={!activeInvestigationDraft?.investigation_draft}
-                  className="col-span-1 w-full rounded-2xl border border-blue-300 bg-blue-50 px-3 py-4 text-center text-base font-black text-blue-900 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
+                  className="col-span-1 w-full rounded-2xl border border-red-300 bg-red-50 px-3 py-4 text-center text-base font-black text-red-900 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5 sm:py-3 sm:text-sm"
                 >
                   Last ned PDF
                 </button>
@@ -501,7 +501,7 @@ export default function InvestigationPage() {
               </pre>
 
               {successMessage ? (
-                <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold leading-6 text-blue-900">
+                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-900">
                   {successMessage}
                 </div>
               ) : null}
@@ -543,7 +543,7 @@ export default function InvestigationPage() {
             />
 
             <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
                 Lagrede utredninger
               </p>
               <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -561,7 +561,7 @@ export default function InvestigationPage() {
                       onClick={() => setSelectedInvestigationDraftId(draft.id)}
                       className={`rounded-2xl border p-4 text-left ${
                         selectedInvestigationDraftId === draft.id
-                          ? "border-blue-500 bg-blue-50"
+                          ? "border-red-500 bg-red-50"
                           : "border-slate-200 bg-slate-50 hover:bg-white"
                       }`}
                     >
@@ -574,7 +574,7 @@ export default function InvestigationPage() {
                           : "Ukjent dato"}
                       </p>
                       {selectedInvestigationDraftId === draft.id ? (
-                        <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-blue-700">
+                        <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-red-700">
                           Vises nå
                         </p>
                       ) : null}
@@ -589,7 +589,7 @@ export default function InvestigationPage() {
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                 Komplett dokumentpakke
               </p>
               <h2 className="mt-3 text-3xl font-black">
