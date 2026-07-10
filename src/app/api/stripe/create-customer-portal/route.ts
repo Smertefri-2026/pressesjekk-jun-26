@@ -64,11 +64,20 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_SITE_URL ||
       "https://pressesjekk.no";
 
+    const body = await request.json().catch(() => null);
+    const requestedReturnPath =
+      typeof body?.returnPath === "string" ? body.returnPath : "/min-side/kjop";
+
+    const safeReturnPath =
+      requestedReturnPath.startsWith("/") && !requestedReturnPath.startsWith("//")
+        ? requestedReturnPath
+        : "/min-side/kjop";
+
     const stripe = getStripe();
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: subscription.stripe_customer_id,
-      return_url: `${origin}/min-side/kjop`,
+      return_url: `${origin}${safeReturnPath}`,
     });
 
     return NextResponse.json({

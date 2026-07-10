@@ -176,7 +176,9 @@ export default function CasePackagePage() {
   const [activeSubscriptionPackageId, setActiveSubscriptionPackageId] =
     useState<PackagePlanId | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [portalMessage, setPortalMessage] = useState("");
 
   const checkoutStatus = searchParams.get("checkout");
 
@@ -353,6 +355,45 @@ export default function CasePackagePage() {
     };
 
     return journalistOptions[option.id] ?? option;
+  }
+
+  async function openCustomerPortal() {
+    setIsOpeningPortal(true);
+    setPortalMessage("");
+    setErrorMessage("");
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      setPortalMessage("Du må være innlogget for å administrere abonnement.");
+      setIsOpeningPortal(false);
+      return;
+    }
+
+    const response = await fetch("/api/stripe/create-customer-portal", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        returnPath: `/min-side/saker/${params.id}/pakke`,
+      }),
+    });
+
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok || !payload?.url) {
+      setPortalMessage(
+        payload?.error ?? "Kunne ikke åpne abonnementportalen akkurat nå."
+      );
+      setIsOpeningPortal(false);
+      return;
+    }
+
+    window.location.href = payload.url;
   }
 
   if (isLoading) {
@@ -544,7 +585,7 @@ export default function CasePackagePage() {
                       <p className="mt-1 text-3xl font-black">
                         {formatKr(option.price)} kr
                       </p>
-                      <p className="mt-2 text-sm font-semibold text-blue-200">
+                      <p className="mt-2 text-sm font-semibold text-red-200">
                         {canUpgrade
                           ? `Mellomlegg nå: ${formatKr(upgradeAmount)} kr`
                           : isCurrent
@@ -680,7 +721,7 @@ export default function CasePackagePage() {
 
                 <Link
                   href={`/utsjekk?plan=${bundle.id}`}
-                  className="mt-auto block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-red-500"
+                  className="mt-auto block rounded-xl bg-orange-400 px-5 py-4 text-center font-black text-slate-950 hover:bg-orange-500"
                 >
                   {bundle.button}
                 </Link>
@@ -760,13 +801,35 @@ export default function CasePackagePage() {
                 Administrer abonnement
               </p>
               <h2 className="mt-3 text-2xl font-black text-slate-950">
-                Pause, stopp og endring
+                Kundeportal, kvitteringer og betaling
               </h2>
               <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-                Aktiv avtale vises på abonnementskortene. Pause, stopp,
-                oppgradering eller nedgradering håndteres manuelt foreløpig,
-                frem til Stripe kundeportal kobles på.
+                Har du aktivt abonnement, kan du åpne Stripe kundeportal for å
+                se avtalen, oppdatere betalingskort, se kvitteringer og
+                administrere abonnementet.
               </p>
+
+              {activeSubscriptionPackageId ? (
+                <button
+                  type="button"
+                  onClick={openCustomerPortal}
+                  disabled={isOpeningPortal}
+                  className="mt-5 rounded-xl border border-emerald-300 bg-emerald-50 px-5 py-4 text-sm font-black text-slate-950 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isOpeningPortal ? "Åpner kundeportal ..." : "Åpne Stripe kundeportal"}
+                </button>
+              ) : (
+                <p className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-semibold leading-6 text-slate-700">
+                  Du har ikke et aktivt abonnement nå. Velg en månedsavtale over
+                  dersom du ønsker løpende tilgang.
+                </p>
+              )}
+
+              {portalMessage ? (
+                <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+                  {portalMessage}
+                </div>
+              ) : null}
             </div>
           </section>
         ) : null}
