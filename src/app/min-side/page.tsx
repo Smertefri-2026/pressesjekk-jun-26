@@ -71,14 +71,19 @@ type ArchiveItem = {
   subtitle: string;
   type: "Mappe" | "Sak";
   status: string;
+  packageSortValue?: string;
   date: string;
+  dateRaw?: string;
   href: string;
   folderId?: string;
   currentFolderId?: string | null;
   currentParentFolderId?: string | null;
+  packageId?: string | null;
+  packageLabel?: string;
+  packageActionLabel?: string;
 };
 
-type SortKey = "name" | "type" | "status" | "date";
+type SortKey = "name" | "type" | "package" | "status" | "date";
 type ArchiveMode = "active" | "trash";
 type ViewMode = "list" | "grid";
 
@@ -123,11 +128,32 @@ function formatActivityDate(date: string) {
   }).format(new Date(date));
 }
 
+function packageLabel(packageId: string | null | undefined) {
+  if (packageId === "report_pack") return "Rapportpakke";
+  if (packageId === "pfu_pack") return "PFU-pakke";
+  if (packageId === "full_pack") return "Full dokumentpakke";
+  if (packageId === "investigation_pack") return "Utredningspakke";
+  if (packageId === "case_bundle_3") return "3 saker";
+  if (packageId === "case_bundle_5") return "5 saker";
+  if (packageId === "case_bundle_10") return "10 saker";
+  if (packageId === "monthly_start") return "Månedsavtale Start";
+  if (packageId === "monthly_pro") return "Månedsavtale Pro";
+  if (packageId === "monthly_agency") return "Månedsavtale Byrå";
+  return "Ingen pakke";
+}
+
+function packageActionLabel(packageId: string | null | undefined) {
+  if (!packageId) return "Velg pakke";
+  if (packageId === "report_pack" || packageId === "pfu_pack") return "Oppgrader";
+  return "Se pakke";
+}
+
 export default function MinSidePage() {
   const [user, setUser] = useState<User | null>(null);
   const [cases, setCases] = useState<CaseRow[]>([]);
   const [folders, setFolders] = useState<CaseFolderRow[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
+  const [caseAccess, setCaseAccess] = useState<CaseAccessRow[]>([]);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [caseCount, setCaseCount] = useState(0);
   const [folderCount, setFolderCount] = useState(0);
@@ -288,6 +314,7 @@ export default function MinSidePage() {
       setCases(caseRows);
       setFolders(folderRows);
       setReports(reportRows);
+      setCaseAccess(accessRows);
       setActivePackageCount(accessRows.length);
       setAvailableCaseCount(availableCases);
       setActivePackageCaseId(accessRows[0]?.case_id ?? null);
@@ -365,6 +392,10 @@ export default function MinSidePage() {
           ? "Velg pakke"
           : "Kjøp pakke";
 
+  const caseAccessByCaseId = useMemo(() => {
+    return new Map(caseAccess.map((access) => [access.case_id, access]));
+  }, [caseAccess]);
+
   const archiveItems = useMemo<ArchiveItem[]>(() => {
     const folderItems: ArchiveItem[] = folders
       .filter((folder) => {
@@ -389,7 +420,9 @@ export default function MinSidePage() {
               : "Saksmappe",
         type: "Mappe",
         status: folderStatusLabel(folder.status),
+        packageSortValue: "",
         date: formatDate(folder.deleted_at ?? folder.created_at),
+        dateRaw: folder.deleted_at ?? folder.created_at,
         href: "#",
         folderId: folder.id,
         currentParentFolderId: folder.parent_folder_id,
@@ -405,34 +438,69 @@ export default function MinSidePage() {
           ? caseItem.folder_id === selectedFolderId
           : !caseItem.folder_id;
       })
-      .map((caseItem) => ({
-        id: `case-${caseItem.id}`,
-        rawId: caseItem.id,
-        icon: "📄",
-        name: caseItem.title,
-        subtitle:
-          archiveMode === "trash"
-            ? caseItem.media_name
-              ? `Slettet sak · ${caseItem.media_name}`
-              : "Slettet sak"
-            : caseItem.media_name ?? "Ukjent medie",
-        type: "Sak",
-        status:
-          archiveMode === "trash" ? "Papirkurv" : statusLabel(caseItem.status),
-        date: formatDate(caseItem.deleted_at ?? caseItem.created_at),
-        href: `/min-side/saker/${caseItem.id}`,
-        currentFolderId: caseItem.folder_id,
-      }));
+      .map((caseItem) => {
+        const access = caseAccessByCaseId.get(caseItem.id);
+        const currentPackageId = access?.package_id ?? null;
+
+        return {
+          id: `case-${caseItem.id}`,
+          rawId: caseItem.id,
+          icon: "📄",
+          name: caseItem.title,
+          subtitle:
+            archiveMode === "trash"
+              ? caseItem.media_name
+                ? `Slettet sak · ${caseItem.media_name}`
+                : "Slettet sak"
+              : caseItem.media_name ?? "Ukjent medie",
+          type: "Sak",
+          status:
+            archiveMode === "trash" ? "Papirkurv" : statusLabel(caseItem.status),
+          date: formatDate(caseItem.deleted_at ?? caseItem.created_at),
+          dateRaw: caseItem.deleted_at ?? caseItem.created_at,
+          href: `/min-side/saker/${caseItem.id}`,
+          currentFolderId: caseItem.folder_id,
+          packageId: currentPackageId,
+          packageLabel: packageLabel(currentPackageId),
+          packageSortValue: packageLabel(currentPackageId),
+          packageActionLabel: packageActionLabel(currentPackageId),
+        };
+      });
 
     return [...folderItems, ...caseItems].sort((a, b) => {
-      const valueA = a[sortKey].toLowerCase();
-      const valueB = b[sortKey].toLowerCase();
+      if (sortKey === "date") {
+        const valueA = new Date(a.dateRaw ?? a.date).getTime();
+        const valueB = new Date(b.dateRaw ?? b.date).getTime();
 
-      if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
-      if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
-      return 0;
+        if (valueA < valueB) return sortDirection === "asc" ? -1 : 1;
+        if (valueA > valueB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      }
+
+      const valueA =
+        sortKey === "package"
+          ? (a.packageSortValue ?? "")
+          : String(a[sortKey] ?? "");
+      const valueB =
+        sortKey === "package"
+          ? (b.packageSortValue ?? "")
+          : String(b[sortKey] ?? "");
+
+      const comparison = valueA
+        .toLowerCase()
+        .localeCompare(valueB.toLowerCase(), "nb-NO");
+
+      return sortDirection === "asc" ? comparison : -comparison;
     });
-  }, [archiveMode, cases, folders, selectedFolderId, sortDirection, sortKey]);
+  }, [
+    archiveMode,
+    caseAccessByCaseId,
+    cases,
+    folders,
+    selectedFolderId,
+    sortDirection,
+    sortKey,
+  ]);
 
   function handleSort(nextSortKey: SortKey) {
     if (sortKey === nextSortKey) {
@@ -442,6 +510,10 @@ export default function MinSidePage() {
 
     setSortKey(nextSortKey);
     setSortDirection(nextSortKey === "date" ? "desc" : "asc");
+  }
+
+  function sortButtonLabel(key: SortKey, label: string) {
+    return `${label}${sortLabel(key)}`;
   }
 
   function sortLabel(key: SortKey) {
@@ -1062,7 +1134,7 @@ export default function MinSidePage() {
           ) : null}
         </section>
 
-        <section id="arkiv" className="mt-10 grid gap-8 lg:grid-cols-[1fr_390px]">
+        <section id="arkiv" className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="rounded-3xl border border-slate-200 bg-white p-0 shadow-sm">
             <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div>
@@ -1165,9 +1237,32 @@ export default function MinSidePage() {
                   </button>
                 ) : null}
 
-                <p className="hidden text-sm font-bold text-slate-500 sm:block">
-                  {viewMode === "list" ? "Listevisning" : "Symbolvisning"}
-                </p>
+                <div className="flex flex-wrap items-center gap-2 text-xs font-black text-slate-500">
+                  <span className="mr-1 uppercase tracking-[0.16em]">
+                    Sorter:
+                  </span>
+
+                  {[
+                    ["name", "Navn"],
+                    ["type", "Type"],
+                    ["package", "Pakke"],
+                    ["status", "Status"],
+                    ["date", "Dato"],
+                  ].map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => handleSort(key as SortKey)}
+                      className={
+                        sortKey === key
+                          ? "rounded-full bg-slate-950 px-3 py-1 text-white"
+                          : "rounded-full bg-slate-100 px-3 py-1 text-slate-600 hover:bg-slate-200"
+                      }
+                    >
+                      {sortButtonLabel(key as SortKey, label)}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex shrink-0 items-center gap-3 text-sm font-black">
@@ -1299,6 +1394,11 @@ export default function MinSidePage() {
                             <p className="mt-1 truncate text-sm font-semibold text-slate-500">
                               {item.subtitle}
                             </p>
+                            {item.type === "Sak" ? (
+                              <p className="mt-2 inline-flex rounded-full bg-white px-3 py-1 text-xs font-black text-slate-700">
+                                {item.packageLabel}
+                              </p>
+                            ) : null}
                           </div>
                         </Link>
                       )}
@@ -1368,6 +1468,15 @@ export default function MinSidePage() {
                               </select>
                             )}
 
+                            {item.type === "Sak" ? (
+                              <Link
+                                href={`/min-side/saker/${item.rawId}/pakke`}
+                                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                              >
+                                {item.packageActionLabel}
+                              </Link>
+                            ) : null}
+
                             <button
                               type="button"
                               onClick={() => moveToTrash(item)}
@@ -1388,43 +1497,19 @@ export default function MinSidePage() {
                   <div className="pl-12">Navn</div>
                   <div className="text-right">Flytt / Handling</div>
                 </div>
-                <div className="hidden grid-cols-[1fr_110px_120px_120px_230px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
-                  <button
-                    type="button"
-                    onClick={() => handleSort("name")}
-                    className="pl-12 text-left hover:text-red-700"
-                  >
-                    Navn{sortLabel("name")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSort("type")}
-                    className="text-left hover:text-red-700"
-                  >
-                    Type{sortLabel("type")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSort("status")}
-                    className="text-left hover:text-red-700"
-                  >
-                    Status{sortLabel("status")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSort("date")}
-                    className="text-left hover:text-red-700"
-                  >
-                    Dato{sortLabel("date")}
-                  </button>
-                  <div className="text-right">Flytt / Handling</div>
+                <div className="hidden grid-cols-[minmax(0,1fr)_190px_220px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
+                  <div className="pl-12 text-left">
+                    Navn
+                  </div>
+                  <div>Pakke / status</div>
+                  <div className="text-right">Flytt / handling</div>
                 </div>
 
                 <div className="divide-y divide-slate-200">
                   {archiveItems.map((item) => (
                     <div
                       key={item.id}
-                      className="grid grid-cols-[minmax(0,1fr)_116px] gap-3 px-5 py-4 transition hover:bg-red-50 md:grid-cols-[1fr_110px_120px_120px_230px] md:items-center"
+                      className="grid grid-cols-[minmax(0,1fr)_116px] gap-3 px-5 py-4 transition hover:bg-red-50 md:grid-cols-[minmax(0,1fr)_190px_220px] md:items-center"
                     >
                       {item.type === "Mappe" ? (
                         <button
@@ -1468,19 +1553,33 @@ export default function MinSidePage() {
                         </Link>
                       )}
 
-                      <div className="hidden text-sm font-bold text-slate-600 md:block">
-                        {item.type}
+                      <div className="hidden min-w-0 text-sm font-bold text-slate-600 md:block">
+                        <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">
+                          {item.type}
+                        </p>
+
+                        {item.type === "Sak" ? (
+                          <span
+                            className={`mt-2 inline-flex max-w-full rounded-full px-3 py-1 text-xs font-black ${
+                              item.packageId
+                                ? "bg-green-100 text-green-800"
+                                : "bg-amber-100 text-amber-900"
+                            }`}
+                          >
+                            {item.packageLabel}
+                          </span>
+                        ) : (
+                          <span className="mt-2 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
+                            {item.status}
+                          </span>
+                        )}
+
+                        <p className="mt-2 text-xs font-semibold text-slate-500">
+                          {item.date}
+                        </p>
                       </div>
 
-                      <div className="hidden text-sm font-bold text-slate-600 md:block">
-                        {item.status}
-                      </div>
-
-                      <div className="hidden text-sm font-semibold text-slate-500 md:block">
-                        {item.date}
-                      </div>
-
-                      <div className="flex flex-col items-end gap-2 md:flex-row md:flex-wrap md:justify-end">
+                      <div className="flex flex-col items-end gap-2 md:items-stretch md:justify-end">
                         {archiveMode === "trash" ? (
                           <>
                             <button
@@ -1510,7 +1609,7 @@ export default function MinSidePage() {
                                     event.target.value || null
                                   )
                                 }
-                                className="w-[108px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50 md:w-auto md:max-w-[140px]"
+                                className="w-[108px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50 md:w-full"
                               >
                                 <option value="">Min Side</option>
                                 {activeFolders.map((folder) => (
@@ -1528,7 +1627,7 @@ export default function MinSidePage() {
                                     event.target.value || null
                                   )
                                 }
-                                className="w-[108px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50 md:w-auto md:max-w-[140px]"
+                                className="w-[108px] rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-700 outline-none hover:bg-slate-50 md:w-full"
                               >
                                 <option value="">Min Side</option>
                                 {activeFolders
@@ -1541,10 +1640,19 @@ export default function MinSidePage() {
                               </select>
                             )}
 
+                            {item.type === "Sak" ? (
+                              <Link
+                                href={`/min-side/saker/${item.rawId}/pakke`}
+                                className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-center text-xs font-black text-slate-950 hover:bg-slate-100"
+                              >
+                                {item.packageActionLabel}
+                              </Link>
+                            ) : null}
+
                             <button
                               type="button"
                               onClick={() => moveToTrash(item)}
-                              className="text-xs font-black text-red-700 underline-offset-4 hover:underline"
+                              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-xs font-black text-red-700 hover:bg-red-100"
                             >
                               Slett
                             </button>
