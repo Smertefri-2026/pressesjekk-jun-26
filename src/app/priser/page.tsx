@@ -19,6 +19,7 @@ const caseBundles = [
     features: [
       "3 rapportpakke-saker",
       "Kan brukes på ulike mediesaker",
+      "Gyldig i 12 måneder",
       "Hver sak kan oppgraderes ved behov",
       "Passer for privatpersoner og små virksomheter",
     ],
@@ -35,7 +36,7 @@ const caseBundles = [
     features: [
       "5 rapportpakke-saker",
       "Bedre pris enn enkeltkjøp",
-      "Kan brukes over tid",
+      "Gyldig i 12 måneder",
       "Oppgradering per sak ved behov",
     ],
     button: "Kjøp 5 saker",
@@ -51,8 +52,8 @@ const caseBundles = [
     features: [
       "10 rapportpakke-saker",
       "Lavere pris per sak",
-      "Passer for sporadisk proffbruk",
-      "Proff-abonnement anbefales ved løpende behov",
+      "Gyldig i 12 måneder",
+      "Abonnement anbefales ved løpende behov",
     ],
     button: "Kjøp 10 saker",
     href: "/utsjekk?plan=case_bundle_10",
@@ -68,12 +69,12 @@ const tabInfo = {
   bundles: {
     label: "Flere saker",
     title: "Kjøp flere saker uten abonnement.",
-    text: "Sakspakker passer når du har flere mediesaker, men ikke trenger løpende proff-abonnement. Hver inkluderte sak starter som rapportpakke.",
+    text: "Sakspakker passer når du har flere mediesaker, men ikke trenger løpende abonnement. Klippekort er gyldige i 12 måneder fra kjøpsdato, og hver inkluderte sak starter som rapportpakke.",
   },
   monthly: {
     label: "Abonnement",
     title: "For deg som jobber løpende med mediesaker.",
-    text: "Proff-abonnement passer for advokater, rådgivere, organisasjoner, byråer og redaksjoner som vurderer flere saker hver måned.",
+    text: "Abonnement passer for advokater, rådgivere, organisasjoner, byråer og redaksjoner som vurderer flere saker hver måned. Ubrukte saker kan rulles videre i inntil 3 måneder så lenge abonnementet er aktivt.",
   },
 } as const;
 
@@ -87,14 +88,14 @@ export default function PriserPage() {
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <Link
           href="/"
-          className="text-sm font-semibold text-blue-700 hover:text-blue-900"
+          className="text-sm font-semibold text-red-700 hover:text-red-900"
         >
           ← Tilbake til forsiden
         </Link>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-blue-700">
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
               Priser
             </p>
 
@@ -103,13 +104,13 @@ export default function PriserPage() {
             </h1>
 
             <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-700 sm:text-xl sm:leading-9">
-              Start med én sak, kjøp flere saker som pakke, eller velg
-              proff-abonnement for løpende arbeid.
+              Start med én sak, kjøp flere saker som klippekort, eller velg
+              abonnement for løpende arbeid med mediesaker.
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-blue-200 bg-blue-50 p-6 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-800">
+          <aside className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
               Viktig
             </p>
             <h2 className="mt-3 text-2xl font-black text-slate-950">
@@ -117,7 +118,7 @@ export default function PriserPage() {
             </h2>
             <p className="mt-3 leading-7 text-slate-700">
               En sak kan inneholde flere URL-er, oppfølgingssaker og artikler om
-              samme mediesituasjon.
+              samme mediesituasjon. Pakken gjelder arbeidet på én samlet sak.
             </p>
           </aside>
         </div>
@@ -142,7 +143,7 @@ export default function PriserPage() {
         </section>
 
         <section className="mt-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
             {tabInfo[activeTab].label}
           </p>
           <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
@@ -162,11 +163,11 @@ export default function PriserPage() {
                   plan.id === "investigation_pack"
                     ? "border-amber-300 bg-amber-50"
                     : plan.id === "full_pack"
-                      ? "border-blue-300 bg-blue-50"
+                      ? "border-red-300 bg-red-50"
                       : "border-slate-200 bg-white"
                 }`}
               >
-                <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
+                <p className="inline-flex w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-red-800">
                   {plan.tag}
                 </p>
 
@@ -185,7 +186,7 @@ export default function PriserPage() {
                 <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex gap-2">
-                      <span className="text-blue-700">✓</span>
+                      <span className="text-red-700">✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -197,7 +198,7 @@ export default function PriserPage() {
                       ? "/kontakt"
                       : `/utsjekk?plan=${plan.id}`
                   }
-                  className="mt-auto block rounded-xl bg-blue-500 px-5 py-4 text-center font-black text-slate-950 hover:bg-blue-500"
+                  className="mt-auto block rounded-xl bg-orange-400 px-5 py-4 text-center font-black text-slate-950 hover:bg-orange-400"
                 >
                   {plan.button}
                 </Link>
@@ -213,7 +214,7 @@ export default function PriserPage() {
                 key={bundle.name}
                 className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
               >
-                <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
+                <p className="inline-flex w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-red-800">
                   {bundle.tag}
                 </p>
 
@@ -225,7 +226,7 @@ export default function PriserPage() {
                   {bundle.price}
                 </p>
 
-                <p className="mt-2 text-sm font-black text-blue-800">
+                <p className="mt-2 text-sm font-black text-red-800">
                   {bundle.perCase}
                 </p>
 
@@ -236,7 +237,7 @@ export default function PriserPage() {
                 <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                   {bundle.features.map((feature) => (
                     <li key={feature} className="flex gap-2">
-                      <span className="text-blue-700">✓</span>
+                      <span className="text-red-700">✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -260,11 +261,11 @@ export default function PriserPage() {
                 key={plan.id}
                 className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
                   plan.id === "monthly_pro"
-                    ? "border-blue-300 bg-blue-50"
+                    ? "border-red-300 bg-red-50"
                     : "border-slate-200 bg-white"
                 }`}
               >
-                <p className="inline-flex w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-blue-800">
+                <p className="inline-flex w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-red-800">
                   {plan.tag}
                 </p>
 
@@ -283,7 +284,7 @@ export default function PriserPage() {
                 <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
                   {plan.features.map((feature) => (
                     <li key={feature} className="flex gap-2">
-                      <span className="text-blue-700">✓</span>
+                      <span className="text-red-700">✓</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -311,7 +312,7 @@ export default function PriserPage() {
         ) : null}
 
         <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-5 text-center shadow-sm sm:p-8">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-700">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
             Klar til å starte?
           </p>
 
@@ -321,13 +322,13 @@ export default function PriserPage() {
 
           <p className="mx-auto mt-4 max-w-2xl leading-8 text-slate-700">
             Du kan begynne med enkeltkjøp per sak, kjøpe en sakspakke eller
-            starte proff-abonnement når løsningen er klar.
+            starte abonnement hvis du jobber løpende med flere saker.
           </p>
 
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/min-side/saker/ny"
-              className="rounded-xl bg-blue-500 px-6 py-4 font-bold text-slate-950 hover:bg-blue-500"
+              className="rounded-xl bg-orange-400 px-6 py-4 font-bold text-slate-950 hover:bg-orange-400"
             >
               Start sak
             </Link>
