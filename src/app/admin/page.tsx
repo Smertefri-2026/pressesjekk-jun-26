@@ -344,9 +344,12 @@ export default function AdminPage() {
       href: "/admin/refusjoner",
       note: refundCount > 0 ? "Til behandling" : "Ingen åpne",
     },
-    { label: "Dagens omsetning", value: formatOre(todayRevenue), href: "/admin/stripe", note: "Netto" },
-    { label: "Mnd. omsetning", value: formatOre(monthRevenue), href: "/admin/stripe", note: "Netto" },
-    { label: "Årsomsetning", value: formatOre(yearRevenue), href: "/admin/stripe", note: "Netto" },
+    {
+      label: "Stripe og omsetning",
+      value: "Åpne",
+      href: "/admin/stripe",
+      note: "Betalinger, abonnement og kvitteringer",
+    },
   ];
 
   return (
@@ -365,8 +368,8 @@ export default function AdminPage() {
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              Nøkkeltall, siste aktivitet og snarveier til drift av brukere,
-              saker, rapporter, pakker og betaling.
+              Kontrollpanel for brukere, saker, pakker, rapporter, raske sjekker,
+              refusjoner og Stripe-betalinger.
             </p>
           </section>
 
@@ -424,7 +427,7 @@ export default function AdminPage() {
                 {item.value}
               </p>
               {item.note ? (
-                <p className="mt-3 text-sm font-bold text-amber-700">
+                <p className="mt-3 text-sm font-bold text-violet-700">
                   {item.note}
                 </p>
               ) : (
