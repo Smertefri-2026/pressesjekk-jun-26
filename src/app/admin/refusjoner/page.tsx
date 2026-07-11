@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { AdminNav } from "@/components/admin/AdminNav";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
@@ -32,6 +33,7 @@ type PurchaseRow = {
   source: string | null;
   stripe_payment_intent_id: string | null;
   stripe_checkout_session_id: string | null;
+  stripe_charge_id: string | null;
   stripe_receipt_url: string | null;
   refund_status: string;
   refunded_amount: number;
@@ -47,7 +49,7 @@ type CaseRow = {
 
 const refundStatuses = [
   { id: "requested", label: "Forespurt" },
-  { id: "processing", label: "Behandles" },
+  { id: "approved", label: "Godkjent / behandles" },
   { id: "rejected", label: "Avvist" },
   { id: "refunded", label: "Refundert" },
 ];
@@ -92,6 +94,22 @@ function formatDate(value: string | null) {
   }).format(new Date(value));
 }
 
+function stripeDashboardUrl(purchase: PurchaseRow) {
+  if (purchase.stripe_charge_id) {
+    return `https://dashboard.stripe.com/test/payments/${purchase.stripe_charge_id}`;
+  }
+
+  if (purchase.stripe_payment_intent_id) {
+    return `https://dashboard.stripe.com/test/payments/${purchase.stripe_payment_intent_id}`;
+  }
+
+  if (purchase.stripe_checkout_session_id) {
+    return `https://dashboard.stripe.com/test/checkout/sessions/${purchase.stripe_checkout_session_id}`;
+  }
+
+  return null;
+}
+
 export default function AdminRefundsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -113,7 +131,7 @@ export default function AdminRefundsPage() {
     const { data, error } = await supabase
       .from("user_purchases")
       .select(
-        "id,user_id,case_id,package_id,purchase_type,status,amount_paid,amount_original,amount_credit,currency,included_cases,used_cases,source,stripe_payment_intent_id,stripe_checkout_session_id,stripe_receipt_url,refund_status,refunded_amount,refund_requested_at,refund_note,created_at"
+        "id,user_id,case_id,package_id,purchase_type,status,amount_paid,amount_original,amount_credit,currency,included_cases,used_cases,source,stripe_payment_intent_id,stripe_checkout_session_id,stripe_charge_id,stripe_receipt_url,refund_status,refunded_amount,refund_requested_at,refund_note,created_at"
       )
       .neq("refund_status", "none")
       .order("refund_requested_at", { ascending: false, nullsFirst: false })
@@ -224,7 +242,7 @@ export default function AdminRefundsPage() {
   const filteredPurchases = purchases.filter((purchase) => {
     const isOpen =
       purchase.refund_status === "requested" ||
-      purchase.refund_status === "processing";
+      purchase.refund_status === "approved";
 
     if (activeTab === "open" && !isOpen) return false;
     if (activeTab === "closed" && isOpen) return false;
@@ -255,7 +273,7 @@ export default function AdminRefundsPage() {
   const openCount = purchases.filter(
     (purchase) =>
       purchase.refund_status === "requested" ||
-      purchase.refund_status === "processing"
+      purchase.refund_status === "approved"
   ).length;
   const closedCount = purchases.length - openCount;
 
@@ -332,7 +350,7 @@ export default function AdminRefundsPage() {
         <LightPublicHeader />
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="rounded-3xl border border-red-200 bg-red-50 p-8 shadow-sm">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-700">
               Ingen tilgang
             </p>
             <h1 className="mt-3 text-3xl font-black text-red-950">
@@ -350,13 +368,13 @@ export default function AdminRefundsPage() {
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link href="/admin" className="text-sm font-bold text-red-700">
+        <Link href="/admin" className="text-sm font-bold text-violet-700">
           ← Tilbake til admin
         </Link>
 
         <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-700">
               Admin
             </p>
             <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950 md:text-6xl">
@@ -364,8 +382,8 @@ export default function AdminRefundsPage() {
             </h1>
             <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-700">
               Her ser du kjøp der kunden har bedt om refusjon eller der refusjon
-              er under manuell behandling. Automatisk Stripe-refusjon er ikke
-              koblet på ennå.
+              er under behandling. Selve tilbakebetalingen gjøres manuelt i
+              Stripe. Oppdater status her etter at refusjonen er behandlet.
             </p>
           </div>
 
@@ -379,6 +397,17 @@ export default function AdminRefundsPage() {
             </button>
             {user ? <SignOutButton /> : null}
           </div>
+        </div>
+
+        <AdminNav />
+
+        <div className="mt-8 rounded-3xl border border-violet-200 bg-violet-50 p-5 text-sm font-semibold leading-7 text-violet-950">
+          <p className="font-black">Viktig:</p>
+          <p className="mt-1">
+            Refusjon må gjennomføres i Stripe Dashboard før kjøpet markeres som
+            refundert her. Denne siden brukes til intern status, oppfølging og
+            dokumentasjon.
+          </p>
         </div>
 
         {errorMessage ? (
@@ -395,7 +424,7 @@ export default function AdminRefundsPage() {
 
         <section className="mt-10 rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 p-6">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-700">
               Refusjonsliste
             </p>
             <h2 className="mt-3 text-3xl font-black text-slate-950">
@@ -447,7 +476,7 @@ export default function AdminRefundsPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Søk på navn, e-post, pakke, sak eller Stripe-ID"
-              className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-base font-semibold text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+              className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-base font-semibold text-slate-950 outline-none focus:border-violet-500 focus:bg-white"
             />
 
             <p className="mt-4 text-sm font-semibold text-slate-600">
@@ -486,7 +515,7 @@ export default function AdminRefundsPage() {
                       {caseItem ? (
                         <Link
                           href={`/min-side/saker/${caseItem.id}`}
-                          className="mt-3 inline-flex text-sm font-bold text-red-700"
+                          className="mt-3 inline-flex text-sm font-bold text-violet-700"
                         >
                           {caseItem.title}
                         </Link>
@@ -538,9 +567,35 @@ export default function AdminRefundsPage() {
                     </div>
 
                     <div className="grid content-start gap-2">
+                      {stripeDashboardUrl(purchase) ? (
+                        <a
+                          href={stripeDashboardUrl(purchase) ?? undefined}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-xl border border-violet-300 bg-violet-50 px-4 py-3 text-center text-sm font-black text-violet-900 hover:bg-violet-100"
+                        >
+                          Åpne i Stripe
+                        </a>
+                      ) : null}
+
+                      {purchase.stripe_receipt_url ? (
+                        <a
+                          href={purchase.stripe_receipt_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+                        >
+                          Åpne kvittering
+                        </a>
+                      ) : (
+                        <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs font-bold text-slate-500">
+                          Mangler kvittering
+                        </p>
+                      )}
+
                       <button
                         type="button"
-                        onClick={() => updateRefundStatus(purchase, "processing")}
+                        onClick={() => updateRefundStatus(purchase, "approved")}
                         disabled={isUpdatingId === purchase.id}
                         className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
                       >
