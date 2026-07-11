@@ -255,7 +255,7 @@ export function CaseWorkflowCard({
               <span
                 className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
                   isActive
-                    ? "bg-blue-300 text-slate-950"
+                    ? "bg-orange-400 text-slate-950"
                     : isLocked
                       ? "bg-slate-200 text-slate-500"
                       : isDone
@@ -304,7 +304,7 @@ export function CaseWorkflowCard({
             return (
               <div
                 key={step.key}
-                className="rounded-2xl border border-blue-100 bg-white/50 p-3 text-slate-500"
+                className="rounded-2xl border border-red-100 bg-white/50 p-3 text-slate-500"
               >
                 {stepContent}
               </div>
@@ -320,7 +320,7 @@ export function CaseWorkflowCard({
                   ? "border-slate-950 bg-slate-950 text-white shadow-sm"
                   : isDone
                     ? "border-red-300 bg-white text-slate-950 hover:bg-red-50"
-                    : "border-blue-100 bg-white/50 text-slate-400 hover:bg-white/70"
+                    : "border-red-100 bg-white/50 text-slate-400 hover:bg-white/70"
               }`}
             >
               {stepContent}

@@ -240,7 +240,7 @@ export default function PresseSjekkPage() {
         <section className="mt-16 rounded-3xl bg-slate-950 p-8 text-white shadow-sm">
           <div className="grid gap-8 lg:grid-cols-[1fr_390px] lg:items-center">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-blue-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                 Klar til å starte?
               </p>
               <h2 className="mt-3 text-4xl font-black">
