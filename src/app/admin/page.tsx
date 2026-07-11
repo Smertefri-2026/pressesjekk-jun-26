@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { AdminNav } from "@/components/admin/AdminNav";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
@@ -54,14 +55,6 @@ type AdminCaseAccess = {
   created_at: string | null;
 };
 
-type AdminPurchase = {
-  id: string;
-  status: string;
-  amount_paid: number;
-  refunded_amount: number;
-  currency: string;
-  created_at: string;
-};
 
 function formatDateTime(value: string | null) {
   if (!value) return "Ukjent";
@@ -75,24 +68,6 @@ function formatDateTime(value: string | null) {
   }).format(new Date(value));
 }
 
-function formatOre(amount: number | null | undefined, currency = "nok") {
-  const value = (amount ?? 0) / 100;
-
-  return new Intl.NumberFormat("nb-NO", {
-    style: "currency",
-    currency: currency.toUpperCase(),
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function netAmount(purchase: AdminPurchase) {
-  if (purchase.status === "failed" || purchase.status === "cancelled") return 0;
-  return Math.max((purchase.amount_paid ?? 0) - (purchase.refunded_amount ?? 0), 0);
-}
-
-function isSameOrAfter(value: string, start: Date) {
-  return new Date(value).getTime() >= start.getTime();
-}
 
 function reportTypeLabel(type: string) {
   if (type === "free_check") return "Regelbasert rapport";
@@ -108,10 +83,6 @@ function packageLabel(packageId: string) {
   if (packageId === "pfu_pack") return "PFU-pakke";
   if (packageId === "full_pack") return "Full dokumentpakke";
   if (packageId === "investigation_pack") return "Utredningspakke";
-  if (packageId === "monthly_start") return "Månedsavtale Start";
-  if (packageId === "monthly_pro") return "Månedsavtale Pro";
-  if (packageId === "monthly_agency") return "Månedsavtale Byrå";
-  if (packageId === "monthly_enterprise") return "Enterprise";
   return packageId;
 }
 
@@ -122,15 +93,7 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const [userCount, setUserCount] = useState(0);
-  const [caseCount, setCaseCount] = useState(0);
-  const [reportCount, setReportCount] = useState(0);
-  const [quickCheckCount, setQuickCheckCount] = useState(0);
-  const [accessCount, setAccessCount] = useState(0);
   const [refundCount, setRefundCount] = useState(0);
-  const [todayRevenue, setTodayRevenue] = useState(0);
-  const [monthRevenue, setMonthRevenue] = useState(0);
-  const [yearRevenue, setYearRevenue] = useState(0);
 
   const [latestProfiles, setLatestProfiles] = useState<AdminProfile[]>([]);
   const [latestCases, setLatestCases] = useState<AdminCase[]>([]);
@@ -177,35 +140,18 @@ export default function AdminPage() {
       setIsAdmin(true);
 
       const [
-        profilesCountResult,
-        casesCountResult,
-        reportsCountResult,
-        quickChecksCountResult,
-        accessCountResult,
         refundsResult,
-        purchasesResult,
         profilesResult,
         casesResult,
         reportsResult,
         quickChecksResult,
         accessResult,
       ] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("cases").select("id", { count: "exact", head: true }),
-        supabase.from("case_reports").select("id", { count: "exact", head: true }),
-        supabase.from("quick_checks").select("id", { count: "exact", head: true }),
-        supabase.from("case_access").select("id", { count: "exact", head: true }),
         supabase
           .from("user_purchases")
           .select("id,refund_status")
-          .in("refund_status", ["requested", "processing"])
+          .in("refund_status", ["requested", "approved"])
           .limit(100),
-        supabase
-          .from("user_purchases")
-          .select("id,status,amount_paid,refunded_amount,currency,created_at")
-          .in("status", ["paid", "refunded", "partially_refunded"])
-          .order("created_at", { ascending: false })
-          .limit(1000),
         supabase
           .from("profiles")
           .select("id,full_name,email,role_type,is_admin,created_at")
@@ -234,13 +180,7 @@ export default function AdminPage() {
       ]);
 
       const firstError =
-        profilesCountResult.error ||
-        casesCountResult.error ||
-        reportsCountResult.error ||
-        quickChecksCountResult.error ||
-        accessCountResult.error ||
         refundsResult.error ||
-        purchasesResult.error ||
         profilesResult.error ||
         casesResult.error ||
         reportsResult.error ||
@@ -253,37 +193,7 @@ export default function AdminPage() {
         return;
       }
 
-      setUserCount(profilesCountResult.count ?? 0);
-      setCaseCount(casesCountResult.count ?? 0);
-      setReportCount(reportsCountResult.count ?? 0);
-      setQuickCheckCount(quickChecksCountResult.count ?? 0);
-      setAccessCount(accessCountResult.count ?? 0);
       setRefundCount((refundsResult.data ?? []).length);
-
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const yearStart = new Date(now.getFullYear(), 0, 1);
-
-      const purchases = (purchasesResult.data ?? []) as AdminPurchase[];
-
-      setTodayRevenue(
-        purchases
-          .filter((purchase) => isSameOrAfter(purchase.created_at, todayStart))
-          .reduce((total, purchase) => total + netAmount(purchase), 0)
-      );
-
-      setMonthRevenue(
-        purchases
-          .filter((purchase) => isSameOrAfter(purchase.created_at, monthStart))
-          .reduce((total, purchase) => total + netAmount(purchase), 0)
-      );
-
-      setYearRevenue(
-        purchases
-          .filter((purchase) => isSameOrAfter(purchase.created_at, yearStart))
-          .reduce((total, purchase) => total + netAmount(purchase), 0)
-      );
 
       setLatestProfiles((profilesResult.data ?? []) as AdminProfile[]);
       setLatestCases((casesResult.data ?? []) as AdminCase[]);
@@ -332,25 +242,6 @@ export default function AdminPage() {
     );
   }
 
-  const statCards = [
-    { label: "Brukere", value: userCount, href: "/admin/brukere" },
-    { label: "Saker", value: caseCount, href: "/admin/saker" },
-    { label: "Rapporter", value: reportCount, href: "/admin/rapporter" },
-    { label: "Raske sjekker", value: quickCheckCount, href: "/admin/raske-sjekker" },
-    { label: "Aktive pakker", value: accessCount, href: "/admin/pakker" },
-    {
-      label: "Refusjoner",
-      value: refundCount,
-      href: "/admin/refusjoner",
-      note: refundCount > 0 ? "Til behandling" : "Ingen åpne",
-    },
-    {
-      label: "Stripe og omsetning",
-      value: "Åpne",
-      href: "/admin/stripe",
-      note: "Betalinger, abonnement og kvitteringer",
-    },
-  ];
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -409,34 +300,74 @@ export default function AdminPage() {
           </aside>
         </div>
 
+        <AdminNav />
+
         {errorMessage ? (
           <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-800">
             {errorMessage}
           </div>
         ) : null}
 
-        <section className="mt-12 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {statCards.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-violet-200 hover:bg-violet-50 hover:shadow-md"
-            >
-              <p className="font-bold text-slate-500">{item.label}</p>
-              <p className="mt-4 text-5xl font-black text-slate-950">
-                {item.value}
-              </p>
-              {item.note ? (
-                <p className="mt-3 text-sm font-bold text-violet-700">
-                  {item.note}
-                </p>
-              ) : (
-                <p className="mt-3 text-sm font-bold text-violet-700">
-                  Åpne
-                </p>
-              )}
-            </Link>
-          ))}
+        <section className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <Link
+            href="/admin/refusjoner"
+            className="rounded-3xl border border-violet-200 bg-violet-50 p-6 shadow-sm transition hover:-translate-y-1 hover:bg-violet-100"
+          >
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-violet-700">
+              Viktig drift
+            </p>
+            <h2 className="mt-3 text-2xl font-black text-slate-950">
+              Refusjoner
+            </h2>
+            <p className="mt-3 text-sm font-bold text-violet-900">
+              {refundCount > 0 ? `${refundCount} til behandling` : "Ingen åpne refusjoner"}
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/stripe"
+            className="rounded-3xl border border-violet-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:bg-violet-50"
+          >
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-violet-700">
+              Betaling
+            </p>
+            <h2 className="mt-3 text-2xl font-black text-slate-950">
+              Stripe
+            </h2>
+            <p className="mt-3 text-sm font-bold text-violet-700">
+              Omsetning, abonnement og kvitteringer
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/pakker"
+            className="rounded-3xl border border-violet-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:bg-violet-50"
+          >
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-violet-700">
+              Tilgang
+            </p>
+            <h2 className="mt-3 text-2xl font-black text-slate-950">
+              Pakker
+            </h2>
+            <p className="mt-3 text-sm font-bold text-violet-700">
+              Manuell tilgang og kompensasjon
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/raske-sjekker"
+            className="rounded-3xl border border-violet-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:bg-violet-50"
+          >
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-violet-700">
+              Inngang
+            </p>
+            <h2 className="mt-3 text-2xl font-black text-slate-950">
+              Raske sjekker
+            </h2>
+            <p className="mt-3 text-sm font-bold text-violet-700">
+              URL-er, AI-status og feilkall
+            </p>
+          </Link>
         </section>
 
         <div className="mt-12 grid gap-8 xl:grid-cols-2">
