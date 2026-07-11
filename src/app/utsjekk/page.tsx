@@ -150,8 +150,12 @@ function UtsjekkContent() {
   const canUsePaymentElement = paymentElementPlanIds.includes(selectedPlan.id);
   const returnUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/min-side?payment=success`
-      : "/min-side?payment=success";
+      ? isUpgradeMode && caseId
+        ? `${window.location.origin}/min-side/saker/${caseId}/pakke?checkout=success`
+        : `${window.location.origin}/min-side/kjop?payment=success`
+      : isUpgradeMode && caseId
+        ? `/min-side/saker/${caseId}/pakke?checkout=success`
+        : "/min-side/kjop?payment=success";
   const nextPath = `/utsjekk?plan=${selectedPlan.id}${
     incomingUrl ? `&url=${encodeURIComponent(incomingUrl)}` : ""
   }${caseId ? `&caseId=${encodeURIComponent(caseId)}&mode=upgrade` : ""}`;
