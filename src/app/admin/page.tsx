@@ -264,7 +264,7 @@ export default function AdminPage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-violet-200 bg-violet-50 p-5 shadow-sm sm:p-7">
+          <aside className="hidden rounded-3xl border border-violet-200 bg-violet-50 p-5 shadow-sm sm:p-7 lg:block">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-800">
               Konto
             </p>
@@ -570,6 +570,40 @@ export default function AdminPage() {
             </div>
           </section>
         </div>
+
+        <aside className="mt-8 rounded-3xl border border-violet-200 bg-violet-50 p-5 shadow-sm sm:p-7 lg:hidden">
+          <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-800">
+            Konto
+          </p>
+
+          <h2 className="mt-4 text-3xl font-black text-slate-950">
+            {adminProfile?.full_name?.trim() || "Admin"}
+          </h2>
+
+          {user?.email ? (
+            <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
+              Innlogget som: <span className="text-slate-950">{user.email}</span>
+            </p>
+          ) : null}
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Link
+              href="/min-side"
+              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+            >
+              Min Side
+            </Link>
+
+            <Link
+              href="/min-side/profil"
+              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
+            >
+              Profil
+            </Link>
+
+            <SignOutButton />
+          </div>
+        </aside>
       </section>
 
       <LightPublicFooter />
