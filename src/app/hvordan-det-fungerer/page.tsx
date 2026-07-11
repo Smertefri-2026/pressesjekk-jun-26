@@ -95,7 +95,7 @@ export default function HvordanDetFungererPage() {
               Slik fungerer det
             </p>
 
-            <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-4 max-w-4xl break-words hyphens-auto text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
               Fra medieartikkel til komplett dokumentpakke.
             </h1>
 

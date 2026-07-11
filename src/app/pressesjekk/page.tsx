@@ -70,7 +70,7 @@ export default function PresseSjekkPage() {
               Start sjekk
             </p>
 
-            <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-4 max-w-4xl break-words hyphens-auto text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
               Start en sak og bygg dokumentasjonen steg for steg.
             </h1>
 
