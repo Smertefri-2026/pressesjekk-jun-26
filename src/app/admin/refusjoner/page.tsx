@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { SignOutButton } from "@/components/auth/SignOutButton";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { AdminAccountBox } from "@/components/admin/AdminAccountBox";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
@@ -395,7 +395,7 @@ export default function AdminRefundsPage() {
             >
               Oppdater
             </button>
-            {user ? <SignOutButton /> : null}
+
           </div>
         </div>
 
@@ -639,6 +639,11 @@ export default function AdminRefundsPage() {
             </>
           )}
         </section>
+        <AdminAccountBox
+          adminName={adminProfile?.full_name}
+          user={user}
+          className="mt-8 lg:hidden"
+        />
       </section>
 
       <LightPublicFooter />
