@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { AdminNav } from "@/components/admin/AdminNav";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
@@ -36,6 +37,8 @@ const statusOptions = [
   { id: "pending", label: "Venter" },
   { id: "error", label: "Feil" },
 ];
+
+const PAGE_SIZE = 10;
 
 function roleLabel(role: string | null) {
   if (role === "reader") return "Leser/privatperson";
@@ -75,6 +78,7 @@ export default function AdminQuickChecksPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [quickChecks, setQuickChecks] = useState<AdminQuickCheck[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   async function checkAdmin() {
     const {
@@ -143,6 +147,7 @@ export default function AdminQuickChecksPage() {
     }
 
     setQuickChecks((data ?? []) as AdminQuickCheck[]);
+    setVisibleCount(PAGE_SIZE);
     setIsSearching(false);
   }
 
@@ -166,6 +171,8 @@ export default function AdminQuickChecksPage() {
     event.preventDefault();
     await loadQuickChecks(search, statusFilter);
   }
+
+  const visibleQuickChecks = quickChecks.slice(0, visibleCount);
 
   if (isLoading) {
     return (
@@ -265,7 +272,9 @@ export default function AdminQuickChecksPage() {
           </aside>
         </div>
 
-        <section className="mt-12 rounded-3xl border border-violet-200 bg-white p-5 shadow-sm ring-1 ring-violet-100 sm:p-7">
+        <AdminNav />
+
+        <section className="mt-8 rounded-3xl border border-violet-200 bg-white p-5 shadow-sm ring-1 ring-violet-100 sm:p-7">
           <form onSubmit={handleSearch} className="grid gap-4 lg:grid-cols-[1fr_240px_auto_auto]">
             <div>
               <label htmlFor="search" className="text-sm font-bold text-slate-800">
@@ -332,7 +341,7 @@ export default function AdminQuickChecksPage() {
         </section>
 
         <section className="mt-8 grid gap-5">
-          {quickChecks.map((item) => (
+          {visibleQuickChecks.map((item) => (
             <article
               key={item.id}
               className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7"
@@ -348,7 +357,7 @@ export default function AdminQuickChecksPage() {
                       {item.ai_status || "Ingen AI-status"}
                     </span>
 
-                    <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-amber-800">
+                    <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-violet-900">
                       Risiko: {riskLabel(item.ai_risk_level)}
                     </span>
                   </div>
@@ -405,6 +414,16 @@ export default function AdminQuickChecksPage() {
               </div>
             </article>
           ))}
+
+          {visibleCount < quickChecks.length ? (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+              className="rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4 text-sm font-black text-violet-900 hover:bg-violet-100"
+            >
+              Vis flere raske sjekker
+            </button>
+          ) : null}
 
           {quickChecks.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-slate-700">
