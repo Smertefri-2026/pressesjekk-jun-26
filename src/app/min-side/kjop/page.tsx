@@ -103,6 +103,8 @@ type CaseRow = {
   created_at: string;
 };
 
+const CASE_PAGE_SIZE = 10;
+
 function packageName(packageId: string) {
   return allPackagePlans.find((plan) => plan.id === packageId)?.name ?? packageId;
 }
@@ -253,6 +255,7 @@ export default function MinSideKjopPage() {
   const [showAllSubscriptionPayments, setShowAllSubscriptionPayments] =
     useState(false);
   const [showAllOneTimeProducts, setShowAllOneTimeProducts] = useState(false);
+  const [showAllCases, setShowAllCases] = useState(false);
 
   useEffect(() => {
     async function loadPurchases() {
@@ -470,8 +473,12 @@ export default function MinSideKjopPage() {
     const response = await fetch("/api/stripe/create-customer-portal", {
       method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
+      body: JSON.stringify({
+        returnPath: "/min-side/kjop",
+      }),
     });
 
     const payload = await response.json().catch(() => null);
@@ -486,6 +493,8 @@ export default function MinSideKjopPage() {
 
     window.location.href = payload.url;
   }
+
+  const visibleCases = showAllCases ? cases : cases.slice(0, CASE_PAGE_SIZE);
 
   async function requestRefund(purchaseId: string) {
     setRefundRequestId(purchaseId);
@@ -874,7 +883,7 @@ export default function MinSideKjopPage() {
                     </h3>
                     <p className="mt-3 max-w-3xl leading-8 text-slate-700">
                       Her vises rapportpakker, PFU-pakker, fullpakker og
-                      klippekort som er kjøpt separat.
+                      andre dokumentpakker som er kjøpt separat.
                     </p>
                   </div>
 
@@ -1084,7 +1093,7 @@ export default function MinSideKjopPage() {
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-200">
-                    {cases.map((caseItem) => {
+                    {visibleCases.map((caseItem) => {
                       const access = caseAccessByCaseId.get(caseItem.id);
                       const packageId = access?.package_id ?? null;
                       const hasPackage = Boolean(packageId);
@@ -1166,6 +1175,16 @@ export default function MinSideKjopPage() {
                   </div>
                 )}
               </div>
+
+              {cases.length > CASE_PAGE_SIZE ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllCases((value) => !value)}
+                  className="mt-5 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  {showAllCases ? "Vis færre saker" : "Vis alle saker"}
+                </button>
+              ) : null}
             </section>
 
           </>
