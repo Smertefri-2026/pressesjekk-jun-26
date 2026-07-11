@@ -44,11 +44,9 @@ const packageOptions = [
   { id: "pfu_pack", label: "PFU-pakke" },
   { id: "full_pack", label: "Full dokumentpakke" },
   { id: "investigation_pack", label: "Utredningspakke" },
-  { id: "monthly_start", label: "Månedsavtale Start" },
-  { id: "monthly_pro", label: "Månedsavtale Pro" },
-  { id: "monthly_agency", label: "Månedsavtale Byrå" },
-  { id: "monthly_enterprise", label: "Enterprise" },
 ];
+
+const PAGE_SIZE = 10;
 
 function packageLabel(packageId: string) {
   return packageOptions.find((item) => item.id === packageId)?.label ?? packageId;
@@ -89,6 +87,7 @@ export default function AdminPackagesPage() {
   const [accessByCaseId, setAccessByCaseId] = useState<Record<string, AdminCaseAccess>>({});
   const [packageSelections, setPackageSelections] = useState<Record<string, string>>({});
   const [savingCaseId, setSavingCaseId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   async function checkAdmin() {
     const {
@@ -261,6 +260,7 @@ export default function AdminPackagesPage() {
     }, {});
 
     setCases(caseRows);
+    setVisibleCount(PAGE_SIZE);
     setProfilesById(profileMap);
     setAccessByCaseId(accessMap);
     setPackageSelections(
@@ -341,6 +341,8 @@ export default function AdminPackagesPage() {
     setSavingCaseId(null);
   }
 
+  const visibleCases = cases.slice(0, visibleCount);
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-slate-50 text-slate-950">
@@ -399,9 +401,9 @@ export default function AdminPackagesPage() {
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Søk opp saker og brukere, se nåværende tilgang og gi eller endre
-              pakker manuelt. Dette brukes ved test, Stripe-feil,
-              servicejustering eller kompensasjon. Vanlige kjøp styres av
-              Stripe og registreres automatisk.
+              saksbaserte dokumentpakker manuelt. Dette brukes ved test,
+              Stripe-feil, servicejustering eller kompensasjon. Abonnement og
+              månedsavtaler styres fra Stripe.
             </p>
           </section>
 
@@ -446,9 +448,9 @@ export default function AdminPackagesPage() {
         <div className="mt-8 rounded-3xl border border-violet-200 bg-violet-50 p-5 text-sm font-semibold leading-7 text-violet-950">
           <p className="font-black">Viktig:</p>
           <p className="mt-1">
-            Denne siden gir manuell tilgang til en sak. Den skal brukes ved
-            test, servicejustering, kompensasjon eller Stripe-feil. Betalte kjøp
-            og abonnement skal normalt komme inn automatisk via Stripe.
+            Denne siden gir manuell tilgang til én konkret sak. Bruk den ved
+            test, servicejustering, kompensasjon eller Stripe-feil. Abonnement,
+            månedsavtaler og vanlige betalinger skal normalt styres fra Stripe.
           </p>
         </div>
 
@@ -503,7 +505,7 @@ export default function AdminPackagesPage() {
         </section>
 
         <section className="mt-8 grid gap-5">
-          {cases.map((caseItem) => {
+          {visibleCases.map((caseItem) => {
             const profile = caseItem.user_id ? profilesById[caseItem.user_id] : null;
             const access = accessByCaseId[caseItem.id];
 
@@ -599,7 +601,7 @@ export default function AdminPackagesPage() {
                         >
                           {savingCaseId === caseItem.id
                             ? "Lagrer..."
-                            : "Lagre tilgang"}
+                            : "Lagre manuell tilgang"}
                         </button>
 
                         <button
@@ -619,6 +621,16 @@ export default function AdminPackagesPage() {
               </article>
             );
           })}
+
+          {visibleCount < cases.length ? (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+              className="rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4 text-sm font-black text-violet-900 hover:bg-violet-100"
+            >
+              Vis flere saker
+            </button>
+          ) : null}
 
           {cases.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-slate-700">
