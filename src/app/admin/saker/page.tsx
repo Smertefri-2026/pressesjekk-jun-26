@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { AdminNav } from "@/components/admin/AdminNav";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
@@ -16,6 +17,8 @@ type AdminProfile = {
   is_admin: boolean | null;
   created_at: string | null;
 };
+
+const PAGE_SIZE = 10;
 
 type AdminCase = {
   id: string;
@@ -57,10 +60,6 @@ const packageLabels: Record<string, string> = {
   pfu_pack: "PFU-pakke",
   full_pack: "Full dokumentpakke",
   investigation_pack: "Utredningspakke",
-  monthly_start: "Månedsavtale Start",
-  monthly_pro: "Månedsavtale Pro",
-  monthly_agency: "Månedsavtale Byrå",
-  monthly_enterprise: "Enterprise",
 };
 
 function packageLabel(packageId: string) {
@@ -101,6 +100,7 @@ export default function AdminCasesPage() {
   const [profilesById, setProfilesById] = useState<Record<string, AdminProfile>>({});
   const [accessByCaseId, setAccessByCaseId] = useState<Record<string, AdminCaseAccess>>({});
   const [reportCountsByCaseId, setReportCountsByCaseId] = useState<Record<string, number>>({});
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   async function checkAdmin() {
     const {
@@ -309,6 +309,7 @@ export default function AdminCasesPage() {
     }, {});
 
     setCases(caseRows);
+    setVisibleCount(PAGE_SIZE);
     setProfilesById(profileMap);
     setAccessByCaseId(accessMap);
     setReportCountsByCaseId(reportCounts);
@@ -335,6 +336,8 @@ export default function AdminCasesPage() {
     event.preventDefault();
     await loadCases(search, statusFilter);
   }
+
+  const visibleCases = cases.slice(0, visibleCount);
 
   if (isLoading) {
     return (
@@ -432,7 +435,9 @@ export default function AdminCasesPage() {
           </aside>
         </div>
 
-        <section className="mt-12 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <AdminNav />
+
+        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
           <form onSubmit={handleSearch} className="grid gap-4 lg:grid-cols-[1fr_240px_auto_auto]">
             <div>
               <label htmlFor="search" className="text-sm font-bold text-slate-800">
@@ -499,7 +504,7 @@ export default function AdminCasesPage() {
         </section>
 
         <section className="mt-8 grid gap-5">
-          {cases.map((caseItem) => {
+          {visibleCases.map((caseItem) => {
             const profile = caseItem.user_id ? profilesById[caseItem.user_id] : null;
             const access = accessByCaseId[caseItem.id];
             const reportCount = reportCountsByCaseId[caseItem.id] ?? 0;
@@ -565,7 +570,7 @@ export default function AdminCasesPage() {
                   <div className="grid content-start gap-3">
                     <Link
                       href={`/min-side/saker/${caseItem.id}`}
-                      className="rounded-2xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800"
+                      className="rounded-2xl bg-violet-700 px-5 py-4 text-center text-sm font-black text-white hover:bg-violet-800"
                     >
                       Åpne sak
                     </Link>
@@ -581,6 +586,16 @@ export default function AdminCasesPage() {
               </article>
             );
           })}
+
+          {visibleCount < cases.length ? (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+              className="rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4 text-sm font-black text-violet-900 hover:bg-violet-100"
+            >
+              Vis flere saker
+            </button>
+          ) : null}
 
           {cases.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-slate-700">
