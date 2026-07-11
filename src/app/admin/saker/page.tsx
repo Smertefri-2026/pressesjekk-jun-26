@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { SignOutButton } from "@/components/auth/SignOutButton";
 import { AdminNav } from "@/components/admin/AdminNav";
+import { AdminAccountBox } from "@/components/admin/AdminAccountBox";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
@@ -399,40 +399,11 @@ export default function AdminCasesPage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-violet-200 bg-violet-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-800">
-              Konto
-            </p>
-
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              {adminProfile?.full_name?.trim() || "Admin"}
-            </h2>
-
-            {user?.email ? (
-              <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
-                Innlogget som:{" "}
-                <span className="text-slate-950">{user.email}</span>
-              </p>
-            ) : null}
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <Link
-                href="/admin"
-                className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
-              >
-                Admin
-              </Link>
-
-              <Link
-                href="/admin/pakker"
-                className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
-              >
-                Pakker
-              </Link>
-
-              <SignOutButton />
-            </div>
-          </aside>
+          <AdminAccountBox
+            adminName={adminProfile?.full_name}
+            user={user}
+            className="hidden lg:block"
+          />
         </div>
 
         <AdminNav />
@@ -603,6 +574,11 @@ export default function AdminCasesPage() {
             </div>
           ) : null}
         </section>
+        <AdminAccountBox
+          adminName={adminProfile?.full_name}
+          user={user}
+          className="mt-8 lg:hidden"
+        />
       </section>
 
       <LightPublicFooter />

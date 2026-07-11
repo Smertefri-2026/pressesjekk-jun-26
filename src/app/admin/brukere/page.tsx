@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { SignOutButton } from "@/components/auth/SignOutButton";
+import { AdminNav } from "@/components/admin/AdminNav";
+import { AdminAccountBox } from "@/components/admin/AdminAccountBox";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
@@ -26,6 +27,8 @@ type AdminCaseAccess = {
   id: string;
   user_id: string;
 };
+
+const PAGE_SIZE = 10;
 
 function roleLabel(roleType: string | null) {
   if (roleType === "advisor") return "Rådgiver";
@@ -60,6 +63,7 @@ export default function AdminUsersPage() {
   const [profiles, setProfiles] = useState<AdminProfile[]>([]);
   const [caseCountsByUserId, setCaseCountsByUserId] = useState<Record<string, number>>({});
   const [packageCountsByUserId, setPackageCountsByUserId] = useState<Record<string, number>>({});
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   async function checkAdmin() {
     const {
@@ -160,6 +164,7 @@ export default function AdminUsersPage() {
     }, {});
 
     setProfiles(profileRows);
+    setVisibleCount(PAGE_SIZE);
     setCaseCountsByUserId(caseCounts);
     setPackageCountsByUserId(packageCounts);
     setIsSearching(false);
@@ -185,6 +190,8 @@ export default function AdminUsersPage() {
     event.preventDefault();
     await loadUsers(search);
   }
+
+  const visibleProfiles = profiles.slice(0, visibleCount);
 
   if (isLoading) {
     return (
@@ -246,43 +253,16 @@ export default function AdminUsersPage() {
             </p>
           </section>
 
-          <aside className="rounded-3xl border border-violet-200 bg-violet-50 p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-violet-800">
-              Konto
-            </p>
-
-            <h2 className="mt-4 text-3xl font-black text-slate-950">
-              {adminProfile?.full_name?.trim() || "Admin"}
-            </h2>
-
-            {user?.email ? (
-              <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
-                Innlogget som:{" "}
-                <span className="text-slate-950">{user.email}</span>
-              </p>
-            ) : null}
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <Link
-                href="/admin"
-                className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
-              >
-                Admin
-              </Link>
-
-              <Link
-                href="/admin/saker"
-                className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
-              >
-                Saker
-              </Link>
-
-              <SignOutButton />
-            </div>
-          </aside>
+          <AdminAccountBox
+            adminName={adminProfile?.full_name}
+            user={user}
+            className="hidden lg:block"
+          />
         </div>
 
-        <section className="mt-12 rounded-3xl border border-violet-200 bg-white p-5 shadow-sm ring-1 ring-violet-100 sm:p-7">
+        <AdminNav />
+
+        <section className="mt-8 rounded-3xl border border-violet-200 bg-white p-5 shadow-sm ring-1 ring-violet-100 sm:p-7">
           <form onSubmit={handleSearch} className="grid gap-4 lg:grid-cols-[1fr_auto_auto]">
             <div>
               <label htmlFor="search" className="text-sm font-bold text-slate-800">
@@ -327,7 +307,7 @@ export default function AdminUsersPage() {
         </section>
 
         <section className="mt-8 grid gap-5">
-          {profiles.map((profile) => {
+          {visibleProfiles.map((profile) => {
             const caseCount = caseCountsByUserId[profile.id] ?? 0;
             const packageCount = packageCountsByUserId[profile.id] ?? 0;
             const searchValue = profile.email || profile.full_name || "";
@@ -345,7 +325,7 @@ export default function AdminUsersPage() {
                       </span>
 
                       {profile.is_admin ? (
-                        <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-amber-800">
+                        <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-violet-900">
                           Admin
                         </span>
                       ) : null}
@@ -402,12 +382,27 @@ export default function AdminUsersPage() {
             );
           })}
 
+          {visibleCount < profiles.length ? (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+              className="rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4 text-sm font-black text-violet-900 hover:bg-violet-100"
+            >
+              Vis flere brukere
+            </button>
+          ) : null}
+
           {profiles.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-slate-700">
               Ingen brukere funnet.
             </div>
           ) : null}
         </section>
+        <AdminAccountBox
+          adminName={adminProfile?.full_name}
+          user={user}
+          className="mt-8 lg:hidden"
+        />
       </section>
 
       <LightPublicFooter />
