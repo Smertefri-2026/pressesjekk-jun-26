@@ -577,10 +577,10 @@ export default function MinSideKjopPage() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/priser"
+              href="#saker-og-dokumentpakker"
               className="rounded-xl bg-red-500 px-5 py-3 font-bold text-white hover:bg-red-600"
             >
-              Kjøp mer
+              Velg sak eller pakke
             </Link>
             {user ? <SignOutButton /> : null}
           </div>
@@ -888,10 +888,10 @@ export default function MinSideKjopPage() {
                   </div>
 
                   <Link
-                    href="/priser"
+                    href="#saker-og-dokumentpakker"
                     className="rounded-xl bg-red-500 px-5 py-3 font-bold text-white hover:bg-red-600"
                   >
-                    Kjøp mer
+                    Velg sak eller pakke
                   </Link>
                 </div>
 
@@ -1063,7 +1063,7 @@ export default function MinSideKjopPage() {
               </section>
             </section>
 
-            <section className="mt-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <section id="saker-og-dokumentpakker" className="mt-10 scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-bold text-red-700">
