@@ -7,6 +7,7 @@ const adminLinks = [
   { href: "/admin/pakker", label: "Pakker" },
   { href: "/admin/rapporter", label: "Rapporter" },
   { href: "/admin/raske-sjekker", label: "Raske sjekker" },
+  { href: "/admin/refusjoner", label: "Refusjoner" },
   { href: "/admin/stripe", label: "Stripe" },
 ];
 
