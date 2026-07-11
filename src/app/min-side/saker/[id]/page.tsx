@@ -246,6 +246,7 @@ export default function CaseDetailPage() {
           "id,title,status,media_name,article_title,article_url,published_date,short_description,created_at,updated_at"
         )
         .eq("id", params.id)
+        .eq("user_id", user.id)
         .single();
 
       if (error) {
@@ -548,6 +549,7 @@ export default function CaseDetailPage() {
             <p className="text-lg font-bold text-slate-700">Laster saken...</p>
           </div>
         </section>
+        <LightPublicFooter />
       </main>
     );
   }
