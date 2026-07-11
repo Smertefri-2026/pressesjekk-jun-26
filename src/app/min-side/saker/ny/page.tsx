@@ -183,6 +183,7 @@ export default function NewCasePage() {
             </p>
           </div>
         </section>
+        <LightPublicFooter />
       </main>
     );
   }
