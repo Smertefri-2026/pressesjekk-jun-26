@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { AdminNav } from "@/components/admin/AdminNav";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
@@ -44,6 +45,8 @@ const reportTypeOptions = [
   { id: "police_draft", label: "Politianmeldelse" },
   { id: "investigation_draft", label: "Utredning" },
 ];
+
+const PAGE_SIZE = 10;
 
 function reportTypeLabel(type: string) {
   if (type === "free_check") return "Regelbasert rapport";
@@ -95,6 +98,7 @@ export default function AdminReportsPage() {
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [casesById, setCasesById] = useState<Record<string, AdminCase>>({});
   const [profilesById, setProfilesById] = useState<Record<string, AdminProfile>>({});
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   async function checkAdmin() {
     const {
@@ -298,6 +302,7 @@ export default function AdminReportsPage() {
     }, {});
 
     setReports(reportRows);
+    setVisibleCount(PAGE_SIZE);
     setCasesById(caseMap);
     setProfilesById(profileMap);
     setIsSearching(false);
@@ -323,6 +328,8 @@ export default function AdminReportsPage() {
     event.preventDefault();
     await loadReports(search, reportTypeFilter);
   }
+
+  const visibleReports = reports.slice(0, visibleCount);
 
   if (isLoading) {
     return (
@@ -420,7 +427,9 @@ export default function AdminReportsPage() {
           </aside>
         </div>
 
-        <section className="mt-12 rounded-3xl border border-violet-200 bg-white p-5 shadow-sm ring-1 ring-violet-100 sm:p-7">
+        <AdminNav />
+
+        <section className="mt-8 rounded-3xl border border-violet-200 bg-white p-5 shadow-sm ring-1 ring-violet-100 sm:p-7">
           <form onSubmit={handleSearch} className="grid gap-4 lg:grid-cols-[1fr_260px_auto_auto]">
             <div>
               <label htmlFor="search" className="text-sm font-bold text-slate-800">
@@ -487,7 +496,7 @@ export default function AdminReportsPage() {
         </section>
 
         <section className="mt-8 grid gap-5">
-          {reports.map((report) => {
+          {visibleReports.map((report) => {
             const caseItem = casesById[report.case_id];
             const profile =
               caseItem?.user_id ? profilesById[caseItem.user_id] : null;
@@ -563,6 +572,16 @@ export default function AdminReportsPage() {
               </article>
             );
           })}
+
+          {visibleCount < reports.length ? (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+              className="rounded-2xl border border-violet-200 bg-violet-50 px-5 py-4 text-sm font-black text-violet-900 hover:bg-violet-100"
+            >
+              Vis flere rapporter
+            </button>
+          ) : null}
 
           {reports.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-slate-700">
