@@ -112,6 +112,7 @@ function stripeDashboardUrl(purchase: PurchaseRow) {
 
 export default function AdminRefundsPage() {
   const [user, setUser] = useState<User | null>(null);
+  const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdatingId, setIsUpdatingId] = useState<string | null>(null);
@@ -211,7 +212,7 @@ export default function AdminRefundsPage() {
 
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
-        .select("id,is_admin")
+        .select("id,full_name,email,role_type,is_admin")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -227,6 +228,7 @@ export default function AdminRefundsPage() {
         return;
       }
 
+      setAdminProfile(profile as AdminProfile);
       setIsAdmin(true);
       await loadRefunds();
       setIsLoading(false);
