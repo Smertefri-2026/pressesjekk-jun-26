@@ -703,6 +703,120 @@ async function updateSubscriptionFromStripe(
   }
 }
 
+async function recordSubscriptionInvoicePurchase(invoice: Stripe.Invoice) {
+  const invoiceWithSubscription = invoice as Stripe.Invoice & {
+    subscription?: string | Stripe.Subscription | null;
+    billing_reason?: string | null;
+    hosted_invoice_url?: string | null;
+    charge?: string | Stripe.Charge | null;
+  };
+
+  // Første abonnementsbetaling lagres allerede via checkout.session.completed.
+  // Her lagrer vi bare senere månedlige trekk.
+  if (invoiceWithSubscription.billing_reason === "subscription_create") {
+    return;
+  }
+
+  const stripeSubscriptionId =
+    typeof invoiceWithSubscription.subscription === "string"
+      ? invoiceWithSubscription.subscription
+      : invoiceWithSubscription.subscription?.id ?? null;
+
+  if (!stripeSubscriptionId) {
+    console.warn("Ignorerer abonnementsfaktura uten subscription-id", {
+      invoiceId: invoice.id,
+    });
+    return;
+  }
+
+  const supabase = getSupabaseServiceClient();
+
+  const { data: existingPurchase, error: existingPurchaseError } = await supabase
+    .from("user_purchases")
+    .select("id")
+    .eq("stripe_invoice_id", invoice.id)
+    .maybeSingle();
+
+  if (existingPurchaseError) {
+    throw new Error(existingPurchaseError.message);
+  }
+
+  if (existingPurchase?.id) {
+    console.log("Abonnementsbetaling finnes allerede", {
+      invoiceId: invoice.id,
+      purchaseId: existingPurchase.id,
+    });
+    return;
+  }
+
+  const { data: subscriptionRow, error: subscriptionError } = await supabase
+    .from("user_subscriptions")
+    .select("user_id,package_id,included_cases_per_month,stripe_customer_id,stripe_subscription_id")
+    .eq("stripe_subscription_id", stripeSubscriptionId)
+    .maybeSingle();
+
+  if (subscriptionError) {
+    throw new Error(subscriptionError.message);
+  }
+
+  if (!subscriptionRow) {
+    console.warn("Fant ikke abonnement for faktura", {
+      invoiceId: invoice.id,
+      stripeSubscriptionId,
+    });
+    return;
+  }
+
+  const packageId = subscriptionRow.package_id as PackagePlanId;
+  const plan = getStripeCheckoutPlan(packageId);
+  const amountPaid = invoice.amount_paid ?? invoice.amount_due ?? 0;
+  const currency = invoice.currency ?? plan?.currency ?? "nok";
+
+  const chargeId =
+    typeof invoiceWithSubscription.charge === "string"
+      ? invoiceWithSubscription.charge
+      : invoiceWithSubscription.charge?.id ?? null;
+
+  const { error } = await supabase.from("user_purchases").insert({
+    user_id: subscriptionRow.user_id,
+    case_id: null,
+    package_id: packageId,
+    purchase_type: "subscription",
+    status: "paid",
+    amount_paid: amountPaid,
+    amount_original: plan?.amount ?? amountPaid,
+    amount_credit: 0,
+    currency,
+    included_cases:
+      subscriptionRow.included_cases_per_month ??
+      includedCasesForPackage(packageId),
+    used_cases: 0,
+    source: "stripe_invoice_subscription",
+    stripe_customer_id: subscriptionRow.stripe_customer_id,
+    stripe_subscription_id: stripeSubscriptionId,
+    stripe_invoice_id: invoice.id,
+    stripe_charge_id: chargeId,
+    stripe_receipt_url: invoiceWithSubscription.hosted_invoice_url ?? null,
+    refund_status: "none",
+    metadata: {
+      stripe_invoice_id: invoice.id,
+      stripe_invoice_status: invoice.status,
+      stripe_billing_reason: invoiceWithSubscription.billing_reason ?? null,
+    },
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  console.log("Lagret månedlig abonnementsbetaling", {
+    invoiceId: invoice.id,
+    stripeSubscriptionId,
+    packageId,
+    amountPaid,
+  });
+}
+
 async function updateSubscriptionStatusFromInvoice(
   invoice: Stripe.Invoice,
   status: string
@@ -817,6 +931,7 @@ export async function POST(request: NextRequest) {
     if (event.type === "invoice.payment_succeeded") {
       const invoice = event.data.object as Stripe.Invoice;
       await updateSubscriptionStatusFromInvoice(invoice, "active");
+      await recordSubscriptionInvoicePurchase(invoice);
     }
 
     if (event.type === "payment_intent.succeeded") {
