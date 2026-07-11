@@ -54,6 +54,15 @@ type AdminCaseAccess = {
   created_at: string | null;
 };
 
+type AdminPurchase = {
+  id: string;
+  status: string;
+  amount_paid: number;
+  refunded_amount: number;
+  currency: string;
+  created_at: string;
+};
+
 function formatDateTime(value: string | null) {
   if (!value) return "Ukjent";
 
@@ -64,6 +73,25 @@ function formatDateTime(value: string | null) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+function formatOre(amount: number | null | undefined, currency = "nok") {
+  const value = (amount ?? 0) / 100;
+
+  return new Intl.NumberFormat("nb-NO", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function netAmount(purchase: AdminPurchase) {
+  if (purchase.status === "failed" || purchase.status === "cancelled") return 0;
+  return Math.max((purchase.amount_paid ?? 0) - (purchase.refunded_amount ?? 0), 0);
+}
+
+function isSameOrAfter(value: string, start: Date) {
+  return new Date(value).getTime() >= start.getTime();
 }
 
 function reportTypeLabel(type: string) {
@@ -100,6 +128,9 @@ export default function AdminPage() {
   const [quickCheckCount, setQuickCheckCount] = useState(0);
   const [accessCount, setAccessCount] = useState(0);
   const [refundCount, setRefundCount] = useState(0);
+  const [todayRevenue, setTodayRevenue] = useState(0);
+  const [monthRevenue, setMonthRevenue] = useState(0);
+  const [yearRevenue, setYearRevenue] = useState(0);
 
   const [latestProfiles, setLatestProfiles] = useState<AdminProfile[]>([]);
   const [latestCases, setLatestCases] = useState<AdminCase[]>([]);
@@ -152,6 +183,7 @@ export default function AdminPage() {
         quickChecksCountResult,
         accessCountResult,
         refundsResult,
+        purchasesResult,
         profilesResult,
         casesResult,
         reportsResult,
@@ -168,6 +200,12 @@ export default function AdminPage() {
           .select("id,refund_status")
           .in("refund_status", ["requested", "processing"])
           .limit(100),
+        supabase
+          .from("user_purchases")
+          .select("id,status,amount_paid,refunded_amount,currency,created_at")
+          .in("status", ["paid", "refunded", "partially_refunded"])
+          .order("created_at", { ascending: false })
+          .limit(1000),
         supabase
           .from("profiles")
           .select("id,full_name,email,role_type,is_admin,created_at")
@@ -202,6 +240,7 @@ export default function AdminPage() {
         quickChecksCountResult.error ||
         accessCountResult.error ||
         refundsResult.error ||
+        purchasesResult.error ||
         profilesResult.error ||
         casesResult.error ||
         reportsResult.error ||
@@ -220,6 +259,31 @@ export default function AdminPage() {
       setQuickCheckCount(quickChecksCountResult.count ?? 0);
       setAccessCount(accessCountResult.count ?? 0);
       setRefundCount((refundsResult.data ?? []).length);
+
+      const now = new Date();
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const yearStart = new Date(now.getFullYear(), 0, 1);
+
+      const purchases = (purchasesResult.data ?? []) as AdminPurchase[];
+
+      setTodayRevenue(
+        purchases
+          .filter((purchase) => isSameOrAfter(purchase.created_at, todayStart))
+          .reduce((total, purchase) => total + netAmount(purchase), 0)
+      );
+
+      setMonthRevenue(
+        purchases
+          .filter((purchase) => isSameOrAfter(purchase.created_at, monthStart))
+          .reduce((total, purchase) => total + netAmount(purchase), 0)
+      );
+
+      setYearRevenue(
+        purchases
+          .filter((purchase) => isSameOrAfter(purchase.created_at, yearStart))
+          .reduce((total, purchase) => total + netAmount(purchase), 0)
+      );
 
       setLatestProfiles((profilesResult.data ?? []) as AdminProfile[]);
       setLatestCases((casesResult.data ?? []) as AdminCase[]);
@@ -280,9 +344,9 @@ export default function AdminPage() {
       href: "/admin/refusjoner",
       note: refundCount > 0 ? "Til behandling" : "Ingen åpne",
     },
-    { label: "Dagens omsetning", value: "0 kr", href: "/admin/stripe", note: "Stripe senere" },
-    { label: "Mnd. omsetning", value: "0 kr", href: "/admin/stripe", note: "Stripe senere" },
-    { label: "Årsomsetning", value: "0 kr", href: "/admin/stripe", note: "Stripe senere" },
+    { label: "Dagens omsetning", value: formatOre(todayRevenue), href: "/admin/stripe", note: "Netto" },
+    { label: "Mnd. omsetning", value: formatOre(monthRevenue), href: "/admin/stripe", note: "Netto" },
+    { label: "Årsomsetning", value: formatOre(yearRevenue), href: "/admin/stripe", note: "Netto" },
   ];
 
   return (
