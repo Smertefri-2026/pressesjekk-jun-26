@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { AdminNav } from "@/components/admin/AdminNav";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
@@ -398,8 +399,9 @@ export default function AdminPackagesPage() {
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
               Søk opp saker og brukere, se nåværende tilgang og gi eller endre
-              pakker manuelt. Bruk dette ved test, Stripe-feil,
-              servicejustering eller kompensasjon.
+              pakker manuelt. Dette brukes ved test, Stripe-feil,
+              servicejustering eller kompensasjon. Vanlige kjøp styres av
+              Stripe og registreres automatisk.
             </p>
           </section>
 
@@ -439,7 +441,18 @@ export default function AdminPackagesPage() {
           </aside>
         </div>
 
-        <section className="mt-12 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <AdminNav />
+
+        <div className="mt-8 rounded-3xl border border-violet-200 bg-violet-50 p-5 text-sm font-semibold leading-7 text-violet-950">
+          <p className="font-black">Viktig:</p>
+          <p className="mt-1">
+            Denne siden gir manuell tilgang til en sak. Den skal brukes ved
+            test, servicejustering, kompensasjon eller Stripe-feil. Betalte kjøp
+            og abonnement skal normalt komme inn automatisk via Stripe.
+          </p>
+        </div>
+
+        <section className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
           <form onSubmit={handleSearch} className="grid gap-4 lg:grid-cols-[1fr_auto_auto]">
             <div>
               <label htmlFor="search" className="text-sm font-bold text-slate-800">
@@ -595,7 +608,7 @@ export default function AdminPackagesPage() {
                             handleSaveAccess(caseItem, "compensation")
                           }
                           disabled={savingCaseId === caseItem.id}
-                          className="rounded-2xl bg-amber-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="rounded-2xl bg-violet-700 px-5 py-4 text-sm font-black text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           Kompensasjon
                         </button>
