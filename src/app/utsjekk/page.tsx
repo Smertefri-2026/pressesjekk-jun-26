@@ -268,7 +268,7 @@ function UtsjekkContent() {
     }
 
     createPaymentIntent();
-  }, [canUsePaymentElement, incomingUrl, selectedPlan.id, userEmail]);
+  }, [canUsePaymentElement, caseId, incomingUrl, selectedPlan.id, userEmail]);
 
   async function handleStartSubscription() {
     setSubscriptionCheckoutError("");
@@ -863,7 +863,7 @@ function UtsjekkContent() {
                 </div>
               </div>
             ) : paymentErrorMessage ? (
-              <div className="mt-5 rounded-2xl border border-red-300/30 bg-amber-500/10 p-4 text-sm font-semibold leading-7 text-orange-100">
+              <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-7 text-red-800">
                 {paymentErrorMessage}
               </div>
             ) : isPreparingPayment ? (
