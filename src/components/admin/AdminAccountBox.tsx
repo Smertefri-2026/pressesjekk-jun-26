@@ -26,7 +26,7 @@ export function AdminAccountBox({
       </h2>
 
       {user?.email ? (
-        <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
+        <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">
           Innlogget som: <span className="text-slate-950">{user.email}</span>
         </p>
       ) : null}

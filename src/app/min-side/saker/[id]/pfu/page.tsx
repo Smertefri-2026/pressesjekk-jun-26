@@ -536,7 +536,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                 Redaksjonell sjekk
               </p>
 
-              <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-6xl">
+              <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-6xl">
                 Bruk rapport og publiseringsgrunnlag
               </h1>
 
@@ -634,7 +634,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
               PFU-klage
             </p>
 
-            <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-7xl">
               PFU-klage
             </h1>
 

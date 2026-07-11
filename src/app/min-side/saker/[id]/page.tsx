@@ -601,7 +601,7 @@ export default function CaseDetailPage() {
               PresseSjekk-sak
             </p>
 
-            <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-7xl">
               {caseItem.title}
             </h1>
 
@@ -823,7 +823,7 @@ export default function CaseDetailPage() {
                         href={caseItem.article_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="block break-words text-lg font-bold text-red-700 hover:text-red-900"
+                        className="block text-lg font-bold text-red-700 hover:text-red-900"
                       >
                         {caseItem.article_url}
                       </a>
@@ -872,7 +872,7 @@ export default function CaseDetailPage() {
                                   href={link.url}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="mt-2 block break-words text-sm font-bold text-red-700 hover:text-red-900"
+                                  className="mt-2 block text-sm font-bold text-red-700 hover:text-red-900"
                                 >
                                   {link.url}
                                 </a>

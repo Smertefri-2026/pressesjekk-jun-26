@@ -522,7 +522,7 @@ function UtsjekkContent() {
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
                   URL fra rask sjekk
                 </p>
-                <p className="mt-2 break-words text-sm font-semibold text-slate-800">
+                <p className="mt-2 text-sm font-semibold text-slate-800">
                   {incomingUrl}
                 </p>
               </div>

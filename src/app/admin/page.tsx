@@ -254,7 +254,7 @@ export default function AdminPage() {
               Admin
             </p>
 
-            <h1 className="mt-4 max-w-4xl break-words hyphens-auto text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-7xl">
               Oversikt
             </h1>
 
@@ -444,7 +444,7 @@ export default function AdminPage() {
                   key={item.id}
                   className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
                 >
-                  <p className="break-words font-bold">{item.url}</p>
+                  <p className="font-bold">{item.url}</p>
                   <p className="mt-2 text-sm text-slate-500">
                     {item.role || "Ukjent rolle"} · {item.check_count ?? 1} sjekk ·{" "}
                     {item.ai_status || "Ingen AI-status"}
@@ -529,7 +529,7 @@ export default function AdminPage() {
                   <span className="font-semibold">
                     {item.full_name || "Navn ikke satt"}
                   </span>
-                  <span className="break-words text-slate-700">{item.email}</span>
+                  <span className="text-slate-700">{item.email}</span>
                   <span className="text-violet-700">
                     {item.is_admin ? "Admin" : item.role_type || "Privatperson"}
                   </span>

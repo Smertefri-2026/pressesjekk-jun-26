@@ -32,7 +32,7 @@ export function CaseArticleCard({ item }: CaseArticleCardProps) {
 
       <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900 p-5">
         <p className="text-sm text-slate-400">URL</p>
-        <p className="mt-2 break-words text-slate-300">{item.url}</p>
+        <p className="mt-2 text-slate-300">{item.url}</p>
       </div>
     </section>
   );

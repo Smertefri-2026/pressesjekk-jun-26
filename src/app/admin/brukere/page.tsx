@@ -243,7 +243,7 @@ export default function AdminUsersPage() {
               Admin / brukere
             </p>
 
-            <h1 className="mt-4 max-w-4xl break-words hyphens-auto text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-7xl">
               Brukere
             </h1>
 
@@ -339,7 +339,7 @@ export default function AdminUsersPage() {
                       {profile.full_name || "Navn ikke satt"}
                     </h2>
 
-                    <p className="mt-2 break-words text-sm font-semibold text-slate-600">
+                    <p className="mt-2 text-sm font-semibold text-slate-600">
                       {profile.email || "E-post ikke funnet"}
                     </p>
 

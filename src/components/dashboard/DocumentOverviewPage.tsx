@@ -272,7 +272,7 @@ export function DocumentOverviewPage({
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">
               Totalt
             </p>
-            <p className="mt-4 text-5xl font-black text-slate-950">
+            <p className="mt-4 [text-wrap:balance] text-4xl font-black sm:text-5xl text-slate-950">
               {reports.length}
             </p>
             <p className="mt-3 leading-7 text-slate-600">

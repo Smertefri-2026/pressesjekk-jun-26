@@ -471,7 +471,7 @@ export default function CasePackagePage() {
               {pageEyebrow}
             </p>
 
-            <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-7xl">
               {pageTitle}
             </h1>
 
@@ -491,7 +491,7 @@ export default function CasePackagePage() {
               {currentPackageLabel}
             </h2>
 
-            <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
+            <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">
               Sak: <span className="text-slate-950">{caseItem.title}</span>
             </p>
 

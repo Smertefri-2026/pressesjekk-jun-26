@@ -906,7 +906,7 @@ export default function MinSidePage() {
               Dashboard
             </p>
 
-            <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-7xl">
               Min Side
             </h1>
 
@@ -927,7 +927,7 @@ export default function MinSidePage() {
             </h2>
 
             {user?.email ? (
-              <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
+              <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">
                 Innlogget som:{" "}
                 <span className="text-slate-950">{user.email}</span>
               </p>
@@ -1079,7 +1079,7 @@ export default function MinSidePage() {
               className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
               <p className="font-bold text-slate-500">Rapporter</p>
-              <p className="mt-4 text-5xl font-black text-slate-950">
+              <p className="mt-4 [text-wrap:balance] text-4xl font-black sm:text-5xl text-slate-950">
                 {reportCount}
               </p>
               <p className="mt-3 text-sm font-semibold text-red-700">
@@ -1094,7 +1094,7 @@ export default function MinSidePage() {
               className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
               <p className="font-bold text-slate-500">PFU-klager</p>
-              <p className="mt-4 text-5xl font-black text-slate-950">
+              <p className="mt-4 [text-wrap:balance] text-4xl font-black sm:text-5xl text-slate-950">
                 {pfuDraftCount}
               </p>
               <p className="mt-3 text-sm font-semibold text-red-700">
@@ -1109,7 +1109,7 @@ export default function MinSidePage() {
               className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
               <p className="font-bold text-slate-500">Politianmeldelser</p>
-              <p className="mt-4 text-5xl font-black text-slate-950">
+              <p className="mt-4 [text-wrap:balance] text-4xl font-black sm:text-5xl text-slate-950">
                 {policeDraftCount}
               </p>
               <p className="mt-3 text-sm font-semibold text-red-700">
@@ -1124,7 +1124,7 @@ export default function MinSidePage() {
               className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
               <p className="font-bold text-slate-500">Utredninger</p>
-              <p className="mt-4 text-5xl font-black text-slate-950">
+              <p className="mt-4 [text-wrap:balance] text-4xl font-black sm:text-5xl text-slate-950">
                 {investigationDraftCount}
               </p>
               <p className="mt-3 text-sm font-semibold text-red-700">
@@ -1712,7 +1712,7 @@ export default function MinSidePage() {
             </h2>
 
             {user?.email ? (
-              <p className="mt-4 break-words text-sm font-semibold leading-6 text-slate-600">
+              <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">
                 Innlogget som:{" "}
                 <span className="text-slate-950">{user.email}</span>
               </p>

@@ -260,7 +260,7 @@ export function QuickCheckBox() {
             <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
               Artikkel
             </p>
-            <p className="mt-2 break-words text-sm font-bold text-slate-950">
+            <p className="mt-2 text-sm font-bold text-slate-950">
               {quickCheck.url}
             </p>
             <p className="mt-2 text-sm font-semibold text-red-800">
