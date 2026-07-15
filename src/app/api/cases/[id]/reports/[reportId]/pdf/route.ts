@@ -15,17 +15,9 @@ function jsonError(message: string, status = 400) {
 
 function safeText(value: unknown) {
   return String(value ?? "")
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n")
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/[–—]/g, "-")
-    .replace(/→/g, "->")
-    .replace(/←/g, "<-")
-    .replace(/…/g, "...")
-    .replace(/•/g, "-")
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
-    .trim();
+    .normalize("NFC")
+    .replace(/\u00a0/g, " ")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "");
 }
 
 function formatDate(value: string | null | undefined) {
