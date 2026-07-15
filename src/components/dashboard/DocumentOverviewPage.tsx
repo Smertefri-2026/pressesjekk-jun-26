@@ -149,7 +149,8 @@ export function DocumentOverviewPage({
       const { data: caseRows, error: caseError } = await supabase
         .from("cases")
         .select("id")
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .is("deleted_at", null);
 
       if (caseError) {
         setErrorMessage(caseError.message);

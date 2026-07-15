@@ -649,7 +649,14 @@ export default function MinSidePage() {
   }
 
   const activityItems: ActivityItem[] = [
-    ...reports.map((report) => {
+    ...reports
+      .filter((report) =>
+        cases.some(
+          (caseItem) =>
+            caseItem.id === report.case_id && !caseItem.deleted_at
+        )
+      )
+      .map((report) => {
       const linkedCase = cases.find((caseItem) => caseItem.id === report.case_id);
 
       return {
@@ -676,14 +683,18 @@ export default function MinSidePage() {
                 : `/min-side/saker/${report.case_id}/rapport`,
       };
     }),
-    ...cases.map((caseItem) => ({
+    ...cases
+      .filter((caseItem) => !caseItem.deleted_at)
+      .map((caseItem) => ({
       id: `case-${caseItem.id}`,
       title: "Sak opprettet",
       description: caseItem.title,
       created_at: caseItem.created_at,
       href: `/min-side/saker/${caseItem.id}`,
     })),
-    ...folders.map((folder) => ({
+    ...folders
+      .filter((folder) => !folder.deleted_at)
+      .map((folder) => ({
       id: `folder-${folder.id}`,
       title: "Mappe opprettet",
       description: folder.title,
