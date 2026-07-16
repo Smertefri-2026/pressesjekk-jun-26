@@ -267,9 +267,13 @@ export default function MinSidePage() {
 
       const caseRows = (casesResult.data ?? []) as CaseRow[];
       const folderRows = (foldersResult.data ?? []) as CaseFolderRow[];
-      const caseIds = new Set(caseRows.map((caseItem) => caseItem.id));
+      const activeCaseIds = new Set(
+        caseRows
+          .filter((caseItem) => !caseItem.deleted_at)
+          .map((caseItem) => caseItem.id)
+      );
       const reportRows = ((reportsResult.data ?? []) as ReportRow[]).filter(
-        (report) => caseIds.has(report.case_id)
+        (report) => activeCaseIds.has(report.case_id)
       );
 
       const activeAccessRows =
