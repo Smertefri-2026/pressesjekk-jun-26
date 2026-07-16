@@ -451,7 +451,79 @@ export default function CaseInputsPage() {
     setDocumentDescription("");
     setSelectedDocumentFile(null);
     setDocumentError("");
-    setDocumentMessage("Dokumentet er lastet opp.");
+    setDocumentMessage("Dokumentet er lastet opp. Leser dokumentteksten...");
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      setDocumentMessage(
+        "Dokumentet er lastet opp, men tekstuthentingen kunne ikke startes. Last siden på nytt og prøv igjen."
+      );
+      setIsUploadingDocument(false);
+      return;
+    }
+
+    try {
+      const extractionResponse = await fetch(
+        `/api/cases/${params.id}/documents/${data.id}/extract`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      const extractionResult = await extractionResponse.json();
+
+      if (!extractionResponse.ok) {
+        setDocumentMessage(
+          "Dokumentet er lastet opp, men teksten kunne ikke leses automatisk."
+        );
+        setDocumentError(
+          extractionResult.error ||
+            "Ukjent feil ved automatisk tekstuthenting."
+        );
+        setIsUploadingDocument(false);
+        return;
+      }
+
+      if (extractionResult.document?.extractionStatus === "completed") {
+        const pageCount = extractionResult.document.pageCount;
+
+        setDocumentMessage(
+          pageCount
+            ? `Dokumentet er lastet opp og teksten er lest fra ${pageCount} side${pageCount === 1 ? "" : "r"}.`
+            : "Dokumentet er lastet opp og teksten er lest."
+        );
+      } else if (
+        extractionResult.document?.extractionStatus === "unsupported"
+      ) {
+        setDocumentMessage(
+          "Dokumentet er lastet opp. Denne filtypen støttes ikke for automatisk tekstlesing ennå."
+        );
+      } else {
+        setDocumentMessage(
+          "Dokumentet er lastet opp, men teksten kunne ikke leses automatisk."
+        );
+
+        if (extractionResult.document?.extractionError) {
+          setDocumentError(extractionResult.document.extractionError);
+        }
+      }
+    } catch (error) {
+      setDocumentMessage(
+        "Dokumentet er lastet opp, men tekstuthentingen feilet."
+      );
+      setDocumentError(
+        error instanceof Error
+          ? error.message
+          : "Ukjent feil ved automatisk tekstuthenting."
+      );
+    }
+
     setIsUploadingDocument(false);
 
     const fileInput = document.getElementById(
