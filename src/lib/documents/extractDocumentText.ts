@@ -63,13 +63,23 @@ export async function extractDocumentText(params: {
         .join("\n\n")
     );
 
-    if (!normalizedText) {
+    const meaningfulCharacters = normalizedText
+      .replace(/--- Side \d+ ---/g, "")
+      .replace(/\s/g, "")
+      .length;
+
+    const minimumExpectedCharacters = Math.max(100, pages.length * 75);
+
+    if (
+      !normalizedText ||
+      meaningfulCharacters < minimumExpectedCharacters
+    ) {
       return {
         status: "failed",
         text: null,
         pageCount: pages.length || null,
         error:
-          "PDF-en inneholder ikke lesbar tekst. Dokumentet kan være skannet som bilde.",
+          "PDF-en inneholder for lite maskinlesbar tekst og ser ut til å være skannet som bilder. Last opp en tekstbasert PDF eller legg inn innholdet manuelt.",
       };
     }
 
