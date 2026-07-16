@@ -52,6 +52,15 @@ type CaseDocumentRow = {
   mime_type: string | null;
   created_at: string;
   deleted_at: string | null;
+  extraction_status:
+    | "pending"
+    | "processing"
+    | "completed"
+    | "failed"
+    | "unsupported";
+  extraction_error: string | null;
+  extracted_at: string | null;
+  page_count: number | null;
 };
 
 type CaseInputRow = {
@@ -291,7 +300,7 @@ export default function CaseInputsPage() {
       const { data: documentsData } = await supabase
         .from("case_documents")
         .select(
-          "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at,deleted_at"
+          "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at,deleted_at,extraction_status,extraction_error,extracted_at,page_count"
         )
         .eq("case_id", params.id)
         .is("deleted_at", null)
@@ -302,7 +311,7 @@ export default function CaseInputsPage() {
       const { data: trashedDocumentsData } = await supabase
         .from("case_documents")
         .select(
-          "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at,deleted_at"
+          "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at,deleted_at,extraction_status,extraction_error,extracted_at,page_count"
         )
         .eq("case_id", params.id)
         .not("deleted_at", "is", null)
@@ -434,7 +443,7 @@ export default function CaseInputsPage() {
         mime_type: selectedDocumentFile.type || null,
       })
       .select(
-        "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at,deleted_at"
+        "id,title,document_type,description,file_name,file_path,file_size,mime_type,created_at,deleted_at,extraction_status,extraction_error,extracted_at,page_count"
       )
       .single();
 
@@ -619,6 +628,128 @@ export default function CaseInputsPage() {
       current.filter((item) => item.id !== document.id)
     );
     setDocumentMessage("Dokumentet er slettet permanent.");
+  }
+
+  async function extractExistingDocument(document: CaseDocumentRow) {
+    setDocumentMessage("");
+    setDocumentError("");
+
+    setDocuments((current) =>
+      current.map((item) =>
+        item.id === document.id
+          ? {
+              ...item,
+              extraction_status: "processing",
+              extraction_error: null,
+            }
+          : item
+      )
+    );
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      setDocumentError(
+        "Innloggingen kunne ikke bekreftes. Last siden på nytt og prøv igjen."
+      );
+
+      setDocuments((current) =>
+        current.map((item) =>
+          item.id === document.id
+            ? {
+                ...item,
+                extraction_status: document.extraction_status,
+              }
+            : item
+        )
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/cases/${params.id}/documents/${document.id}/extract`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error || "Dokumentteksten kunne ikke leses."
+        );
+      }
+
+      const extractionStatus =
+        result.document?.extractionStatus ?? "failed";
+      const extractionError =
+        result.document?.extractionError ?? null;
+      const pageCount =
+        result.document?.pageCount ?? null;
+      const extractedAt =
+        result.document?.extractedAt ?? new Date().toISOString();
+
+      setDocuments((current) =>
+        current.map((item) =>
+          item.id === document.id
+            ? {
+                ...item,
+                extraction_status: extractionStatus,
+                extraction_error: extractionError,
+                extracted_at: extractedAt,
+                page_count: pageCount,
+              }
+            : item
+        )
+      );
+
+      if (extractionStatus === "completed") {
+        setDocumentMessage(
+          pageCount
+            ? `Dokumentet «${document.title}» er lest fra ${pageCount} side${
+                pageCount === 1 ? "" : "r"
+              }.`
+            : `Dokumentet «${document.title}» er lest.`
+        );
+      } else if (extractionStatus === "unsupported") {
+        setDocumentMessage(
+          `Dokumentet «${document.title}» er lagret, men filtypen støttes ikke for automatisk tekstlesing ennå.`
+        );
+      } else {
+        setDocumentError(
+          extractionError ||
+            `Teksten i «${document.title}» kunne ikke leses automatisk.`
+        );
+      }
+    } catch (error) {
+      setDocuments((current) =>
+        current.map((item) =>
+          item.id === document.id
+            ? {
+                ...item,
+                extraction_status: "failed",
+                extraction_error:
+                  error instanceof Error
+                    ? error.message
+                    : "Ukjent feil ved tekstuthenting.",
+              }
+            : item
+        )
+      );
+
+      setDocumentError(
+        error instanceof Error
+          ? error.message
+          : "Ukjent feil ved tekstuthenting."
+      );
+    }
   }
 
   async function restoreDocument(document: CaseDocumentRow) {
@@ -1389,6 +1520,26 @@ export default function CaseInputsPage() {
                           </p>
                         ) : null}
 
+                        {documentMode !== "trash" ? (
+                          <p className="mt-3 text-sm font-bold text-slate-600">
+                            {document.extraction_status === "completed"
+                              ? `Tekst lest${
+                                  document.page_count
+                                    ? ` · ${document.page_count} side${
+                                        document.page_count === 1 ? "" : "r"
+                                      }`
+                                    : ""
+                                }`
+                              : document.extraction_status === "processing"
+                                ? "Leser dokumenttekst..."
+                                : document.extraction_status === "unsupported"
+                                  ? "Filtypen støttes ikke for tekstlesing"
+                                  : document.extraction_status === "failed"
+                                    ? "Tekstlesing feilet"
+                                    : "Dokumentet er ikke lest ennå"}
+                          </p>
+                        ) : null}
+
                         <div className="mt-5 flex flex-wrap gap-2">
                           {documentMode === "trash" ? (
                             <>
@@ -1418,6 +1569,25 @@ export default function CaseInputsPage() {
                               >
                                 Åpne
                               </button>
+                              {document.extraction_status !== "completed" &&
+                              document.extraction_status !== "unsupported" ? (
+                                <button
+                                  type="button"
+                                  disabled={
+                                    document.extraction_status === "processing"
+                                  }
+                                  onClick={() =>
+                                    extractExistingDocument(document)
+                                  }
+                                  className="rounded-xl border border-orange-300 bg-orange-50 px-4 py-3 text-sm font-black text-orange-900 hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  {document.extraction_status === "processing"
+                                    ? "Leser..."
+                                    : document.extraction_status === "failed"
+                                      ? "Prøv igjen"
+                                      : "Les dokument"}
+                                </button>
+                              ) : null}
                               <button
                                 type="button"
                                 onClick={() => deleteDocument(document)}
@@ -1529,6 +1699,27 @@ export default function CaseInputsPage() {
                               >
                                 Åpne
                               </button>
+
+                              {document.extraction_status !== "completed" &&
+                              document.extraction_status !== "unsupported" ? (
+                                <button
+                                  type="button"
+                                  disabled={
+                                    document.extraction_status === "processing"
+                                  }
+                                  onClick={() =>
+                                    extractExistingDocument(document)
+                                  }
+                                  className="rounded-lg border border-orange-300 bg-orange-50 px-3 py-2 text-xs font-black text-orange-900 hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                  {document.extraction_status === "processing"
+                                    ? "Leser..."
+                                    : document.extraction_status === "failed"
+                                      ? "Prøv igjen"
+                                      : "Les dokument"}
+                                </button>
+                              ) : null}
+
                               <button
                                 type="button"
                                 onClick={() => deleteDocument(document)}
