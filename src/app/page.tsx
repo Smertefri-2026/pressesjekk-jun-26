@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { QuickCheckBox } from "@/components/public/QuickCheckBox";
+import { CaseFlowAnimation } from "@/components/public/CaseFlowAnimation";
 
 const mainBenefits = [
   {
@@ -244,12 +245,10 @@ export default function HomePage() {
             </div>
 
             <figure className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.04] lg:self-stretch">
-              <img
-                src="/images/bilde3.png"
-                alt="Dokumentpakke med rapport, tilsvar og dokumentasjon for en mediesak."
-                className="h-full min-h-[260px] w-full object-cover"
-                loading="lazy"
-              />
+              <figcaption className="sr-only">
+                Saksflyt: artikkel, vurderingspunkter, rapport
+              </figcaption>
+              <CaseFlowAnimation />
             </figure>
           </div>
         </section>
