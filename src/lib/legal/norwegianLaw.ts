@@ -231,7 +231,7 @@ export function formatNorwegianLawRulesForPrompt(rules: NorwegianLawRule[]) {
         `Kort forklaring: ${rule.summary}`,
         `Relevans: ${rule.relevance}`,
         `Forsiktig språk: ${rule.cautiousLanguage.join(" / ")}`,
-      ].join("\\n");
+      ].join("\n");
     })
-    .join("\\n\\n");
+    .join("\n\n");
 }

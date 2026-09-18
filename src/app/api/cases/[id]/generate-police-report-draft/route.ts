@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
-import { createClient } from "@supabase/supabase-js";
+import { requireUser } from "@/lib/supabase/authServer";
+import { jsonError } from "@/lib/api/http";
+import { callAiText, AI_DOCUMENT_ISOLATION_INSTRUCTIONS } from "@/lib/ai/openai";
+import { formatDocumentsForPrompt } from "@/lib/documents/formatForPrompt";
 import { assertCaseAccess } from "@/lib/access/assertCaseAccess";
 import {
   editorResponsibilityRules,
@@ -31,53 +33,14 @@ export async function POST(
 ) {
   const { id } = await context.params;
 
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.replace("Bearer ", "");
-
-  if (!token) {
-    return NextResponse.json(
-      { error: "Du må være innlogget." },
-      { status: 401 }
-    );
+  if (!process.env.OPENAI_API_KEY) {
+    return jsonError("OPENAI_API_KEY mangler i .env.local.", 500);
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const openAiKey = process.env.OPENAI_API_KEY;
+  const auth = await requireUser(request);
+  if (!auth.ok) return jsonError(auth.error, auth.status);
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.json(
-      { error: "Supabase-miljøvariabler mangler." },
-      { status: 500 }
-    );
-  }
-
-  if (!openAiKey) {
-    return NextResponse.json(
-      { error: "OPENAI_API_KEY mangler i .env.local." },
-      { status: 500 }
-    );
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  });
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser(token);
-
-  if (userError || !user) {
-    return NextResponse.json(
-      { error: "Kunne ikke bekrefte bruker." },
-      { status: 401 }
-    );
-  }
+  const { user, supabase } = auth;
 
   const { data: caseItem, error: caseError } = await supabase
     .from("cases")
@@ -118,8 +81,9 @@ export async function POST(
 
   const { data: documents } = await supabase
     .from("case_documents")
-    .select("*")
+    .select("id,title,document_type,file_name,created_at,extracted_text")
     .eq("case_id", id)
+    .is("deleted_at", null)
     .order("created_at", { ascending: true });
 
   const { data: reports } = await supabase
@@ -153,10 +117,6 @@ export async function POST(
   const compensationRulesForPrompt = formatNorwegianLawRulesForPrompt(
     getCompensationContextRules()
   );
-
-  const client = new OpenAI({
-    apiKey: openAiKey,
-  });
 
   const prompt = `
 Du er en forsiktig norsk saksbehandler som lager et strukturert utkast til politianmeldelse / vurderingsnotat i en mediesak.
@@ -232,7 +192,7 @@ SAKSOPPLYSNINGER:
 ${jsonText(inputs)}
 
 DOKUMENTER:
-${jsonText(documents)}
+${formatDocumentsForPrompt(documents)}
 
 SISTE RAPPORT:
 ${jsonText(latestFullReport)}
@@ -245,19 +205,12 @@ ${jsonText(pfuDecision)}
 `;
 
   try {
-    const completion = await client.responses.create({
-      model: "gpt-4.1-mini",
-      input: prompt,
-    });
-
-    const policeDraft = safeText(completion.output_text);
-
-    if (!policeDraft) {
-      return NextResponse.json(
-        { error: "KI-en returnerte ikke tekst." },
-        { status: 500 }
-      );
-    }
+    const policeDraft = safeText(
+      await callAiText({
+        prompt,
+        instructions: AI_DOCUMENT_ISOLATION_INSTRUCTIONS,
+      })
+    );
 
     const existingVersions = (reports ?? [])
       .map((report) => Number(report.version))

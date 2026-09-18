@@ -100,7 +100,7 @@ export default function VilkarPage() {
           <aside className="hidden overflow-hidden rounded-3xl border border-red-200 bg-white shadow-sm lg:block">
             <div className="relative min-h-[280px] bg-slate-950 p-7 text-white">
               <div className="absolute right-6 top-6 h-24 w-24 rounded-full bg-red-500/20 blur-2xl" />
-              <div className="absolute bottom-6 left-6 h-28 w-28 rounded-full bg-orange-400/20 blur-2xl" />
+              <div className="absolute bottom-6 left-6 h-28 w-28 rounded-full bg-red-700/25 blur-2xl" />
 
               <div className="relative">
                 <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
@@ -109,7 +109,7 @@ export default function VilkarPage() {
 
                 <div className="mt-8 rounded-2xl border border-white/10 bg-white/10 p-5">
                   <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-400 text-sm font-black text-slate-950">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-red-400 text-sm font-black text-slate-950">
                       ✓
                     </span>
                     <div className="h-3 flex-1 rounded-full bg-white/60" />

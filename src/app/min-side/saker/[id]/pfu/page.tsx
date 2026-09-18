@@ -2,13 +2,16 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
-import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
+import { CaseSidebar } from "@/components/cases/CaseSidebar";
+import { JournalistWorkflowGate } from "@/components/cases/JournalistWorkflowGate";
+import { CaseAttachmentPanel } from "@/components/cases/CaseAttachmentPanel";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
-import type { PackagePlanId } from "@/data/packagePlans";
+import { packageAccessSteps, type PackagePlanId } from "@/data/packagePlans";
+import type { CaseReportRow as FullCaseReportRow } from "@/lib/report/mappers";
 
 type CaseAccessRow = {
   package_id: PackagePlanId;
@@ -47,19 +50,26 @@ type ProfileRow = {
   role_type: string | null;
 };
 
-type CaseReportRow = {
-  id: string;
-  version: number;
-  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft" | "investigation_draft";
-  pfu_draft: string | null;
-  status: "draft" | "ready" | "archived";
-  created_at: string;
-};
+type CaseReportRow = Pick<
+  FullCaseReportRow,
+  "id" | "version" | "report_type" | "pfu_draft" | "status" | "created_at"
+>;
 
 type PfuDecisionRow = {
   id: string;
+  pfu_complaint_sent: boolean | null;
+  pfu_sent_date: string | null;
+  pfu_case_number: string | null;
+  pfu_case_url: string | null;
   decision_received: boolean | null;
+  decision_date: string | null;
+  decision_result: string | null;
+  decision_summary: string | null;
+  decision_text: string | null;
+  uploaded_file_path: string | null;
   uploaded_file_name: string | null;
+  uploaded_file_type: string | null;
+  next_step_interest: string | null;
 };
 
 function formatDate(date: string | null) {
@@ -94,6 +104,17 @@ function roleTypeLabel(roleType: string | null) {
   return roleType;
 }
 
+function decisionResultLabel(value: string | null) {
+  if (!value) return "Ikke satt";
+  if (value === "upheld") return "Felt";
+  if (value === "not_upheld") return "Ikke felt";
+  if (value === "dismissed") return "Avvist";
+  if (value === "withdrawn") return "Trukket";
+  if (value === "partly_upheld") return "Delvis felt";
+  if (value === "other") return "Annet";
+  return value;
+}
+
 function statusLabel(status: CaseRow["status"]) {
   if (status === "draft") return "Utkast";
   if (status === "in_progress") return "Under arbeid";
@@ -102,23 +123,39 @@ function statusLabel(status: CaseRow["status"]) {
   return status;
 }
 
-export default function PfuDraftPage() {
+export default function PfuPage() {
   const params = useParams<{ id: string }>();
 
   const [user, setUser] = useState<User | null>(null);
-  const [caseAccessPackageId, setCaseAccessPackageId] =
-    useState<PackagePlanId | null>(null);
+  const [caseAccessPackageId, setCaseAccessPackageId] = useState<PackagePlanId | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [caseItem, setCaseItem] = useState<CaseRow | null>(null);
   const [caseInput, setCaseInput] = useState<CaseInputRow | null>(null);
   const [pfuDrafts, setPfuDrafts] = useState<CaseReportRow[]>([]);
   const [selectedPfuDraftId, setSelectedPfuDraftId] = useState<string | null>(null);
   const [reports, setReports] = useState<CaseReportRow[]>([]);
-  const [pfuDecision, setPfuDecision] = useState<PfuDecisionRow | null>(null);
+
+  const [decisionId, setDecisionId] = useState<string | null>(null);
+  const [pfuComplaintSent, setPfuComplaintSent] = useState(false);
+  const [pfuSentDate, setPfuSentDate] = useState("");
+  const [pfuCaseNumber, setPfuCaseNumber] = useState("");
+  const [pfuCaseUrl, setPfuCaseUrl] = useState("");
+  const [decisionReceived, setDecisionReceived] = useState(false);
+  const [decisionDate, setDecisionDate] = useState("");
+  const [decisionResult, setDecisionResult] = useState("");
+  const [decisionSummary, setDecisionSummary] = useState("");
+  const [decisionText, setDecisionText] = useState("");
+  const [nextStepInterest, setNextStepInterest] = useState("");
+  // Historiske filreferanser (legacy - nye opplastinger skjer via
+  // CaseAttachmentPanel/case_documents, se Dokumentasjon i høyrekolonnen).
+  const [uploadedFilePath, setUploadedFilePath] = useState("");
+  const [uploadedFileName, setUploadedFileName] = useState("");
+  const [uploadedFileType, setUploadedFileType] = useState("");
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [isGeneratingAiDraft, setIsGeneratingAiDraft] = useState(false);
+  const [isSavingDecision, setIsSavingDecision] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -140,16 +177,20 @@ export default function PfuDraftPage() {
 
       setUser(user);
 
-      const { data: accessData } = await supabase
+      const { data: accessData, error: accessError } = await supabase
         .from("case_access")
         .select("package_id,status")
         .eq("case_id", params.id)
         .eq("status", "active")
         .maybeSingle();
 
-      const caseAccess = accessData as CaseAccessRow | null;
+      if (accessError) {
+        setErrorMessage(accessError.message);
+        setIsLoading(false);
+        return;
+      }
 
-      setCaseAccessPackageId(caseAccess?.package_id ?? null);
+      setCaseAccessPackageId((accessData as CaseAccessRow | null)?.package_id ?? null);
 
       const { data: profileData } = await supabase
         .from("profiles")
@@ -161,9 +202,7 @@ export default function PfuDraftPage() {
 
       const { data: caseData, error: caseError } = await supabase
         .from("cases")
-        .select(
-          "id,title,status,media_name,article_title,article_url,published_date,short_description"
-        )
+        .select("id,title,status,media_name,article_title,article_url,published_date,short_description")
         .eq("id", params.id)
         .single();
 
@@ -191,37 +230,51 @@ export default function PfuDraftPage() {
 
       setCaseInput((inputData as CaseInputRow | null) ?? null);
 
-      const { data: reportData, error: reportError } = await supabase
+      const { data: allReportsData } = await supabase
         .from("case_reports")
         .select("id,version,report_type,pfu_draft,status,created_at")
         .eq("case_id", params.id)
-        .eq("report_type", "pfu_draft")
         .order("version", { ascending: false });
 
-      if (reportError) {
-        setErrorMessage(reportError.message);
+      const allReports = (allReportsData ?? []) as CaseReportRow[];
+      setReports(allReports);
+
+      const loadedPfuDrafts = allReports.filter((report) => report.report_type === "pfu_draft");
+      setPfuDrafts(loadedPfuDrafts);
+      setSelectedPfuDraftId(loadedPfuDrafts[0]?.id ?? null);
+
+      const { data: decisionData, error: decisionError } = await supabase
+        .from("pfu_decisions")
+        .select(
+          "id,pfu_complaint_sent,pfu_sent_date,pfu_case_number,pfu_case_url,decision_received,decision_date,decision_result,decision_summary,decision_text,uploaded_file_path,uploaded_file_name,uploaded_file_type,next_step_interest"
+        )
+        .eq("case_id", params.id)
+        .maybeSingle();
+
+      if (decisionError) {
+        setErrorMessage(decisionError.message);
         setIsLoading(false);
         return;
       }
 
-      const loadedPfuDrafts = (reportData ?? []) as CaseReportRow[];
-      setPfuDrafts(loadedPfuDrafts);
-      setSelectedPfuDraftId(loadedPfuDrafts[0]?.id ?? null);
+      if (decisionData) {
+        const decision = decisionData as PfuDecisionRow;
 
-      const { data: allReportsData } = await supabase
-        .from("case_reports")
-        .select("id,version,report_type,pfu_draft,status,created_at")
-        .eq("case_id", params.id);
-
-      setReports((allReportsData ?? []) as CaseReportRow[]);
-
-      const { data: pfuDecisionData } = await supabase
-        .from("pfu_decisions")
-        .select("id,decision_received,uploaded_file_name")
-        .eq("case_id", params.id)
-        .maybeSingle();
-
-      setPfuDecision((pfuDecisionData as PfuDecisionRow | null) ?? null);
+        setDecisionId(decision.id);
+        setPfuComplaintSent(Boolean(decision.pfu_complaint_sent));
+        setPfuSentDate(decision.pfu_sent_date ?? "");
+        setPfuCaseNumber(decision.pfu_case_number ?? "");
+        setPfuCaseUrl(decision.pfu_case_url ?? "");
+        setDecisionReceived(Boolean(decision.decision_received));
+        setDecisionDate(decision.decision_date ?? "");
+        setDecisionResult(decision.decision_result ?? "");
+        setDecisionSummary(decision.decision_summary ?? "");
+        setDecisionText(decision.decision_text ?? "");
+        setNextStepInterest(decision.next_step_interest ?? "");
+        setUploadedFilePath(decision.uploaded_file_path ?? "");
+        setUploadedFileName(decision.uploaded_file_name ?? "");
+        setUploadedFileType(decision.uploaded_file_type ?? "");
+      }
 
       setIsLoading(false);
     }
@@ -286,7 +339,7 @@ Detaljer:
 ${caseInput?.legal_status_details || "[Forklar om saken er anmeldt, henlagt, avgjort, påklaget, uavklart eller ikke relevant.]"}
 
 7. Dokumentasjon
-${caseInput?.documentation_summary || "[List opp dokumentasjon: e-poster, SMS, vedlegg, skjermbilder, rettsdokumenter, tidligere korrespondanse eller annen relevant dokumentasjon.]"}
+${caseInput?.documentation_summary || "[Se dokumentasjonen som er lastet opp i saken (Dokumentasjon på saksopplysninger-siden) for e-poster, SMS, vedlegg og annen dokumentasjon.]"}
 
 8. Hva ønskes oppnådd?
 ${caseInput?.desired_outcome || "[F.eks. retting, tilsvar, beklagelse, presisering, sletting/avindeksering, PFU-behandling eller annen oppfølging.]"}
@@ -305,14 +358,14 @@ Basert på de registrerte opplysningene kan følgende temaer være relevante å 
 Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetisk vurdering. Utkastet bør kvalitetssikres før bruk.`;
   }, [caseItem, caseInput, profile, user]);
 
-  const activePfuDraft =
-    pfuDrafts.find((draft) => draft.id === selectedPfuDraftId) ??
-    pfuDrafts[0] ??
-    null;
-
+  const activePfuDraft = pfuDrafts.find((draft) => draft.id === selectedPfuDraftId) ?? pfuDrafts[0] ?? null;
   const activePfuDraftText = activePfuDraft?.pfu_draft || draftText;
 
   const isJournalistWorkflow = profile?.role_type === "journalist";
+
+  const hasFullPackAccess = Boolean(
+    caseAccessPackageId && (packageAccessSteps[caseAccessPackageId] ?? []).includes(5)
+  );
 
   function handleDownloadPfuDraftText() {
     const safeTitle = (caseItem?.title ?? "pressesjekk-pfu-klage")
@@ -320,17 +373,12 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
       .replace(/[^a-z0-9æøå]+/gi, "-")
       .replace(/^-+|-+$/g, "");
 
-    const blob = new Blob([activePfuDraftText], {
-      type: "text/plain;charset=utf-8",
-    });
-
+    const blob = new Blob([activePfuDraftText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
 
     link.href = url;
-    link.download = `${safeTitle}-${activePfuDraft
-      ? `pfu-klageutkast-v${activePfuDraft.version}`
-      : "pfu-klageutkast"}.txt`;
+    link.download = `${safeTitle}-${activePfuDraft ? `pfu-klageutkast-v${activePfuDraft.version}` : "pfu-klageutkast"}.txt`;
 
     document.body.appendChild(link);
     link.click();
@@ -345,9 +393,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
       return;
     }
 
-    const { data: sessionData, error: sessionError } =
-      await supabase.auth.getSession();
-
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     const accessToken = sessionData.session?.access_token;
 
     if (sessionError || !accessToken) {
@@ -357,15 +403,10 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
     setErrorMessage("");
 
-    const response = await fetch(
-      `/api/cases/${params.id}/reports/${activePfuDraft.id}/pdf`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+    const response = await fetch(`/api/cases/${params.id}/reports/${activePfuDraft.id}/pdf`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     if (!response.ok) {
       const payload = await response.json().catch(() => null);
@@ -400,9 +441,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
       await navigator.clipboard.writeText(activePfuDraftText);
       setCopyMessage("PFU-klageet er kopiert.");
     } catch {
-      setErrorMessage(
-        "Kunne ikke kopiere automatisk. Marker teksten og kopier manuelt."
-      );
+      setErrorMessage("Kunne ikke kopiere automatisk. Marker teksten og kopier manuelt.");
     }
   }
 
@@ -414,9 +453,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
     setSuccessMessage("");
     setCopyMessage("");
 
-    const { data: sessionData, error: sessionError } =
-      await supabase.auth.getSession();
-
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     const accessToken = sessionData.session?.access_token;
 
     if (sessionError || !accessToken) {
@@ -427,9 +464,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
     const response = await fetch(`/api/cases/${params.id}/generate-pfu-draft`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
 
     const result = await response.json();
@@ -458,14 +493,12 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
   async function handleSavePfuDraft() {
     if (!caseItem) return;
 
-    setIsSaving(true);
+    setIsSavingDraft(true);
     setErrorMessage("");
     setSuccessMessage("");
 
     const allKnownVersions = [...reports, ...pfuDrafts].map((item) => item.version);
-
-    const nextVersion =
-      allKnownVersions.length > 0 ? Math.max(...allKnownVersions) + 1 : 1;
+    const nextVersion = allKnownVersions.length > 0 ? Math.max(...allKnownVersions) + 1 : 1;
 
     const { data: savedDraft, error } = await supabase
       .from("case_reports")
@@ -481,13 +514,13 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
     if (error) {
       setErrorMessage(error.message);
-      setIsSaving(false);
+      setIsSavingDraft(false);
       return;
     }
 
     if (!savedDraft?.id) {
       setErrorMessage("PFU-klagen ble lagret, men vi fant ikke dokument-ID.");
-      setIsSaving(false);
+      setIsSavingDraft(false);
       return;
     }
 
@@ -497,9 +530,78 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
     setPfuDrafts((current) => [newPfuDraft, ...current]);
     setReports((current) => [newPfuDraft, ...current]);
-
     setSelectedPfuDraftId(newPfuDraft.id);
-    setIsSaving(false);
+    setIsSavingDraft(false);
+  }
+
+  async function handleSaveDecision(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!user || !caseItem) {
+      setErrorMessage("Du må være innlogget for å lagre PFU-status.");
+      return;
+    }
+
+    setIsSavingDecision(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const payload = {
+        case_id: caseItem.id,
+        user_id: user.id,
+
+        pfu_complaint_sent: pfuComplaintSent,
+        pfu_sent_date: pfuSentDate || null,
+        pfu_case_number: pfuCaseNumber.trim() || null,
+        pfu_case_url: pfuCaseUrl.trim() || null,
+
+        decision_received: hasFullPackAccess ? decisionReceived : false,
+        decision_date: hasFullPackAccess ? decisionDate || null : null,
+        decision_result: hasFullPackAccess ? decisionResult || null : null,
+        decision_summary: hasFullPackAccess ? decisionSummary.trim() || null : null,
+        decision_text: hasFullPackAccess ? decisionText.trim() || null : null,
+
+        uploaded_file_path: uploadedFilePath || null,
+        uploaded_file_name: uploadedFileName || null,
+        uploaded_file_type: uploadedFileType || null,
+
+        next_step_interest: nextStepInterest || null,
+      };
+
+      if (decisionId) {
+        const { error } = await supabase.from("pfu_decisions").update(payload).eq("id", decisionId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("pfu_decisions")
+          .insert(payload)
+          .select("id")
+          .single();
+
+        if (error) throw error;
+        setDecisionId(data.id);
+      }
+
+      setSuccessMessage("PFU-status er lagret.");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Kunne ikke lagre PFU-status.");
+    } finally {
+      setIsSavingDecision(false);
+    }
+  }
+
+  async function handleOpenFile() {
+    if (!uploadedFilePath) return;
+
+    const { data, error } = await supabase.storage.from("case-documents").createSignedUrl(uploadedFilePath, 60);
+
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
   if (isLoading) {
@@ -508,9 +610,7 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
         <LightPublicHeader />
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-            <p className="text-lg font-bold text-slate-700">
-              Laster PFU-klage...
-            </p>
+            <p className="text-lg font-bold text-slate-700">Laster PFU...</p>
           </div>
         </section>
       </main>
@@ -519,100 +619,24 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
 
   if (isJournalistWorkflow) {
     return (
-      <main className="min-h-screen bg-slate-50 text-slate-950">
-        <LightPublicHeader />
-
-        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-          <Link
-            href={`/min-side/saker/${params.id}`}
-            className="text-sm font-semibold text-red-700 hover:text-red-900"
-          >
-            ← Tilbake til saken
-          </Link>
-
-          <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <section className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm sm:p-10">
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-800">
-                Redaksjonell sjekk
-              </p>
-
-              <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-6xl">
-                Bruk rapport og publiseringsgrunnlag
-              </h1>
-
-              <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-                Denne siden er laget for PFU-klager etter publisering. For journalist
-                og redaksjon brukes PresseSjekk til publiseringsgrunnlag,
-                VVP-risiko, kildekontroll og redaksjonell kvalitetssikring før
-                publisering.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href={`/min-side/saker/${params.id}/rapport`}
-                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
-                >
-                  Gå til redaksjonell rapport
-                </Link>
-
-                <Link
-                  href={`/min-side/saker/${params.id}/opplysninger`}
-                  className="rounded-2xl border border-red-300 bg-white px-6 py-4 font-black text-red-900 hover:bg-red-50"
-                >
-                  Gå til publiseringsgrunnlag
-                </Link>
-
-                <Link
-                  href={`/min-side/saker/${params.id}/pakke`}
-                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
-                >
-                  Se redaksjonelle pakker
-                </Link>
-              </div>
-            </section>
-
-            <aside className="grid content-start gap-6">
-              <CaseWorkflowCard
-                caseId={params.id}
-                statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
-                activeStep="rapport"
-                workflowType="journalist"
-                currentPackageId={caseAccessPackageId ?? undefined}
-                stepsDone={{
-                  caseRegistered: true,
-                  caseInputs: Boolean(caseInput),
-                  report: reports.some(
-                    (report) =>
-                      report.report_type === "free_check" ||
-                      report.report_type === "full_report"
-                  ),
-                  pfuDraft: false,
-                  pfuDecision: false,
-                  policeReport: false,
-                  investigation: reports.some(
-                    (report) => report.report_type === "investigation_draft"
-                  ),
-                }}
-              />
-
-              <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
-                  Riktig arbeidsflyt
-                </p>
-                <h2 className="mt-3 text-3xl font-black">
-                  Før publisering
-                </h2>
-                <p className="mt-4 leading-8 text-slate-300">
-                  For redaksjoner bør hovedløpet være publiseringsgrunnlag,
-                  redaksjonell rapport og VVP-risiko, ikke PFU-klage mot egen sak.
-                </p>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <LightPublicFooter />
-      </main>
+      <JournalistWorkflowGate
+        caseId={params.id}
+        heading="Bruk rapport og publiseringsgrunnlag"
+        description="Denne siden er laget for PFU-klage og PFU-avgjørelse etter publisering. For journalist og redaksjon brukes PresseSjekk til publiseringsgrunnlag, VVP-risiko, kildekontroll og redaksjonell kvalitetssikring før publisering."
+        statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+        currentPackageId={caseAccessPackageId ?? undefined}
+        stepsDone={{
+          caseRegistered: true,
+          caseInputs: Boolean(caseInput),
+          report: reports.some(
+            (report) => report.report_type === "free_check" || report.report_type === "full_report"
+          ),
+          pfuDraft: false,
+          pfuDecision: false,
+          policeReport: false,
+          investigation: reports.some((report) => report.report_type === "investigation_draft"),
+        }}
+      />
     );
   }
 
@@ -621,42 +645,50 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link
-          href="/min-side"
-          className="text-sm font-semibold text-red-700 hover:text-red-900"
-        >
+        <Link href="/min-side" className="text-sm font-semibold text-red-700 hover:text-red-900">
           ← Tilbake til Min Side
         </Link>
 
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
           <section>
-            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
-              PFU-klage
-            </p>
+            <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">PFU</p>
 
             <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-7xl">
-              PFU-klage
+              PFU-klage og avgjørelse
             </h1>
 
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-              PFU-klageet bygger på saken, saksopplysninger,
-              dokumentasjon og relevante punkter i Vær Varsom-plakaten.
-              Utkastet er et arbeidsgrunnlag før eventuell innsending eller
-              videre kvalitetssikring.
+              Lag PFU-klagen, registrer at den er sendt inn, og følg opp med PFU-avgjørelsen når den kommer - samlet
+              på ett sted.
             </p>
 
-            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
-                Kladd
-              </p>
+            {errorMessage ? (
+              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
+                {errorMessage}
+              </div>
+            ) : null}
 
-              <h2 className="mt-3 text-4xl font-black text-slate-950">
-                {activePfuDraft
-                  ? `PFU-klage v${activePfuDraft.version}`
-                  : "PFU-klage"}
+            {successMessage ? (
+              <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
+                {successMessage}
+              </div>
+            ) : null}
+
+            {copyMessage ? (
+              <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
+                {copyMessage}
+              </div>
+            ) : null}
+
+            {/* Steg 1: PFU-klage */}
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">1. PFU-klage</p>
+
+              <h2 className="mt-3 text-3xl font-black text-slate-950">
+                {activePfuDraft ? `PFU-klage v${activePfuDraft.version}` : "Lag PFU-klagen"}
               </h2>
 
-              <p className="mt-4 max-w-3xl leading-8 text-slate-700">
+              <p className="mt-4 max-w-3xl leading-7 text-slate-700">
                 {activePfuDraft
                   ? "Dette er valgt lagret PFU-klage. Du kan laste ned PDF, laste ned tekst eller lage et nytt KI-utkast."
                   : "Bruk KI-knappen for å lage en gjennomarbeidet PFU-klage basert på saken og relevante presseetiske punkter."}
@@ -667,11 +699,9 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                   type="button"
                   onClick={handleGenerateAiPfuDraft}
                   disabled={isGeneratingAiDraft}
-                  className="col-span-2 w-full rounded-2xl bg-red-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
+                  className="col-span-2 w-full rounded-2xl bg-red-500 px-5 py-4 text-center text-base font-black text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
                 >
-                  {isGeneratingAiDraft
-                    ? "Genererer..."
-                    : "Generer PFU-klage med KI"}
+                  {isGeneratingAiDraft ? "Genererer..." : "Generer PFU-klage med KI"}
                 </button>
 
                 <button
@@ -690,147 +720,333 @@ Dette er ikke en ferdig PFU-klage, juridisk rådgivning eller endelig presseetis
                 >
                   Last ned tekst
                 </button>
-
-
               </div>
 
-              <pre className="mt-8 max-h-[900px] overflow-auto whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800 sm:p-7">
+              <pre className="mt-8 max-h-[500px] overflow-auto whitespace-pre-wrap rounded-3xl border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-800 sm:p-7">
                 {activePfuDraftText}
               </pre>
 
-              {errorMessage ? (
-                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
-                  {errorMessage}
-                </div>
-              ) : null}
+              <button
+                type="button"
+                onClick={handleCopyDraft}
+                className="mt-4 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-100"
+              >
+                Kopier tekst
+              </button>
 
-              {copyMessage ? (
-                <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-800">
-                  {copyMessage}
-                </div>
-              ) : null}
-
-              {successMessage ? (
-                <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
-                  {successMessage}
-                </div>
-              ) : null}
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href={`/min-side/saker/${params.id}/pfu-avgjorelse`}
-                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
+              {!activePfuDraft ? (
+                <button
+                  type="button"
+                  onClick={handleSavePfuDraft}
+                  disabled={isSavingDraft}
+                  className="mt-4 ml-3 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Gå til PFU-avgjørelse
-                </Link>
-
-                <Link
-                  href={`/min-side/saker/${params.id}/politianmeldelse`}
-                  className="rounded-2xl border border-red-300 bg-red-50 px-6 py-4 font-black text-red-900 hover:bg-red-50"
-                >
-                  Gå til politianmeldelse
-                </Link>
-
-                <Link
-                  href={`/min-side/saker/${params.id}`}
-                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
-                >
-                  Til saken
-                </Link>
-              </div>
+                  {isSavingDraft ? "Lagrer..." : "Lagre uten KI"}
+                </button>
+              ) : null}
             </div>
-          </section>
 
-          <aside className="grid content-start gap-6">
-            <CaseWorkflowCard
-              caseId={params.id}
-              statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
-              activeStep="pfu"
-              workflowType={profile?.role_type === "journalist" ? "journalist" : "standard"}
-              currentPackageId={caseAccessPackageId ?? undefined}
-              stepsDone={{
-                caseRegistered: true,
-                caseInputs: Boolean(caseInput),
-                report: reports.some(
-                  (report) =>
-                    report.report_type === "free_check" ||
-                    report.report_type === "full_report"
-                ),
-                pfuDraft: pfuDrafts.length > 0,
-                pfuDecision: Boolean(
-                  pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
-                ),
-                policeReport: reports.some((report) => report.report_type === "police_draft"),
-                investigation: reports.some(
-                  (report) => report.report_type === "investigation_draft"
-                ),
-              }}
-            />
+            {/* Steg 2 og 3: status + avgjørelse, ett skjema */}
+            <form
+              onSubmit={handleSaveDecision}
+              className="mt-8 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8"
+            >
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">2. Send inn</p>
+              <h2 className="mt-3 text-3xl font-black text-slate-950">Status på innsendt klage</h2>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
-                Lagrede PFU-klager
-              </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                {pfuDrafts.length > 1
-                  ? `${pfuDrafts.length} lagret`
-                  : pfuDrafts.length === 1
-                    ? "1 lagret"
-                    : "Ingen lagret"}
-              </h2>
-              <div className="mt-5 grid gap-3">
-                {pfuDrafts.length === 0 ? (
-                  <p className="leading-8 text-slate-700">
-                    Ingen PFU-klage er lagret ennå. Lagre utkastet når du
-                    ønsker å bevare denne versjonen.
-                  </p>
+              <div className="mt-6 grid gap-6">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <label className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={pfuComplaintSent}
+                      onChange={(event) => setPfuComplaintSent(event.target.checked)}
+                      className="mt-1 h-5 w-5 rounded border-slate-300"
+                    />
+                    <span>
+                      <span className="block font-black text-slate-950">PFU-klage er sendt</span>
+                      <span className="mt-1 block text-sm leading-6 text-slate-600">
+                        Huk av hvis klagen faktisk er sendt til PFU.
+                      </span>
+                    </span>
+                  </label>
+                </div>
+
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div>
+                    <label htmlFor="pfuSentDate" className="text-sm font-bold text-slate-800">
+                      Dato sendt
+                    </label>
+                    <input
+                      id="pfuSentDate"
+                      type="date"
+                      value={pfuSentDate}
+                      onChange={(event) => setPfuSentDate(event.target.value)}
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="pfuCaseNumber" className="text-sm font-bold text-slate-800">
+                      PFU-saksnummer
+                    </label>
+                    <input
+                      id="pfuCaseNumber"
+                      type="text"
+                      value={pfuCaseNumber}
+                      onChange={(event) => setPfuCaseNumber(event.target.value)}
+                      placeholder="F.eks. 123/26"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="pfuCaseUrl" className="text-sm font-bold text-slate-800">
+                    Lenke til PFU-sak
+                  </label>
+                  <input
+                    id="pfuCaseUrl"
+                    type="url"
+                    value={pfuCaseUrl}
+                    onChange={(event) => setPfuCaseUrl(event.target.value)}
+                    placeholder="https://..."
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-10 border-t border-slate-200 pt-8">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">3. PFU-avgjørelse</p>
+                <h2 className="mt-3 text-3xl font-black text-slate-950">Last opp avgjørelsen</h2>
+
+                {!hasFullPackAccess ? (
+                  <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+                    <p className="font-black text-slate-950">Krever Full dokumentpakke</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-700">
+                      Registrering av PFU-avgjørelsen (mottatt/resultat/opplasting) er en del av Full dokumentpakke.
+                      Du kan fortsatt sende inn PFU-klagen med denne pakken.
+                    </p>
+                    <Link
+                      href={`/min-side/saker/${params.id}/pakke`}
+                      className="mt-4 inline-flex rounded-xl bg-red-500 px-4 py-2.5 text-xs font-black text-white hover:bg-red-600"
+                    >
+                      Oppgrader til Full dokumentpakke
+                    </Link>
+                  </div>
                 ) : (
-                  pfuDrafts.map((draft) => {
-                    const isSelected = activePfuDraft?.id === draft.id;
+                  <div className="mt-6 grid gap-6">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                      <label className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          checked={decisionReceived}
+                          onChange={(event) => setDecisionReceived(event.target.checked)}
+                          className="mt-1 h-5 w-5 rounded border-slate-300"
+                        />
+                        <span>
+                          <span className="block font-black text-slate-950">PFU-avgjørelse er mottatt</span>
+                          <span className="mt-1 block text-sm leading-6 text-slate-600">
+                            Huk av når avgjørelsen er mottatt eller publisert.
+                          </span>
+                        </span>
+                      </label>
+                    </div>
 
-                    return (
-                      <button
-                        key={`${draft.id}-${draft.version}`}
-                        type="button"
-                        onClick={() => setSelectedPfuDraftId(draft.id)}
-                        className={`rounded-2xl border p-4 text-left transition ${
-                          isSelected
-                            ? "border-red-500 bg-red-50 shadow-sm"
-                            : "border-slate-200 bg-slate-50 hover:bg-red-50"
-                        }`}
-                      >
-                        <p className="font-black text-slate-950">
-                          PFU-klage v{draft.version}
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-slate-600">
-                          {formatDate(draft.created_at)}
-                        </p>
-                        {isSelected ? (
-                          <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-red-700">
-                            Vises nå
-                          </p>
-                        ) : null}
-                      </button>
-                    );
-                  })
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="decisionDate" className="text-sm font-bold text-slate-800">
+                          Dato for avgjørelse
+                        </label>
+                        <input
+                          id="decisionDate"
+                          type="date"
+                          value={decisionDate}
+                          onChange={(event) => setDecisionDate(event.target.value)}
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="decisionResult" className="text-sm font-bold text-slate-800">
+                          Resultat
+                        </label>
+                        <select
+                          id="decisionResult"
+                          value={decisionResult}
+                          onChange={(event) => setDecisionResult(event.target.value)}
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+                        >
+                          <option value="">Velg resultat</option>
+                          <option value="upheld">Felt</option>
+                          <option value="partly_upheld">Delvis felt</option>
+                          <option value="not_upheld">Ikke felt</option>
+                          <option value="dismissed">Avvist</option>
+                          <option value="withdrawn">Trukket</option>
+                          <option value="other">Annet</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="decisionSummary" className="text-sm font-bold text-slate-800">
+                        Kort sammendrag
+                      </label>
+                      <textarea
+                        id="decisionSummary"
+                        rows={4}
+                        value={decisionSummary}
+                        onChange={(event) => setDecisionSummary(event.target.value)}
+                        placeholder="Oppsummer kort hva PFU kom frem til..."
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="decisionText" className="text-sm font-bold text-slate-800">
+                        Lim inn tekst eller utdrag fra avgjørelsen
+                      </label>
+                      <textarea
+                        id="decisionText"
+                        rows={6}
+                        value={decisionText}
+                        onChange={(event) => setDecisionText(event.target.value)}
+                        placeholder="Lim inn hele eller deler av PFU-avgjørelsen..."
+                        className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+                      />
+                    </div>
+
+                    <p className="text-sm leading-6 text-slate-500">
+                      Last opp selve avgjørelsen som fil i Dokumentasjon til høyre - KI-en leser innholdet
+                      automatisk sammen med sakens øvrige dokumenter.
+                    </p>
+                  </div>
                 )}
               </div>
-            </div>
 
-            <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
-                Videre arbeid
-              </p>
-              <h2 className="mt-3 text-3xl font-black">
-                Fra klage til oppfølging
-              </h2>
-              <p className="mt-4 leading-8 text-slate-300">
-                Bruk utkastet som et arbeidsgrunnlag. Før innsending bør teksten
-                kontrolleres, tilpasses saken og vurderes opp mot relevante
-                punkter i Vær Varsom-plakaten.
-              </p>
-            </div>
-          </aside>
+              <div className="mt-8 border-t border-slate-200 pt-8">
+                <label htmlFor="nextStepInterest" className="text-sm font-bold text-slate-800">
+                  Ønsker du å vurdere neste steg?
+                </label>
+                <select
+                  id="nextStepInterest"
+                  value={nextStepInterest}
+                  onChange={(event) => setNextStepInterest(event.target.value)}
+                  className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-slate-950 outline-none focus:border-red-500 focus:bg-white"
+                >
+                  <option value="">Ikke valgt</option>
+                  <option value="need_review">Ja, vurder neste steg</option>
+                  <option value="police_report_interest">Ja, jeg vil vurdere politianmeldelse</option>
+                  <option value="investigation_interest">Ja, jeg vil vurdere utredningspakke</option>
+                  <option value="not_now">Ikke nå</option>
+                </select>
+
+                <button
+                  type="submit"
+                  disabled={isSavingDecision}
+                  className="mt-6 w-full rounded-2xl bg-slate-950 px-6 py-4 text-center font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                >
+                  {isSavingDecision ? "Lagrer..." : "Lagre PFU-status"}
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <CaseSidebar
+            caseId={params.id}
+            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+            activeStep="pfu"
+            workflowType={profile?.role_type === "journalist" ? "journalist" : "standard"}
+            currentPackageId={caseAccessPackageId ?? undefined}
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInput),
+              report: reports.some(
+                (report) => report.report_type === "free_check" || report.report_type === "full_report"
+              ),
+              pfuDraft: pfuDrafts.length > 0,
+              pfuDecision: Boolean(decisionReceived || uploadedFileName),
+              policeReport: reports.some((report) => report.report_type === "police_draft"),
+              investigation: reports.some((report) => report.report_type === "investigation_draft"),
+            }}
+            statusTitle="PFU"
+            statusItems={[
+              {
+                label: "Klage",
+                value: pfuDrafts.length > 0 ? `${pfuDrafts.length} lagret` : "Ikke opprettet",
+                tone: pfuDrafts.length > 0 ? "success" : "neutral",
+              },
+              {
+                label: "Sendt",
+                value: pfuComplaintSent ? "Ja" : "Nei",
+                tone: pfuComplaintSent ? "success" : "neutral",
+              },
+              {
+                label: "Avgjørelse",
+                value: !hasFullPackAccess ? "Ikke tilgjengelig" : decisionReceived ? decisionResultLabel(decisionResult) : "Ikke mottatt",
+                tone: hasFullPackAccess && decisionReceived ? "success" : "neutral",
+              },
+            ]}
+            statusContent={
+              <div className="grid gap-4">
+                {pfuDrafts.length > 0 ? (
+                  <div className="grid gap-2">
+                    {pfuDrafts.map((draft) => {
+                      const isSelected = activePfuDraft?.id === draft.id;
+
+                      return (
+                        <button
+                          key={`${draft.id}-${draft.version}`}
+                          type="button"
+                          onClick={() => setSelectedPfuDraftId(draft.id)}
+                          className={`rounded-2xl border p-3 text-left transition ${
+                            isSelected
+                              ? "border-red-500 bg-red-50 shadow-sm"
+                              : "border-slate-200 bg-slate-50 hover:bg-red-50"
+                          }`}
+                        >
+                          <p className="font-black text-slate-950">PFU-klage v{draft.version}</p>
+                          <p className="mt-1 text-xs font-semibold text-slate-600">{formatDate(draft.created_at)}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+
+                {uploadedFilePath ? (
+                  <button
+                    type="button"
+                    onClick={handleOpenFile}
+                    className="rounded-xl bg-slate-950 px-5 py-4 text-sm font-black text-white hover:bg-slate-800"
+                  >
+                    Åpne opplastet fil ({uploadedFileName})
+                  </button>
+                ) : null}
+
+                <CaseAttachmentPanel
+                  caseId={params.id}
+                  title="PFU-dokumenter og vedlegg"
+                  description="Last opp PFU-avgjørelsen og annen dokumentasjon som hører til saken. Vedlegg lagres sammen med sakens øvrige dokumenter."
+                  defaultDocumentType="pfu_document"
+                  emptyStateTitle="Ingen vedlegg lastet opp ennå"
+                  emptyStateDescription="Last opp PFU-avgjørelsen som fil her, i tillegg til å fylle inn detaljene i skjemaet til venstre."
+                />
+              </div>
+            }
+            nextStep={{
+              title: "Etter PFU",
+              description:
+                "Bruk PFU-klagen og en eventuell avgjørelse som arbeidsgrunnlag. Etterpå kan du vurdere politianmeldelse eller en utredningspakke.",
+              primary: {
+                label: "Gå til politianmeldelse",
+                href: `/min-side/saker/${params.id}/politianmeldelse`,
+              },
+              secondary: {
+                label: "Gå til utredning",
+                href: `/min-side/saker/${params.id}/utredning`,
+              },
+            }}
+          />
         </div>
       </section>
 

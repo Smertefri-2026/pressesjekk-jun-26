@@ -8,28 +8,30 @@ import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { allPackagePlans } from "@/data/packagePlans";
 import { supabase } from "@/lib/supabase/client";
+import type { PurchaseRow as FullPurchaseRow } from "@/lib/purchases/types";
 
-type PurchaseRow = {
-  id: string;
-  user_id: string;
-  case_id: string | null;
-  package_id: string;
-  purchase_type: string;
-  status: string;
-  amount_paid: number;
-  amount_original: number | null;
-  amount_credit: number;
-  currency: string;
-  included_cases: number | null;
-  used_cases: number;
-  source: string;
-  stripe_payment_intent_id: string | null;
-  stripe_checkout_session_id: string | null;
-  stripe_receipt_url: string | null;
-  refund_status: string;
-  refunded_amount: number;
-  created_at: string;
-};
+type PurchaseRow = Pick<
+  FullPurchaseRow,
+  | "id"
+  | "user_id"
+  | "case_id"
+  | "package_id"
+  | "purchase_type"
+  | "status"
+  | "amount_paid"
+  | "amount_original"
+  | "amount_credit"
+  | "currency"
+  | "included_cases"
+  | "used_cases"
+  | "source"
+  | "stripe_payment_intent_id"
+  | "stripe_checkout_session_id"
+  | "stripe_receipt_url"
+  | "refund_status"
+  | "refunded_amount"
+  | "created_at"
+>;
 
 type EntitlementRow = {
   id: string;
@@ -224,6 +226,8 @@ function sourceLabel(source: string) {
   if (source.includes("subscription")) return "Abonnement";
   if (source.includes("stripe_checkout")) return "Stripe-kjøp";
   if (source.includes("stripe_payment")) return "Kortbetaling";
+  if (source.includes("user_case_entitlement")) return "Fra sakspakke";
+  if (source.includes("compensation")) return "Kompensasjon";
   if (source.includes("manual")) return "Manuelt";
   return source || "Ikke oppgitt";
 }
@@ -593,7 +597,7 @@ export default function MinSideKjopPage() {
         ) : null}
 
         {refundMessage ? (
-          <div className="mt-8 rounded-3xl border border-green-200 bg-green-50 p-6 font-semibold text-green-800">
+          <div className="mt-8 rounded-3xl border border-emerald-200 bg-emerald-50 p-6 font-semibold text-emerald-800">
             {refundMessage}
           </div>
         ) : null}
@@ -775,7 +779,7 @@ export default function MinSideKjopPage() {
                               </div>
                             ) : (
                               <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-                                <thead className="bg-slate-50 text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                                <thead className="bg-slate-50 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
                                   <tr>
                                     <th className="px-5 py-4">Dato</th>
                                     <th className="px-5 py-4">Pakke</th>
@@ -801,7 +805,7 @@ export default function MinSideKjopPage() {
                                         )}
                                       </td>
                                       <td className="whitespace-nowrap px-5 py-4">
-                                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">
+                                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
                                           {statusLabel(purchase.status)}
                                         </span>
                                       </td>
@@ -917,7 +921,7 @@ export default function MinSideKjopPage() {
                         >
                           <div className="flex flex-wrap items-start justify-between gap-4">
                             <div>
-                              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
                                 Produkt
                               </p>
                               <h4 className="mt-2 text-2xl font-black text-slate-950">
@@ -928,7 +932,7 @@ export default function MinSideKjopPage() {
                               </p>
                             </div>
 
-                            <span className="rounded-full bg-green-100 px-4 py-2 text-sm font-bold text-green-800">
+                            <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-800">
                               {statusLabel(entitlement.status)}
                             </span>
                           </div>
@@ -1017,7 +1021,7 @@ export default function MinSideKjopPage() {
                               <span className="font-bold text-slate-700">
                                 Betalingsstatus:
                               </span>
-                              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">
+                              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
                                 {statusLabel(relatedPurchase.status)}
                               </span>
 
@@ -1134,7 +1138,7 @@ export default function MinSideKjopPage() {
                               Status
                             </p>
                             {hasPackage ? (
-                              <span className="mt-2 inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">
+                              <span className="mt-2 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
                                 {statusLabel(access?.status ?? "active")}
                               </span>
                             ) : (

@@ -7,7 +7,13 @@ import { loadStripe } from "@stripe/stripe-js";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
-import { allPackagePlans, type PackagePlan, type PackagePlanId } from "@/data/packagePlans";
+import {
+  allPackagePlans,
+  v1PurchasablePackageIds,
+  type PackagePlan,
+  type PackagePlanId,
+} from "@/data/packagePlans";
+import { stripeCheckoutPlans } from "@/lib/stripe/plans";
 import { supabase } from "@/lib/supabase/client";
 import { StripePaymentElementBox } from "@/components/checkout/StripePaymentElementBox";
 
@@ -34,51 +40,31 @@ const roleOptions = [
   { value: "organization", label: "Organisasjon/bedrift" },
 ];
 
-const checkoutPlanIds: PackagePlanId[] = [
-  "report_pack",
-  "pfu_pack",
-  "full_pack",
-  "investigation_pack",
-  "case_bundle_3",
-  "case_bundle_5",
-  "case_bundle_10",
-  "monthly_start",
-  "monthly_pro",
-  "monthly_agency",
-];
+// Kun v1-pakkene er en del av den offentlige checkouten. Dette speiler
+// v1PurchasablePackageIds (data/packagePlans.ts), som også er det
+// betalingsrutene håndhever server-side - denne listen skal ikke drifte fra
+// den. Andre pakker (bunter/abonnement/utredning) selges foreløpig via
+// manuell kontakt (se priser/proff), ikke gjennom denne checkouten.
+const checkoutPlanIds: PackagePlanId[] = v1PurchasablePackageIds;
 
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
 const stripePromise = stripePublishableKey
   ? loadStripe(stripePublishableKey)
   : null;
 
-const paymentElementPlanIds: PackagePlanId[] = [
-  "report_pack",
-  "pfu_pack",
-  "full_pack",
-  "investigation_pack",
-  "case_bundle_3",
-  "case_bundle_5",
-  "case_bundle_10",
-];
+const paymentElementPlanIds: PackagePlanId[] = v1PurchasablePackageIds;
 
 const checkoutPlans = allPackagePlans.filter((plan) =>
   checkoutPlanIds.includes(plan.id)
 );
 
-const planAmounts: Record<PackagePlanId, number> = {
-  report_pack: 49000,
-  pfu_pack: 149000,
-  full_pack: 299000,
-  investigation_pack: 10000000,
-  case_bundle_3: 139000,
-  case_bundle_5: 219000,
-  case_bundle_10: 399000,
-  monthly_start: 129000,
-  monthly_pro: 499000,
-  monthly_agency: 1499000,
-  monthly_enterprise: 0,
-};
+// Beløp vises kun til bruker før betaling - selve beløpet som trekkes
+// bestemmes alltid server-side i create-payment-intent/create-subscription-checkout
+// ut fra stripeCheckoutPlans. Denne mappen er avledet derfra for å unngå at
+// visningsbeløpet drifter fra det som faktisk belastes.
+const planAmounts: Record<PackagePlanId, number> = Object.fromEntries(
+  Object.entries(stripeCheckoutPlans).map(([id, plan]) => [id, plan.amount])
+) as Record<PackagePlanId, number>;
 
 function isPackagePlanId(value: string | null): value is PackagePlanId {
   return Boolean(value && checkoutPlans.some((plan) => plan.id === value));
@@ -413,19 +399,19 @@ function UtsjekkContent() {
   }
 
   return (
-    <main className="min-h-screen bg-stone-50 text-slate-950">
+    <main className="min-h-screen bg-slate-50 text-slate-950">
       <LightPublicHeader />
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
         <Link
           href="/priser"
-          className="text-sm font-semibold text-orange-700 hover:text-orange-900"
+          className="text-sm font-semibold text-red-700 hover:text-red-900"
         >
           ← Tilbake til priser
         </Link>
 
         <div className="mt-8">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-orange-700">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-700">
             Utsjekk
           </p>
           <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
@@ -442,7 +428,7 @@ function UtsjekkContent() {
 
         <div className="mt-10 grid gap-6 xl:grid-cols-[1fr_1.05fr_0.95fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               1. Din pakke
             </p>
 
@@ -461,7 +447,7 @@ function UtsjekkContent() {
               id="checkout-plan"
               value={selectedPlan.id}
               onChange={(event) => handlePlanChange(event.target.value)}
-              className="mt-2 w-full rounded-2xl border border-slate-300 bg-stone-50 px-4 py-4 text-base font-bold text-slate-950 outline-none focus:border-orange-500 focus:bg-white"
+              className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4 text-base font-bold text-slate-950 outline-none focus:border-red-500 focus:bg-white"
             >
               <optgroup label="Enkeltkjøp">
                 {checkoutPlans
@@ -494,8 +480,8 @@ function UtsjekkContent() {
               </optgroup>
             </select>
 
-            <div className="mt-6 rounded-3xl border border-amber-200 bg-amber-50 p-5">
-              <p className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-amber-800">
+            <div className="mt-6 rounded-3xl border border-red-200 bg-red-50 p-5">
+              <p className="inline-flex rounded-full bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-red-800">
                 {planTypeTitle(selectedPlan.type)}
               </p>
 
@@ -514,7 +500,7 @@ function UtsjekkContent() {
               <ul className="mt-5 space-y-3 text-sm leading-6 text-slate-700">
                 {selectedPlan.features.slice(0, 5).map((feature) => (
                   <li key={feature} className="flex gap-2">
-                    <span className="font-black text-orange-700">✓</span>
+                    <span className="font-black text-red-700">✓</span>
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -522,8 +508,8 @@ function UtsjekkContent() {
             </div>
 
             {incomingUrl ? (
-              <div className="mt-5 rounded-2xl border border-slate-200 bg-stone-50 p-4">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
                   URL fra rask sjekk
                 </p>
                 <p className="mt-2 text-sm font-semibold text-slate-800">
@@ -534,7 +520,7 @@ function UtsjekkContent() {
           </section>
 
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-700">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               2. Konto for Min Side
             </p>
 
@@ -548,14 +534,14 @@ function UtsjekkContent() {
             </p>
 
             {isCheckingUser ? (
-              <div className="mt-6 rounded-2xl border border-slate-200 bg-stone-50 p-5">
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
                 <p className="font-bold text-slate-700">
                   Sjekker innlogging...
                 </p>
               </div>
             ) : profile || userEmail ? (
-              <div className="mt-6 rounded-3xl border border-green-200 bg-green-50 p-5">
-                <p className="text-sm font-black uppercase tracking-[0.18em] text-green-800">
+              <div className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-5">
+                <p className="text-sm font-black uppercase tracking-[0.18em] text-emerald-800">
                   Innlogget
                 </p>
 
@@ -597,7 +583,7 @@ function UtsjekkContent() {
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   <Link
                     href="/min-side/profil"
-                    className="rounded-xl border border-green-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-green-100"
+                    className="rounded-xl border border-emerald-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-emerald-100"
                   >
                     Endre profil
                   </Link>
@@ -605,7 +591,7 @@ function UtsjekkContent() {
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-stone-100"
+                    className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100"
                   >
                     Logg ut
                   </button>
@@ -679,7 +665,7 @@ function UtsjekkContent() {
                             setAuthFullName(event.target.value)
                           }
                           placeholder="Ditt navn"
-                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-orange-500"
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-red-500"
                         />
                       </div>
 
@@ -696,7 +682,7 @@ function UtsjekkContent() {
                           onChange={(event) =>
                             setAuthRoleType(event.target.value)
                           }
-                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-orange-500"
+                          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-red-500"
                         >
                           {roleOptions.map((role) => (
                             <option key={role.value} value={role.value}>
@@ -723,7 +709,7 @@ function UtsjekkContent() {
                       value={authEmail}
                       onChange={(event) => setAuthEmail(event.target.value)}
                       placeholder="din@epost.no"
-                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-orange-500"
+                      className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 text-slate-950 outline-none focus:border-red-500"
                     />
                   </div>
 
@@ -751,7 +737,7 @@ function UtsjekkContent() {
                           setAuthPassword(event.target.value)
                         }
                         placeholder="Minimum 6 tegn"
-                        className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 pr-16 text-slate-950 outline-none focus:border-orange-500"
+                        className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-4 pr-16 text-slate-950 outline-none focus:border-red-500"
                       />
 
                       <button
@@ -759,7 +745,7 @@ function UtsjekkContent() {
                         onClick={() =>
                           setAuthShowPassword((value) => !value)
                         }
-                        className="absolute inset-y-0 right-3 my-auto flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-stone-100 hover:text-slate-950"
+                        className="absolute inset-y-0 right-3 my-auto flex h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-950"
                         aria-label={
                           authShowPassword ? "Skjul passord" : "Vis passord"
                         }
@@ -773,7 +759,7 @@ function UtsjekkContent() {
                   </div>
 
                   {authErrorMessage ? (
-                    <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold leading-6 text-amber-800">
+                    <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
                       {authErrorMessage}
                     </div>
                   ) : null}
@@ -787,7 +773,7 @@ function UtsjekkContent() {
                   <button
                     type="submit"
                     disabled={authIsLoading}
-                    className="rounded-2xl bg-amber-500 px-6 py-4 font-black text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="rounded-2xl bg-red-500 px-6 py-4 font-black text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {authIsLoading
                       ? "Jobber..."
@@ -799,21 +785,21 @@ function UtsjekkContent() {
               </div>
             )}
 
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-stone-50 p-4 text-sm leading-7 text-slate-600">
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-600">
               Etter betaling får du pakken som ledig sak eller tilgang på Min
               Side. Der kan du opprette saken, legge til flere URL-er og bygge
               rapporten videre.
             </div>
           </section>
 
-          <aside className="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-white p-5 text-slate-950 shadow-sm sm:p-7">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-700">
+          <aside className="rounded-3xl border border-red-200 bg-gradient-to-br from-red-50 to-white p-5 text-slate-950 shadow-sm sm:p-7">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
               3. Betaling
             </p>
 
             <h2 className="mt-3 text-3xl font-black">Ordresammendrag</h2>
 
-            <div className="mt-6 rounded-3xl border border-amber-200 bg-white p-5">
+            <div className="mt-6 rounded-3xl border border-red-200 bg-white p-5">
               <div className="flex justify-between gap-4 text-sm font-bold text-slate-700">
                 <span>{selectedPlan.name}</span>
                 <span>
@@ -828,7 +814,7 @@ function UtsjekkContent() {
                 </div>
               ) : null}
 
-              <div className="mt-4 border-t border-amber-200 pt-4">
+              <div className="mt-4 border-t border-red-200 pt-4">
                 <div className="flex justify-between gap-4 text-xl font-black">
                   <span>{isUpgradeMode ? "Mellomlegg nå" : "Å betale nå"}</span>
                   <span>
@@ -861,7 +847,7 @@ function UtsjekkContent() {
                     : "Start abonnement"}
                 </button>
 
-                <div className="rounded-2xl border border-amber-200 bg-amber-100 p-4 text-sm font-semibold leading-7 text-slate-700">
+                <div className="rounded-2xl border border-slate-200 bg-slate-100 p-4 text-sm font-semibold leading-7 text-slate-700">
                   Du sendes videre til Stripe for sikker kortbetaling og
                   månedlig abonnement. Etter betaling vises abonnementet på Min Side.
                 </div>
@@ -871,7 +857,7 @@ function UtsjekkContent() {
                 {paymentErrorMessage}
               </div>
             ) : isPreparingPayment ? (
-              <div className="mt-5 rounded-2xl border border-amber-200 bg-white p-4 text-sm font-semibold leading-7 text-slate-700">
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold leading-7 text-slate-700">
                 Klargjør sikkert betalingsfelt...
               </div>
             ) : clientSecret && stripePromise ? (
@@ -888,7 +874,7 @@ function UtsjekkContent() {
                 <StripePaymentElementBox returnUrl={returnUrl} />
               </Elements>
             ) : (
-              <div className="mt-5 rounded-2xl border border-amber-200 bg-white p-4 text-sm font-semibold leading-7 text-slate-700">
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-sm font-semibold leading-7 text-slate-700">
                 Betalingsfeltet vises når pakken er valgt og konto er bekreftet.
               </div>
             )}
@@ -910,7 +896,7 @@ export default function UtsjekkPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-stone-50 text-slate-950">
+        <main className="min-h-screen bg-slate-50 text-slate-950">
           <LightPublicHeader />
           <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">

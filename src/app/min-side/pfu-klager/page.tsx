@@ -1,16 +1,11 @@
-import { DocumentOverviewPage } from "@/components/dashboard/DocumentOverviewPage";
+import { redirect } from "next/navigation";
 
-export default function PfuKlagerPage() {
-  return (
-    <DocumentOverviewPage
-      eyebrow="PFU-klager"
-      title="PFU-klager"
-      description="Samlet oversikt over PFU-klageutkast som er laget i dine saker."
-      reportTypes={["pfu_draft"]}
-      emptyTitle="Ingen PFU-klager ennå"
-      emptyText="Når du genererer et PFU-klageutkast i en sak, vises det her."
-      primaryHref="/min-side"
-      primaryLabel="Se saker"
-    />
-  );
+/**
+ * Fase 6.3 — de fire arkiv-sidene (rapporter/pfu-klager/politianmeldelser/
+ * utredninger) er slått sammen til én side med faner på /min-side/rapporter.
+ * Denne ruten beholdes som en varig omdirigering slik at gamle lenker og
+ * bokmerker fortsatt fungerer.
+ */
+export default function PfuKlagerRedirectPage() {
+  redirect("/min-side/rapporter?tab=pfu");
 }

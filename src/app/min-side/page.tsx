@@ -6,7 +6,9 @@ import type { User } from "@supabase/supabase-js";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { packagePlanName } from "@/data/packagePlans";
 import { supabase } from "@/lib/supabase/client";
+import { Badge, StatCard } from "@/components/design-system";
 
 type CaseRow = {
   id: string;
@@ -61,6 +63,26 @@ type ActivityItem = {
   description: string;
   created_at: string;
   href: string;
+};
+
+type CaseDocumentRow = {
+  case_id: string;
+  extraction_status: string | null;
+};
+
+type CaseClaimRow = {
+  case_id: string;
+  no_evidence_confirmed_at: string | null;
+  claim_evidence_links: { id: string }[] | null;
+};
+
+type CaseDocumentationSummary = {
+  caseId: string;
+  title: string;
+  documentCount: number;
+  processingCount: number;
+  failedCount: number;
+  undocumentedClaimCount: number;
 };
 
 type ArchiveItem = {
@@ -118,33 +140,19 @@ function formatDate(date: string) {
   }).format(new Date(date));
 }
 
-function formatActivityDate(date: string) {
-  return new Intl.DateTimeFormat("nb-NO", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(date));
-}
-
 function packageLabel(packageId: string | null | undefined) {
-  if (packageId === "report_pack") return "Rapportpakke";
-  if (packageId === "pfu_pack") return "PFU-pakke";
-  if (packageId === "full_pack") return "Full dokumentpakke";
-  if (packageId === "investigation_pack") return "Utredningspakke";
-  if (packageId === "case_bundle_3") return "3 saker";
-  if (packageId === "case_bundle_5") return "5 saker";
-  if (packageId === "case_bundle_10") return "10 saker";
-  if (packageId === "monthly_start") return "Månedsavtale Start";
-  if (packageId === "monthly_pro") return "Månedsavtale Pro";
-  if (packageId === "monthly_agency") return "Månedsavtale Byrå";
-  return "Ingen pakke";
+  return packageId ? packagePlanName(packageId) : "Ingen pakke";
 }
 
 function packageActionLabel(packageId: string | null | undefined) {
   if (!packageId) return "Velg pakke";
-  if (packageId === "report_pack" || packageId === "pfu_pack") return "Oppgrader";
+  if (
+    packageId === "report_pack" ||
+    packageId === "pfu_pack" ||
+    packageId === "full_pack"
+  ) {
+    return "Oppgrader";
+  }
   return "Se pakke";
 }
 
@@ -166,6 +174,7 @@ export default function MinSidePage() {
   const [activePackageCaseId, setActivePackageCaseId] = useState<string | null>(
     null
   );
+  const [documentationSummaries, setDocumentationSummaries] = useState<CaseDocumentationSummary[]>([]);
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(() => {
@@ -294,6 +303,51 @@ export default function MinSidePage() {
         .eq("user_id", user.id)
         .eq("status", "active");
 
+      const activeCaseIdList = Array.from(activeCaseIds);
+
+      const [documentsForDocsResult, claimsForDocsResult] =
+        activeCaseIdList.length > 0
+          ? await Promise.all([
+              supabase
+                .from("case_documents")
+                .select("case_id,extraction_status")
+                .in("case_id", activeCaseIdList)
+                .is("deleted_at", null),
+              supabase
+                .from("claims")
+                .select("case_id,no_evidence_confirmed_at,claim_evidence_links(id)")
+                .in("case_id", activeCaseIdList)
+                .is("deleted_at", null),
+            ])
+          : [{ data: [], error: null }, { data: [], error: null }];
+
+      if (!documentsForDocsResult.error && !claimsForDocsResult.error) {
+        const docRows = (documentsForDocsResult.data ?? []) as unknown as CaseDocumentRow[];
+        const claimRows = (claimsForDocsResult.data ?? []) as unknown as CaseClaimRow[];
+
+        const summaries = caseRows
+          .filter((caseItem) => activeCaseIds.has(caseItem.id))
+          .map((caseItem) => {
+            const caseDocs = docRows.filter((d) => d.case_id === caseItem.id);
+            const caseClaims = claimRows.filter((c) => c.case_id === caseItem.id);
+
+            return {
+              caseId: caseItem.id,
+              title: caseItem.title,
+              documentCount: caseDocs.length,
+              processingCount: caseDocs.filter(
+                (d) => d.extraction_status === "pending" || d.extraction_status === "processing"
+              ).length,
+              failedCount: caseDocs.filter((d) => d.extraction_status === "failed").length,
+              undocumentedClaimCount: caseClaims.filter(
+                (c) => !c.no_evidence_confirmed_at && (c.claim_evidence_links ?? []).length === 0
+              ).length,
+            };
+          });
+
+        setDocumentationSummaries(summaries);
+      }
+
       const accessRows = ((activeAccessRows.data ?? []) as CaseAccessRow[]).filter(
         (access) => access.status === "active"
       );
@@ -318,6 +372,23 @@ export default function MinSidePage() {
       setCases(caseRows);
       setFolders(folderRows);
       setReports(reportRows);
+
+      // Sesjonslagret "hvilken mappe står jeg i"-peker kan bli ugyldig (mappe
+      // slettet, ryddet opp, eller aldri fantes for denne brukeren). Uten
+      // denne sjekken vises et tomt arkiv uten synlig vei tilbake, selv om
+      // brukeren faktisk har saker og mapper - fordi filtreringen bruker den
+      // rå IDen, mens tittel/tilbake-lenke bruker det oppslåtte mappe-objektet
+      // og faller stille tilbake til rot-visning når IDen ikke treffer noe.
+      if (
+        selectedFolderId &&
+        !folderRows.some(
+          (folder) => folder.id === selectedFolderId && !folder.deleted_at
+        )
+      ) {
+        sessionStorage.removeItem("pressesjekkSelectedFolderId");
+        setSelectedFolderId(null);
+      }
+
       setCaseAccess(accessRows);
       setActivePackageCount(accessRows.length);
       setAvailableCaseCount(availableCases);
@@ -352,6 +423,7 @@ export default function MinSidePage() {
     }
 
     loadDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only fetch; selectedFolderId is only read here to validate the sessionStorage-persisted value against freshly-loaded folders, not to re-trigger on navigation.
   }, []);
 
   const selectedFolder = useMemo(() => {
@@ -684,7 +756,7 @@ export default function MinSidePage() {
               ? `/min-side/saker/${report.case_id}/politianmeldelse`
               : report.report_type === "investigation_draft"
                 ? `/min-side/saker/${report.case_id}/utredning`
-                : `/min-side/saker/${report.case_id}/rapport`,
+                : `/min-side/saker/${report.case_id}/full-rapport`,
       };
     }),
     ...cases
@@ -710,7 +782,14 @@ export default function MinSidePage() {
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )
-    .slice(0, 5);
+    .slice(0, 3);
+
+  const totalDocumentCount = documentationSummaries.reduce((sum, s) => sum + s.documentCount, 0);
+  const processingDocumentCount = documentationSummaries.reduce((sum, s) => sum + s.processingCount, 0);
+  const failedDocumentCount = documentationSummaries.reduce((sum, s) => sum + s.failedCount, 0);
+  const casesMissingDocumentation = documentationSummaries
+    .filter((s) => s.undocumentedClaimCount > 0)
+    .sort((a, b) => b.undocumentedClaimCount - a.undocumentedClaimCount);
 
 
   async function createFolder() {
@@ -970,183 +1049,36 @@ export default function MinSidePage() {
           </aside>
         </div>
 
-        <section className="mt-8 grid grid-cols-2 gap-3 md:hidden">
-          <Link
-            href={packageHref}
-            className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="text-xs font-bold text-red-800">Tilgang / pakker</p>
-            <p className="mt-3 text-3xl font-black text-slate-950">
-              {packageStatusLabel}
-            </p>
-            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-800">
-              {packageCtaLabel}
-            </p>
-          </Link>
-
-          <Link
-            href="/min-side/kjop"
-            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="text-xs font-bold text-red-800">Kjøpshistorikk</p>
-            <p className="mt-3 text-3xl font-black text-slate-950">
-              Kjøp
-            </p>
-            <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
-              Betalinger og kvitteringer
-            </p>
-          </Link>
-
-          {reportCount > 0 ? (
-            <Link
-              href="/min-side/rapporter"
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="text-xs font-bold text-slate-500">Rapporter</p>
-              <p className="mt-3 text-3xl font-black text-slate-950">
-                {reportCount}
-              </p>
-              <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
-                Se rapporter
-              </p>
-            </Link>
-          ) : null}
-
-          {pfuDraftCount > 0 ? (
-            <Link
-              href="/min-side/pfu-klager"
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="text-xs font-bold text-slate-500">PFU-klager</p>
-              <p className="mt-3 text-3xl font-black text-slate-950">
-                {pfuDraftCount}
-              </p>
-              <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
-                Se PFU-klager
-              </p>
-            </Link>
-          ) : null}
-
-          {policeDraftCount > 0 ? (
-            <Link
-              href="/min-side/politianmeldelser"
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="text-xs font-bold text-slate-500">Politianmeldelser</p>
-              <p className="mt-3 text-3xl font-black text-slate-950">
-                {policeDraftCount}
-              </p>
-              <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
-                Se anmeldelser
-              </p>
-            </Link>
-          ) : null}
-
-          {investigationDraftCount > 0 ? (
-            <Link
-              href="/min-side/utredninger"
-              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="text-xs font-bold text-slate-500">Utredninger</p>
-              <p className="mt-3 text-3xl font-black text-slate-950">
-                {investigationDraftCount}
-              </p>
-              <p className="mt-2 text-[11px] font-semibold leading-5 text-red-700">
-                Se utredninger
-              </p>
-            </Link>
-          ) : null}
-        </section>
-
         <section
-          className="mt-14 hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-6"
+          className="mt-8 grid grid-cols-2 gap-3 md:mt-14 md:grid-cols-2 md:gap-6 lg:grid-cols-6"
           id="oversikt"
         >
-          <Link
+          <StatCard
             href={packageHref}
-            className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="font-bold text-red-800">Tilgang / pakker</p>
-            <p className="mt-4 text-3xl font-black text-slate-950">
-              {packageStatusLabel}
-            </p>
-            <p className="mt-3 text-sm font-semibold text-red-800">
-              {packageCtaLabel}
-            </p>
-          </Link>
+            label="Tilgang / pakker"
+            value={packageStatusLabel}
+            cta={packageCtaLabel}
+            tone="accent"
+            labelTone="accent"
+          />
 
-          <Link
+          <StatCard
             href="/min-side/kjop"
-            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="font-bold text-red-800">Kjøpshistorikk</p>
-            <p className="mt-4 text-3xl font-black text-slate-950">
-              Kjøp
-            </p>
-            <p className="mt-3 text-sm font-semibold text-red-700">
-              Betalinger og kvitteringer
-            </p>
-          </Link>
+            label="Kjøpshistorikk"
+            value="Kjøp"
+            cta="Betalinger og kvitteringer"
+            labelTone="accent"
+          />
 
-          {reportCount > 0 ? (
-            <Link
-              href="/min-side/rapporter"
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="font-bold text-slate-500">Rapporter</p>
-              <p className="mt-4 [text-wrap:balance] text-4xl font-black sm:text-5xl text-slate-950">
-                {reportCount}
-              </p>
-              <p className="mt-3 text-sm font-semibold text-red-700">
-                Se rapporter
-              </p>
-            </Link>
-          ) : null}
+          <StatCard
+            href="/min-side/rapporter"
+            label="Rapporter"
+            value={reportCount + pfuDraftCount + policeDraftCount + investigationDraftCount}
+            cta="Se rapporter"
+            large
+          />
 
-          {pfuDraftCount > 0 ? (
-            <Link
-              href="/min-side/pfu-klager"
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="font-bold text-slate-500">PFU-klager</p>
-              <p className="mt-4 [text-wrap:balance] text-4xl font-black sm:text-5xl text-slate-950">
-                {pfuDraftCount}
-              </p>
-              <p className="mt-3 text-sm font-semibold text-red-700">
-                Se PFU-klager
-              </p>
-            </Link>
-          ) : null}
-
-          {policeDraftCount > 0 ? (
-            <Link
-              href="/min-side/politianmeldelser"
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="font-bold text-slate-500">Politianmeldelser</p>
-              <p className="mt-4 [text-wrap:balance] text-4xl font-black sm:text-5xl text-slate-950">
-                {policeDraftCount}
-              </p>
-              <p className="mt-3 text-sm font-semibold text-red-700">
-                Se politianmeldelser
-              </p>
-            </Link>
-          ) : null}
-
-          {investigationDraftCount > 0 ? (
-            <Link
-              href="/min-side/utredninger"
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="font-bold text-slate-500">Utredninger</p>
-              <p className="mt-4 [text-wrap:balance] text-4xl font-black sm:text-5xl text-slate-950">
-                {investigationDraftCount}
-              </p>
-              <p className="mt-3 text-sm font-semibold text-red-700">
-                Se utredninger
-              </p>
-            </Link>
-          ) : null}
+          <StatCard href="/min-side/dokumentasjon" label="Dokumentasjon" value={caseCount} cta="Se dokumentasjon" large />
         </section>
 
         <section id="arkiv" className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -1337,7 +1269,7 @@ export default function MinSidePage() {
                         type="button"
                         onClick={createFolder}
                         disabled={isCreatingFolder}
-                        className="rounded-xl bg-red-500 px-5 py-4 text-sm font-black text-slate-950 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-xl bg-red-500 px-5 py-4 text-sm font-black text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isCreatingFolder
                           ? "Oppretter..."
@@ -1439,7 +1371,7 @@ export default function MinSidePage() {
                           </>
                         ) : (
                           <>
-                            <label className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+                            <label className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
                               Flytt til
                             </label>
 
@@ -1508,11 +1440,11 @@ export default function MinSidePage() {
               </div>
             ) : (
               <div className="overflow-hidden">
-                <div className="grid grid-cols-[minmax(0,1fr)_116px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:hidden">
+                <div className="grid grid-cols-[minmax(0,1fr)_116px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 md:hidden">
                   <div className="pl-12">Navn</div>
                   <div className="text-right">Flytt / Handling</div>
                 </div>
-                <div className="hidden grid-cols-[minmax(0,1fr)_190px_220px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 md:grid">
+                <div className="hidden grid-cols-[minmax(0,1fr)_190px_220px] border-b border-slate-200 bg-slate-50 px-5 py-3 text-xs font-bold uppercase tracking-[0.18em] text-slate-500 md:grid">
                   <div className="pl-12 text-left">
                     Navn
                   </div>
@@ -1569,7 +1501,7 @@ export default function MinSidePage() {
                       )}
 
                       <div className="hidden min-w-0 text-sm font-bold text-slate-600 md:block">
-                        <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">
+                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
                           {item.type}
                         </p>
 
@@ -1577,7 +1509,7 @@ export default function MinSidePage() {
                           <span
                             className={`mt-2 inline-flex max-w-full rounded-full px-3 py-1 text-xs font-black ${
                               item.packageId
-                                ? "bg-green-100 text-green-800"
+                                ? "bg-emerald-100 text-emerald-800"
                                 : "bg-amber-100 text-amber-900"
                             }`}
                           >
@@ -1682,36 +1614,93 @@ export default function MinSidePage() {
           </div>
 
           <aside className="grid gap-6">
-            <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
-                Siste aktivitet
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
+                Dokumentasjon
               </p>
 
-              {activityItems.length === 0 ? (
-                <p className="mt-4 leading-8 text-slate-300">
-                  {isJournalistWorkflow
-                    ? "Aktivitet vises her når du har opprettet din første redaksjonelle sak, lagt inn publiseringsgrunnlag eller laget rapport."
-                    : "Aktivitet vises her når du har opprettet din første sak, rapport, PFU-klage, politianmeldelse eller utredning."}
+              {totalDocumentCount === 0 ? (
+                <p className="mt-4 leading-7 text-slate-600">
+                  Her får du oversikt over dokumentene dine når du laster opp den første dokumentasjonen på en sak.
                 </p>
               ) : (
-                <div className="mt-5 grid gap-3">
-                  {activityItems.map((item) => (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      className="rounded-2xl border border-white/10 bg-white/5 p-4 hover:bg-white/10"
-                    >
-                      <p className="font-black text-white">{item.title}</p>
-                      <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-300">
-                        {item.description}
+                <>
+                  <div className="mt-5 grid grid-cols-2 gap-3">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-3xl font-black text-slate-950">{totalDocumentCount}</p>
+                      <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                        {totalDocumentCount === 1 ? "dokument totalt" : "dokumenter totalt"}
                       </p>
-                      <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-red-300">
-                        {formatActivityDate(item.created_at)}
+                    </div>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-3xl font-black text-slate-950">{processingDocumentCount}</p>
+                      <p className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
+                        under analyse
                       </p>
-                    </Link>
-                  ))}
-                </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {processingDocumentCount > 0 ? (
+                      <Badge tone="info">{processingDocumentCount} KI analyserer</Badge>
+                    ) : null}
+                    {failedDocumentCount > 0 ? (
+                      <Badge tone="danger">
+                        {failedDocumentCount} {failedDocumentCount === 1 ? "kunne ikke analyseres" : "kunne ikke analyseres"}
+                      </Badge>
+                    ) : null}
+                    {casesMissingDocumentation.length > 0 ? (
+                      <Badge tone="warning">
+                        {casesMissingDocumentation.length} {casesMissingDocumentation.length === 1 ? "sak mangler dokumentasjon" : "saker mangler dokumentasjon"}
+                      </Badge>
+                    ) : null}
+                  </div>
+
+                  {casesMissingDocumentation.length > 0 ? (
+                    <div className="mt-4 grid gap-2">
+                      {casesMissingDocumentation.slice(0, 3).map((summary) => (
+                        <Link
+                          key={summary.caseId}
+                          href={`/min-side/saker/${summary.caseId}/full-rapport`}
+                          className="rounded-2xl border border-slate-200 bg-slate-50 p-3 hover:bg-red-50"
+                        >
+                          <p className="truncate text-sm font-black text-slate-950">{summary.title}</p>
+                          <p className="mt-1 text-xs text-slate-600">
+                            {summary.undocumentedClaimCount} {summary.undocumentedClaimCount === 1 ? "påstand mangler dokumentasjon" : "påstander mangler dokumentasjon"}
+                          </p>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-4 text-sm leading-6 text-slate-500">Ingen kjente dokumentasjonshull akkurat nå.</p>
+                  )}
+                </>
               )}
+
+              <Link
+                href="/min-side/dokumentasjon"
+                className="mt-5 inline-block text-sm font-black text-red-700 hover:text-red-900"
+              >
+                Se dokumentasjon →
+              </Link>
+
+              {activityItems.length > 0 ? (
+                <div className="mt-6 border-t border-slate-200 pt-5">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Sist skjedde</p>
+                  <div className="mt-3 grid gap-2">
+                    {activityItems.map((item) => (
+                      <Link
+                        key={item.id}
+                        href={item.href}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 p-3 hover:bg-red-50"
+                      >
+                        <p className="truncate text-sm font-bold text-slate-950">{item.title}</p>
+                        <p className="mt-0.5 truncate text-xs text-slate-500">{item.description}</p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
 
           </aside>

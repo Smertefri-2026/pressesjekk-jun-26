@@ -7,7 +7,9 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminAccountBox } from "@/components/admin/AdminAccountBox";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { packagePlanName } from "@/data/packagePlans";
 import { supabase } from "@/lib/supabase/client";
+import type { PurchaseRow as FullPurchaseRow } from "@/lib/purchases/types";
 
 type AdminProfile = {
   id: string;
@@ -17,30 +19,31 @@ type AdminProfile = {
   is_admin: boolean | null;
 };
 
-type PurchaseRow = {
-  id: string;
-  user_id: string;
-  case_id: string | null;
-  package_id: string;
-  purchase_type: string;
-  status: string;
-  amount_paid: number;
-  amount_original: number | null;
-  amount_credit: number;
-  currency: string;
-  included_cases: number;
-  used_cases: number;
-  source: string | null;
-  stripe_payment_intent_id: string | null;
-  stripe_checkout_session_id: string | null;
-  stripe_charge_id: string | null;
-  stripe_receipt_url: string | null;
-  refund_status: string;
-  refunded_amount: number;
-  refund_requested_at: string | null;
-  refund_note: string | null;
-  created_at: string;
-};
+type PurchaseRow = Pick<
+  FullPurchaseRow,
+  | "id"
+  | "user_id"
+  | "case_id"
+  | "package_id"
+  | "purchase_type"
+  | "status"
+  | "amount_paid"
+  | "amount_original"
+  | "amount_credit"
+  | "currency"
+  | "included_cases"
+  | "used_cases"
+  | "source"
+  | "stripe_payment_intent_id"
+  | "stripe_checkout_session_id"
+  | "stripe_charge_id"
+  | "stripe_receipt_url"
+  | "refund_status"
+  | "refunded_amount"
+  | "refund_requested_at"
+  | "refund_note"
+  | "created_at"
+>;
 
 type CaseRow = {
   id: string;
@@ -56,19 +59,7 @@ const refundStatuses = [
 
 const PAGE_SIZE = 10;
 
-function packageLabel(packageId: string) {
-  if (packageId === "report_pack") return "Rapportpakke";
-  if (packageId === "pfu_pack") return "PFU-pakke";
-  if (packageId === "full_pack") return "Full dokumentpakke";
-  if (packageId === "investigation_pack") return "Utredningspakke";
-  if (packageId === "case_bundle_3") return "3 saker";
-  if (packageId === "case_bundle_5") return "5 saker";
-  if (packageId === "case_bundle_10") return "10 saker";
-  if (packageId === "monthly_start") return "Månedsavtale Start";
-  if (packageId === "monthly_pro") return "Månedsavtale Pro";
-  if (packageId === "monthly_agency") return "Månedsavtale Byrå";
-  return packageId;
-}
+const packageLabel = packagePlanName;
 
 function refundLabel(status: string) {
   return refundStatuses.find((item) => item.id === status)?.label ?? status;
@@ -279,55 +270,59 @@ export default function AdminRefundsPage() {
   ).length;
   const closedCount = purchases.length - openCount;
 
-  async function updateRefundStatus(purchase: PurchaseRow, nextStatus: string) {
+  async function submitRefundDecision(
+    purchase: PurchaseRow,
+    decision: "approve" | "reject" | "refund"
+  ) {
     setIsUpdatingId(purchase.id);
     setErrorMessage("");
     setSuccessMessage("");
 
-    const updatePayload: Record<string, string | number | null> = {
-      refund_status: nextStatus,
-    };
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    if (nextStatus === "refunded") {
-      updatePayload.refunded_amount = purchase.amount_paid;
-    }
-
-    if (nextStatus === "rejected") {
-      updatePayload.refunded_amount = 0;
-    }
-
-    const { error } = await supabase
-      .from("user_purchases")
-      .update(updatePayload)
-      .eq("id", purchase.id);
-
-    if (error) {
-      setErrorMessage(error.message);
+    if (!session?.access_token) {
+      setErrorMessage("Innloggingen kunne ikke bekreftes. Last siden på nytt.");
       setIsUpdatingId(null);
       return;
     }
 
+    const response = await fetch(`/api/admin/refunds/${purchase.id}/decision`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ decision }),
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setErrorMessage(result?.error ?? "Kunne ikke oppdatere refusjonen.");
+      setIsUpdatingId(null);
+      return;
+    }
+
+    const updated = result.purchase as Partial<PurchaseRow>;
+
     setPurchases((current) =>
       current.map((item) =>
-        item.id === purchase.id
-          ? {
-              ...item,
-              refund_status: nextStatus,
-              refunded_amount:
-                nextStatus === "refunded"
-                  ? purchase.amount_paid
-                  : nextStatus === "rejected"
-                    ? 0
-                    : item.refunded_amount,
-            }
-          : item
+        item.id === purchase.id ? { ...item, ...updated } : item
       )
     );
 
+    const messages: Record<typeof decision, string> = {
+      approve: "godkjent. Utfør selve refusjonen i Stripe når du er klar.",
+      reject: "avvist.",
+      refund: `refundert i Stripe.${
+        result.accessResult ? ` ${result.accessResult}` : ""
+      }`,
+    };
+
     setSuccessMessage(
-      `Refusjon for ${packageLabel(purchase.package_id)} er markert som ${refundLabel(
-        nextStatus
-      ).toLowerCase()}.`
+      `Refusjon for ${packageLabel(purchase.package_id)} er ${messages[decision]}`
     );
     setIsUpdatingId(null);
   }
@@ -404,11 +399,13 @@ export default function AdminRefundsPage() {
         <AdminNav />
 
         <div className="mt-8 rounded-3xl border border-violet-200 bg-violet-50 p-5 text-sm font-semibold leading-7 text-violet-950">
-          <p className="font-black">Viktig:</p>
+          <p className="font-black">Refusjonsflyt:</p>
           <p className="mt-1">
-            Refusjon må gjennomføres i Stripe Dashboard før kjøpet markeres som
-            refundert her. Denne siden brukes til intern status, oppfølging og
-            dokumentasjon.
+            1) Kunden ber om refusjon → 2) du godkjenner eller avviser her → 3)
+            «Utfør refusjon i Stripe» kaller Stripe sitt refusjons-API direkte
+            og oppdaterer status først når Stripe bekrefter → 4) tilgangen som
+            hørte til kjøpet trekkes automatisk tilbake (utenom løpende
+            abonnement, som må vurderes manuelt).
           </p>
         </div>
 
@@ -595,29 +592,42 @@ export default function AdminRefundsPage() {
                         </p>
                       )}
 
+                      {purchase.refund_status === "requested" ? (
+                        <button
+                          type="button"
+                          onClick={() => submitRefundDecision(purchase, "approve")}
+                          disabled={isUpdatingId === purchase.id}
+                          className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Godkjenn
+                        </button>
+                      ) : null}
+                      {purchase.refund_status === "requested" ||
+                      purchase.refund_status === "approved" ? (
+                        <button
+                          type="button"
+                          onClick={() => submitRefundDecision(purchase, "reject")}
+                          disabled={isUpdatingId === purchase.id}
+                          className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-black text-red-800 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Avvis
+                        </button>
+                      ) : null}
                       <button
                         type="button"
-                        onClick={() => updateRefundStatus(purchase, "approved")}
-                        disabled={isUpdatingId === purchase.id}
-                        className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-950 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        Behandles
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => updateRefundStatus(purchase, "rejected")}
-                        disabled={isUpdatingId === purchase.id}
-                        className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-black text-red-800 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        Avvis
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => updateRefundStatus(purchase, "refunded")}
-                        disabled={isUpdatingId === purchase.id}
+                        onClick={() => submitRefundDecision(purchase, "refund")}
+                        disabled={
+                          isUpdatingId === purchase.id ||
+                          purchase.refund_status !== "approved"
+                        }
+                        title={
+                          purchase.refund_status !== "approved"
+                            ? "Må godkjennes først"
+                            : undefined
+                        }
                         className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        Marker refundert
+                        Utfør refusjon i Stripe
                       </button>
                     </div>
                   </article>

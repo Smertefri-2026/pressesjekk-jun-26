@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe/server";
 import { getStripeCheckoutPlan } from "@/lib/stripe/plans";
-import type { PackagePlanId } from "@/data/packagePlans";
+import { isV1Purchasable, type PackagePlanId } from "@/data/packagePlans";
 
 const subscriptionPackageIds: PackagePlanId[] = [
   "monthly_start",
@@ -31,6 +31,20 @@ export async function POST(request: NextRequest) {
     if (!plan || !isSubscriptionPackage(packageId)) {
       return NextResponse.json(
         { error: "Dette abonnementet kan ikke kjøpes her." },
+        { status: 400 }
+      );
+    }
+
+    // Server-side håndheving av v1-omfanget - se create-payment-intent.
+    // I v1 er ingen abonnement markert kjøpbare (deferredPackageIds), så
+    // denne ruten avviser i praksis alle forespørsler til abonnement er
+    // åpnet for salg.
+    if (!isV1Purchasable(packageId)) {
+      return NextResponse.json(
+        {
+          error:
+            "Abonnement er ikke åpnet for kjøp ennå. Ta kontakt for profftilgang.",
+        },
         { status: 400 }
       );
     }

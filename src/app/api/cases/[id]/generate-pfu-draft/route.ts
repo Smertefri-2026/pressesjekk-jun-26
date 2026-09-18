@@ -1,6 +1,6 @@
-import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { requireUser } from "@/lib/supabase/authServer";
+import { callAiText } from "@/lib/ai/openai";
 import { assertCaseAccess } from "@/lib/access/assertCaseAccess";
 import {
   editorResponsibilityRules,
@@ -15,10 +15,6 @@ type RouteContext = {
     id: string;
   }>;
 };
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
@@ -37,43 +33,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params;
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    const openaiKey = process.env.OPENAI_API_KEY;
-
-    if (!supabaseUrl || !supabaseAnonKey) {
-      return jsonError("Supabase miljøvariabler mangler.", 500);
-    }
-
-    if (!openaiKey) {
+    if (!process.env.OPENAI_API_KEY) {
       return jsonError("OPENAI_API_KEY mangler.", 500);
     }
 
-    const authorization = request.headers.get("authorization");
+    const auth = await requireUser(request);
+    if (!auth.ok) return jsonError(auth.error, auth.status);
 
-    if (!authorization?.startsWith("Bearer ")) {
-      return jsonError("Du må være innlogget for å generere PFU-klage.", 401);
-    }
-
-    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          Authorization: authorization,
-        },
-      },
-      auth: {
-        persistSession: false,
-      },
-    });
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseUser.auth.getUser();
-
-    if (userError || !user) {
-      return jsonError("Kunne ikke bekrefte innlogget bruker.", 401);
-    }
+    const { user, supabase: supabaseUser } = auth;
 
     const { data: profile } = await supabaseUser
       .from("profiles")
@@ -261,16 +228,7 @@ PFU-KLAGEUTKAST
 Skriv klart, rolig, profesjonelt og nøkternt.
 `;
 
-    const response = await openai.responses.create({
-      model: "gpt-4.1-mini",
-      input: prompt,
-    });
-
-    const pfuDraft = response.output_text?.trim();
-
-    if (!pfuDraft) {
-      return jsonError("KI svarte uten PFU-klage.", 500);
-    }
+    const pfuDraft = (await callAiText({ prompt })).trim();
 
     const { data: insertedReport, error: insertError } = await supabaseUser
       .from("case_reports")

@@ -5,10 +5,11 @@ import { useParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
-import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
+import { CaseSidebar } from "@/components/cases/CaseSidebar";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 import type { PackagePlanId } from "@/data/packagePlans";
+import type { CaseReportRow as FullCaseReportRow } from "@/lib/report/mappers";
 
 type CaseRow = {
   id: string;
@@ -37,13 +38,7 @@ type CaseInputRow = {
   desired_outcome: string | null;
 };
 
-type CaseReportRow = {
-  id: string;
-  version: number;
-  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft" | "investigation_draft";
-  status: "draft" | "ready" | "archived";
-  created_at: string;
-};
+type CaseReportRow = Pick<FullCaseReportRow, "id" | "version" | "report_type" | "status" | "created_at">;
 
 type CaseAccessRow = {
   package_id: PackagePlanId;
@@ -115,42 +110,6 @@ function formatDate(date: string | null) {
     month: "2-digit",
     year: "numeric",
   }).format(new Date(date));
-}
-
-function packageLabel(packageId: PackagePlanId | null) {
-  if (packageId === "report_pack") return "Rapportpakke";
-  if (packageId === "pfu_pack") return "PFU-pakke";
-  if (packageId === "full_pack") return "Full dokumentpakke";
-  if (packageId === "investigation_pack") return "Utredningspakke";
-  if (packageId === "monthly_start") return "Månedsavtale Start";
-  if (packageId === "monthly_pro") return "Månedsavtale Pro";
-  if (packageId === "monthly_agency") return "Månedsavtale Byrå";
-  if (packageId === "monthly_enterprise") return "Enterprise";
-  return "Ingen aktiv pakke";
-}
-
-function hasPackageAccess(
-  currentPackageId: PackagePlanId | null,
-  requiredPackageId: PackagePlanId
-) {
-  const accessRank: Record<PackagePlanId, number> = {
-    report_pack: 1,
-    case_bundle_3: 1,
-    case_bundle_5: 1,
-    case_bundle_10: 1,
-    monthly_start: 1,
-    monthly_pro: 1,
-    monthly_agency: 1,
-    monthly_enterprise: 1,
-    pfu_pack: 2,
-    full_pack: 3,
-    investigation_pack: 4,
-  };
-
-  return (
-    Boolean(currentPackageId) &&
-    accessRank[currentPackageId as PackagePlanId] >= accessRank[requiredPackageId]
-  );
 }
 
 function InfoBlock({
@@ -229,12 +188,18 @@ export default function CaseDetailPage() {
         profileData?.role_type === "journalist" ? "journalist" : "standard"
       );
 
-      const { data: accessData } = await supabase
+      const { data: accessData, error: accessError } = await supabase
         .from("case_access")
         .select("package_id,status")
         .eq("case_id", params.id)
         .eq("status", "active")
         .maybeSingle();
+
+      if (accessError) {
+        setErrorMessage(accessError.message);
+        setIsLoading(false);
+        return;
+      }
 
       const caseAccess = accessData as CaseAccessRow | null;
 
@@ -519,26 +484,6 @@ export default function CaseDetailPage() {
   );
 
   const isJournalistWorkflow = workflowType === "journalist";
-
-  const nextDocumentsTitle = isJournalistWorkflow
-    ? "Videre redaksjonelt arbeid"
-    : "Videre dokumenter";
-
-  const nextDocumentsText = isJournalistWorkflow
-    ? "Når rapporten er klar, kan saken bygges videre med publiseringsgrunnlag, kildevurdering og redaksjonell risikosjekk."
-    : "Når rapporten er klar, kan saken bygges videre med PFU-klage, politianmeldelse eller utredningspakke ved behov.";
-
-  const unlockedCapabilities = isJournalistWorkflow
-    ? [
-        { label: "Redaksjonell rapport", id: "report_pack" as PackagePlanId },
-        { label: "Publiseringsgrunnlag", id: "pfu_pack" as PackagePlanId },
-        { label: "Utvidet VVP-risiko", id: "full_pack" as PackagePlanId },
-      ]
-    : [
-        { label: "Rapport", id: "report_pack" as PackagePlanId },
-        { label: "PFU-klage", id: "pfu_pack" as PackagePlanId },
-        { label: "Politianmeldelse", id: "full_pack" as PackagePlanId },
-      ];
 
   if (isLoading) {
     return (
@@ -862,7 +807,7 @@ export default function CaseDetailPage() {
                           >
                             <div className="flex flex-wrap items-start justify-between gap-3">
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs font-black uppercase tracking-[0.16em] text-red-700">
+                                <p className="text-xs font-bold uppercase tracking-[0.16em] text-red-700">
                                   {link.is_primary ? "Hovedartikkel" : "Relatert artikkel"}
                                 </p>
                                 {link.title ? (
@@ -945,8 +890,7 @@ export default function CaseDetailPage() {
 
           </section>
 
-          <aside className="grid content-start gap-6">
-          <CaseWorkflowCard
+          <CaseSidebar
             caseId={params.id}
             statusLabel={statusLabel(caseItem.status)}
             activeStep="case"
@@ -967,64 +911,42 @@ export default function CaseDetailPage() {
               policeReport: reports.some((report) => report.report_type === "police_draft"),
               investigation: reports.some((report) => report.report_type === "investigation_draft"),
             }}
-          />
-
-            <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
-                Rapport
-              </p>
-              <h2 className="mt-3 text-3xl font-black">
-                {reportDrafts.length > 1
-                  ? `${reportDrafts.length} rapporter lagret`
-                  : reportDrafts.length === 1
-                    ? "1 rapport lagret"
-                    : "Ingen rapport lagret"}
-              </h2>
-              <p className="mt-4 leading-8 text-slate-300">
-                {reportDrafts.length > 0
+            statusItems={[
+              {
+                label: "Rapport",
+                value:
+                  reportDrafts.length > 0
+                    ? `${reportDrafts.length} lagret · v${reportDrafts[0]?.version}`
+                    : "Ikke laget",
+                tone: reportDrafts.length > 0 ? "success" : "neutral",
+                href: `/min-side/saker/${params.id}/full-rapport`,
+              },
+            ]}
+            nextStep={{
+              title:
+                reportDrafts.length > 0 ? "Fortsett med rapporten" : "Første rapportutkast",
+              description:
+                reportDrafts.length > 0
                   ? `Siste rapportversjon er v${reportDrafts[0]?.version}. Du kan åpne rapporten eller lage en ny versjon.`
-                  : "Når saksopplysninger er lagt inn, kan du lage første rapport."}
-              </p>
-
-              <Link
-                href={`/min-side/saker/${params.id}/rapport`}
-                className="mt-6 inline-flex rounded-xl bg-orange-400 px-5 py-4 text-sm font-black text-slate-950 hover:bg-orange-500"
-              >
-                {reportDrafts.length > 0 ? "Åpne rapport" : "Lag rapport"}
-              </Link>
-            </div>
-
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
-                Status og dokumentpakker
-              </p>
-
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                Se hva saken har tilgang til
-              </h2>
-
-              <p className="mt-4 leading-8 text-slate-700">
-                Se hva som er låst opp for saken, hva som kan oppgraderes, og
-                hvilke dokumenter som kan lages videre.
-              </p>
-
-              <Link
-                href={`/min-side/saker/${params.id}/pakke`}
-                className="mt-6 block rounded-xl bg-slate-950 px-5 py-4 text-center text-sm font-black text-white hover:bg-slate-800"
-              >
-                Se status og pakker
-              </Link>
-            </div>
-
-          </aside>
+                  : "Når saksopplysninger er lagt inn, kan du lage første rapport.",
+              primary: {
+                label: reportDrafts.length > 0 ? "Åpne rapport" : "Lag rapport",
+                href: `/min-side/saker/${params.id}/full-rapport`,
+              },
+              secondary: {
+                label: "Se status og pakker",
+                href: `/min-side/saker/${params.id}/pakke`,
+              },
+            }}
+          />
         </div>
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:hidden">
           <Link
-            href={`/min-side/saker/${params.id}/opplysninger`}
+            href={`/min-side/saker/${params.id}/full-rapport`}
             className="rounded-2xl bg-slate-950 px-6 py-4 text-center font-black text-white hover:bg-slate-800"
           >
-            Gå til saksopplysninger
+            Gå til full rapport
           </Link>
 
           <Link

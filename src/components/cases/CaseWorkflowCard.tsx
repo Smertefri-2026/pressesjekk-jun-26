@@ -10,13 +10,11 @@ import {
 
 export type CaseWorkflowStep =
   | "case"
-  | "opplysninger"
-  | "rapport"
+  | "full-rapport"
   | "pfu"
   | "pfu-avgjorelse"
   | "politianmeldelse"
-  | "utredning"
-  | "rediger";
+  | "utredning";
 
 type CaseWorkflowCardProps = {
   caseId: string;
@@ -35,84 +33,90 @@ type CaseWorkflowCardProps = {
   };
 };
 
-const workflowSteps: {
-  key: CaseWorkflowStep;
+type DoneKey =
+  | "caseRegistered"
+  | "caseInputs"
+  | "report"
+  | "pfuDraft"
+  | "pfuDecision"
+  | "policeReport"
+  | "investigation";
+
+type VisualStepKey = "enkel_rapport" | "full_rapport" | "pfu" | "politianmeldelse" | "utredning";
+
+/**
+ * Fase 6 — Saksgang samler de tidligere sju sidene i fem naturlige
+ * arbeidssteg for brukeren. Hvert visuelt steg kan romme flere sider/URL-er
+ * (ingen ruter er fjernet) og flere pakke-terskler (f.eks. PFU-klage krever
+ * PFU-pakke, PFU-avgjørelse krever Full dokumentpakke - begge ligger nå i
+ * samme steg "PFU", men beholder sine egne tilgangsgrenser).
+ */
+const visualSteps: {
+  key: VisualStepKey;
+  memberSteps: CaseWorkflowStep[];
   label: string;
   description: string;
   href: (caseId: string) => string;
-  doneKey:
-    | "caseRegistered"
-    | "caseInputs"
-    | "report"
-    | "pfuDraft"
-    | "pfuDecision"
-    | "policeReport"
-    | "investigation";
+  doneKeys: DoneKey[];
+  /** Første numeriske adgangsposisjon (1-7, gammel granularitet) dette steget krever for i det hele tatt å være tilgjengelig. */
+  accessPosition: number;
 }[] = [
   {
-    key: "case",
-    label: "Sak registrert",
-    description: "Grunnsiden for saken",
+    key: "enkel_rapport",
+    memberSteps: ["case"],
+    label: "Enkel rapport",
+    description: "Grunnopplysninger om saken",
     href: (caseId) => `/min-side/saker/${caseId}`,
-    doneKey: "caseRegistered",
+    doneKeys: ["caseRegistered"],
+    accessPosition: 1,
   },
   {
-    key: "opplysninger",
-    label: "Saksopplysninger",
-    description: "Fakta, tilsvar og dokumentasjon",
-    href: (caseId) => `/min-side/saker/${caseId}/opplysninger`,
-    doneKey: "caseInputs",
-  },
-  {
-    key: "rapport",
-    label: "Rapport",
-    description: "Rapportutkast og vurdering",
-    href: (caseId) => `/min-side/saker/${caseId}/rapport`,
-    doneKey: "report",
+    key: "full_rapport",
+    memberSteps: ["full-rapport"],
+    label: "Full rapport",
+    description: "Saksopplysninger, dokumentasjon og KI-rapport",
+    href: (caseId) => `/min-side/saker/${caseId}/full-rapport`,
+    doneKeys: ["caseInputs", "report"],
+    accessPosition: 2,
   },
   {
     key: "pfu",
-    label: "PFU-klage",
-    description: "Utkast til PFU-klage",
+    memberSteps: ["pfu", "pfu-avgjorelse"],
+    label: "PFU",
+    description: "Klage og avgjørelse",
     href: (caseId) => `/min-side/saker/${caseId}/pfu`,
-    doneKey: "pfuDraft",
-  },
-  {
-    key: "pfu-avgjorelse",
-    label: "PFU-avgjørelse",
-    description: "Resultat og dokumentasjon",
-    href: (caseId) => `/min-side/saker/${caseId}/pfu-avgjorelse`,
-    doneKey: "pfuDecision",
+    doneKeys: ["pfuDraft", "pfuDecision"],
+    accessPosition: 4,
   },
   {
     key: "politianmeldelse",
+    memberSteps: ["politianmeldelse"],
     label: "Politianmeldelse",
-    description: "Videre vurdering",
+    description: "Anmeldelse og videre vurdering",
     href: (caseId) => `/min-side/saker/${caseId}/politianmeldelse`,
-    doneKey: "policeReport",
+    doneKeys: ["policeReport"],
+    accessPosition: 6,
   },
   {
     key: "utredning",
-    label: "Utredningspakke",
+    memberSteps: ["utredning"],
+    label: "Utredning",
     description: "Manuell gjennomgang",
     href: (caseId) => `/min-side/saker/${caseId}/utredning`,
-    doneKey: "investigation",
+    doneKeys: ["investigation"],
+    accessPosition: 7,
   },
 ];
 
-function inferPackageFromActiveStep(activeStep: CaseWorkflowStep): PackagePlanId {
-  if (activeStep === "pfu") {
-    return "pfu_pack";
-  }
+const journalistText: Partial<Record<VisualStepKey, { label: string; description: string }>> = {
+  enkel_rapport: { label: "Sak opprettet", description: "Artikkelidé / publisering" },
+  full_rapport: { label: "Redaksjonell sjekk", description: "Publiseringsgrunnlag og presseetisk rapport" },
+};
 
-  if (activeStep === "utredning") {
-    return "investigation_pack";
-  }
-
-  if (activeStep === "pfu-avgjorelse" || activeStep === "politianmeldelse") {
-    return "full_pack";
-  }
-
+function inferPackageFromAccessPosition(position: number): PackagePlanId {
+  if (position >= 7) return "investigation_pack";
+  if (position >= 6) return "full_pack";
+  if (position >= 4) return "pfu_pack";
   return "report_pack";
 }
 
@@ -138,9 +142,11 @@ function getPackageLabel(packageId: PackagePlanId) {
 
 function getPackageAccessLabel(packageId: PackagePlanId) {
   const steps = packageAccessSteps[packageId] ?? [1, 2, 3];
-  const lastStep = steps[steps.length - 1] ?? 3;
 
-  return `Tilgang: steg 1–${lastStep}`;
+  const reachedSteps = visualSteps.filter((step) => steps.includes(step.accessPosition));
+  const lastReached = reachedSteps[reachedSteps.length - 1];
+
+  return `Tilgang: til og med ${lastReached?.label ?? "Full rapport"}`;
 }
 
 export function CaseWorkflowCard({
@@ -154,79 +160,37 @@ export function CaseWorkflowCard({
   const effectivePackageId =
     workflowType === "journalist"
       ? "report_pack"
-      : currentPackageId ?? inferPackageFromActiveStep(activeStep);
+      : (currentPackageId ?? inferPackageFromAccessPosition(
+          visualSteps.find((step) => step.memberSteps.includes(activeStep))?.accessPosition ?? 1
+        ));
 
   const accessSteps = packageAccessSteps[effectivePackageId] ?? [1, 2, 3];
   const upgradePackage = getUpgradePackage(effectivePackageId);
 
-  const visibleWorkflowSteps = useMemo(() => {
+  const visibleSteps = useMemo(() => {
     if (workflowType === "journalist") {
-      return workflowSteps.filter((step) =>
-        ["case", "opplysninger", "rapport"].includes(step.key)
-      );
+      return visualSteps.filter((step) => step.key === "enkel_rapport" || step.key === "full_rapport");
     }
 
-    return workflowSteps;
+    return visualSteps;
   }, [workflowType]);
 
-  const firstLockedStepKey = visibleWorkflowSteps.find((_, index) => {
-    const stepNumber = index + 1;
-    return !accessSteps.includes(stepNumber);
-  })?.key;
-
-  function getStepText(step: (typeof workflowSteps)[number]) {
-    if (workflowType !== "journalist") {
-      return {
-        label: step.label,
-        description: step.description,
-      };
-    }
-
-    if (step.key === "case") {
-      return {
-        label: "Sak opprettet",
-        description: "Artikkelidé / publisering",
-      };
-    }
-
-    if (step.key === "opplysninger") {
-      return {
-        label: "Publiseringsgrunnlag",
-        description: "Fakta, kilder og tilsvar",
-      };
-    }
-
-    if (step.key === "rapport") {
-      return {
-        label: "Redaksjonell sjekk",
-        description: "Presseetisk rapport",
-      };
-    }
-
-    return {
-      label: step.label,
-      description: step.description,
-    };
-  }
+  const firstLockedStepKey = visibleSteps.find(
+    (step) => workflowType !== "journalist" && !accessSteps.includes(step.accessPosition)
+  )?.key;
 
   return (
     <aside className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-7">
-      <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
-        Saksgang
-      </p>
+      <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">Saksgang</p>
 
-      <h2 className="mt-4 text-3xl font-black text-slate-950">
-        {statusLabel}
-      </h2>
+      <h2 className="mt-4 text-3xl font-black text-slate-950">{statusLabel}</h2>
 
       <div className="mt-5 rounded-2xl border border-red-200 bg-white/70 p-4">
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-red-800">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-800">
           {workflowType === "journalist" ? "Arbeidsflyt" : "Valgt pakke"}
         </p>
         <p className="mt-2 text-lg font-black text-slate-950">
-          {workflowType === "journalist"
-            ? "Journalist / redaksjon"
-            : getPackageLabel(effectivePackageId)}
+          {workflowType === "journalist" ? "Journalist / redaksjon" : getPackageLabel(effectivePackageId)}
         </p>
         <p className="mt-1 text-sm font-semibold text-slate-600">
           {workflowType === "journalist"
@@ -236,30 +200,27 @@ export function CaseWorkflowCard({
       </div>
 
       <div className="mt-6 grid gap-3">
-        {visibleWorkflowSteps.map((step, index) => {
+        {visibleSteps.map((step, index) => {
           const stepNumber = index + 1;
-          const isDone =
-            step.doneKey === "caseRegistered"
-              ? true
-              : Boolean(stepsDone?.[step.doneKey]);
+          const isDone = step.doneKeys.some((key) => (key === "caseRegistered" ? true : Boolean(stepsDone?.[key])));
+          const isActive = step.memberSteps.includes(activeStep);
+          const isLocked = workflowType !== "journalist" && !accessSteps.includes(step.accessPosition);
+          const showUpgradeButton = isLocked && step.key === firstLockedStepKey && upgradePackage;
 
-          const isActive = activeStep === step.key;
-          const isLocked =
-            workflowType !== "journalist" && !accessSteps.includes(stepNumber);
-
-          const showUpgradeButton =
-            isLocked && step.key === firstLockedStepKey && upgradePackage;
+          const text = journalistText[step.key];
+          const label = workflowType === "journalist" && text ? text.label : step.label;
+          const description = workflowType === "journalist" && text ? text.description : step.description;
 
           const stepContent = (
             <div className="flex items-start gap-3">
               <span
                 className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${
                   isActive
-                    ? "bg-orange-400 text-slate-950"
+                    ? "bg-red-500 text-white"
                     : isLocked
                       ? "bg-slate-200 text-slate-500"
                       : isDone
-                        ? "bg-orange-400 text-slate-950"
+                        ? "bg-emerald-100 text-emerald-800"
                         : "bg-slate-200 text-slate-500"
                 }`}
               >
@@ -267,7 +228,7 @@ export function CaseWorkflowCard({
               </span>
 
               <div className="min-w-0 flex-1">
-                <p className="font-black">{getStepText(step).label}</p>
+                <p className="font-black">{label}</p>
                 <p
                   className={`mt-0.5 text-xs leading-5 ${
                     isActive
@@ -285,13 +246,13 @@ export function CaseWorkflowCard({
                       ? `Krever ${upgradePackage?.name ?? "oppgradering"}`
                       : isDone
                         ? "Utført / påbegynt"
-                        : getStepText(step).description}
+                        : description}
                 </p>
 
                 {showUpgradeButton ? (
                   <a
                     href={`/min-side/saker/${caseId}/pakke`}
-                    className="mt-3 inline-flex rounded-xl bg-orange-400 px-4 py-2 text-xs font-black text-slate-950 hover:bg-orange-400"
+                    className="mt-3 inline-flex rounded-xl bg-red-500 px-4 py-2 text-xs font-black text-white hover:bg-red-600"
                   >
                     Oppgrader til {upgradePackage.name}
                   </a>
@@ -302,10 +263,7 @@ export function CaseWorkflowCard({
 
           if (isLocked) {
             return (
-              <div
-                key={step.key}
-                className="rounded-2xl border border-red-100 bg-white/50 p-3 text-slate-500"
-              >
+              <div key={step.key} className="rounded-2xl border border-red-100 bg-white/50 p-3 text-slate-500">
                 {stepContent}
               </div>
             );

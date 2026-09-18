@@ -42,7 +42,7 @@ export const singlePackages: PackagePlan[] = [
       "Nedlasting som PDF og tekst",
       "Passer for privatpersoner, virksomheter og journalister",
     ],
-    href: "/pressesjekk",
+    href: "/utsjekk?plan=report_pack",
     button: "Start med rapportpakke",
   },
   {
@@ -60,7 +60,7 @@ export const singlePackages: PackagePlan[] = [
       "Nedlasting av PFU-klage som PDF og tekst",
       "Kan oppgraderes videre til full dokumentpakke",
     ],
-    href: "/pressesjekk",
+    href: "/utsjekk?plan=pfu_pack",
     button: "Velg PFU-pakke",
   },
   {
@@ -79,7 +79,7 @@ export const singlePackages: PackagePlan[] = [
       "Nedlasting som komplett PDF",
       "Best grunnlag før eventuell utredningspakke",
     ],
-    href: "/pressesjekk",
+    href: "/utsjekk?plan=full_pack",
     button: "Velg full dokumentpakke",
   },
   {
@@ -98,8 +98,8 @@ export const singlePackages: PackagePlan[] = [
       "Kronologisk saksgjennomgang",
       "Vedleggsliste og strukturert grunnlag",
     ],
-    href: "/kontakt",
-    button: "Be om utredningspakke",
+    href: "/utsjekk?plan=investigation_pack",
+    button: "Velg full utredningspakke",
   },
 ];
 
@@ -239,15 +239,16 @@ export const allPackagePlans = [
   ...monthlyPackages,
 ];
 
-// --- v1 checkout-scope (B4) ---------------------------------------------
-// Kun disse tre pakkene er kjøpbare i v1 sin offentlige checkout.
+// --- v1 checkout-scope (B4, utvidet i 5.3 til å inkludere Utredningspakken) --
+// Disse fire enkeltpakkene er kjøpbare direkte i v1 sin offentlige checkout.
 export const v1PurchasablePackageIds: PackagePlanId[] = [
   "report_pack",
   "pfu_pack",
   "full_pack",
+  "investigation_pack",
 ];
 
-// De tre v1-pakkene som skal vises som kjøpbare (brukes i /priser i C3).
+// De fire v1-pakkene som skal vises som kjøpbare (brukes i /priser i C3).
 export const v1PurchasablePackages: PackagePlan[] = singlePackages.filter(
   (plan) => (v1PurchasablePackageIds as string[]).includes(plan.id)
 );
@@ -255,7 +256,6 @@ export const v1PurchasablePackages: PackagePlan[] = singlePackages.filter(
 // Utsatt til etter v1 – skal IKKE være del av offentlig checkout.
 // Vises eventuelt som "Kontakt oss" i stedet for kjøpsknapp.
 export const deferredPackageIds: PackagePlanId[] = [
-  "investigation_pack",
   "monthly_start",
   "monthly_pro",
   "monthly_agency",
@@ -287,3 +287,37 @@ export const upgradePaths = {
   pfu_pack: "full_pack",
   full_pack: "investigation_pack",
 } as const;
+
+// --- Canonical pakke-oppslag (5.3) ---------------------------------------
+// Én kilde for visningsnavn, rangering og pris, slik at sider ikke lenger
+// skriver sine egne kopier som kan gli fra hverandre. Se UX-rapporten
+// "Rødstreken" punkt 03/06 (fase 5.2).
+
+// Rangering brukt til oppgraderings-/mellomleggslogikk. Alle "startnivå"-
+// produkter (sakspakker, abonnement) rangerer likt med Rapportpakke, siden
+// en sak alltid starter som rapportpakke-nivå uansett hvordan den ble kjøpt.
+export const packagePlanRankById: Record<PackagePlanId, number> = {
+  report_pack: 1,
+  case_bundle_3: 1,
+  case_bundle_5: 1,
+  case_bundle_10: 1,
+  monthly_start: 1,
+  monthly_pro: 1,
+  monthly_agency: 1,
+  monthly_enterprise: 1,
+  pfu_pack: 2,
+  full_pack: 3,
+  investigation_pack: 4,
+};
+
+export function packagePlanRank(packageId: PackagePlanId | null | undefined): number {
+  if (!packageId) return 0;
+  return packagePlanRankById[packageId] ?? 1;
+}
+
+export function packagePlanName(packageId: string | null | undefined): string {
+  if (!packageId) return "Ingen aktiv pakke";
+  // Ukjent, men ikke-tom verdi (f.eks. eldre/utgått pakke-id i loggdata) vises
+  // som selve id-en i stedet for å late som om saken ikke har noen pakke.
+  return allPackagePlans.find((plan) => plan.id === packageId)?.name ?? packageId;
+}

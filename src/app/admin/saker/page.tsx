@@ -7,6 +7,7 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminAccountBox } from "@/components/admin/AdminAccountBox";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { packagePlanName } from "@/data/packagePlans";
 import { supabase } from "@/lib/supabase/client";
 
 type AdminProfile = {
@@ -55,16 +56,7 @@ const statusOptions = [
   { id: "closed", label: "Lukket" },
 ];
 
-const packageLabels: Record<string, string> = {
-  report_pack: "Rapportpakke",
-  pfu_pack: "PFU-pakke",
-  full_pack: "Full dokumentpakke",
-  investigation_pack: "Utredningspakke",
-};
-
-function packageLabel(packageId: string) {
-  return packageLabels[packageId] ?? packageId;
-}
+const packageLabel = packagePlanName;
 
 function statusLabel(status: string | null) {
   if (status === "draft") return "Utkast";

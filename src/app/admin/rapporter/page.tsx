@@ -70,7 +70,7 @@ function reportHref(report: AdminReport) {
     return `/min-side/saker/${report.case_id}/utredning`;
   }
 
-  return `/min-side/saker/${report.case_id}/rapport`;
+  return `/min-side/saker/${report.case_id}/full-rapport`;
 }
 
 function formatDateTime(value: string | null) {

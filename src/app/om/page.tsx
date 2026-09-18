@@ -221,7 +221,7 @@ export default function OmPage() {
           <div className="grid gap-8 p-5 sm:p-8 lg:grid-cols-[1fr_460px] lg:items-stretch">
             <div className="grid content-start gap-6">
               <div>
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                   Visjon
                 </p>
                 <h2 className="mt-3 text-4xl font-black">
@@ -235,7 +235,7 @@ export default function OmPage() {
               </div>
 
               <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                   Neste steg
                 </p>
                 <p className="mt-4 text-2xl font-black">
@@ -243,7 +243,7 @@ export default function OmPage() {
                 </p>
                 <Link
                   href="/pressesjekk"
-                  className="mt-6 inline-flex rounded-xl bg-red-500 px-6 py-4 font-black text-white hover:bg-orange-600"
+                  className="mt-6 inline-flex rounded-xl bg-red-500 px-6 py-4 font-black text-white hover:bg-red-600"
                 >
                   Start sjekk
                 </Link>

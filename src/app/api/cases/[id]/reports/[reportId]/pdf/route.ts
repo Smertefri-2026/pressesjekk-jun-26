@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb, type Color, type PDFPage } from "pdf-lib";
+import { normalizeReportSections } from "@/lib/report/mappers";
+import type { ReportSection } from "@/lib/report/types";
 
 type RouteContext = {
   params: Promise<{
@@ -910,6 +912,283 @@ async function createReportPdf(reportText: string) {
   return await pdfDoc.save();
 }
 
+const GAP_TYPE_LABELS: Record<string, string> = {
+  undocumented_claim: "Dokumentasjon mangler",
+  partially_documented_claim: "Kun delvis dokumentert",
+  conflicting_claim: "Motstridende opplysninger",
+  unanchored_claim: "Ikke knyttet til tidslinjen",
+  undocumented_event: "Hendelse uten dokumentasjon",
+  unconfirmed_witness: "Vitne uten skriftlig erklæring",
+};
+
+const IDENTITY_LABELS: Record<string, string> = {
+  possible: "Mulig vitne (ikke bekreftet)",
+  named: "Navngitt vitne",
+  anonymous: "Anonymisert vitne",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  well_documented: "Godt dokumentert",
+  partially_documented: "Delvis dokumentert",
+  conflicting: "Motstridende dokumentasjon",
+  undocumented: "Ikke dokumentert",
+};
+
+const CONFIDENCE_LABELS: Record<string, string> = { high: "Høy", medium: "Middels", low: "Lav" };
+
+/**
+ * Strukturert PDF-rendering (fase 4). I motsetning til createReportPdf
+ * over, som gjenkjenner seksjoner ved å lete etter kjente overskriftstekster
+ * i en flat streng, jobber denne DIREKTE på typede ReportSection-objekter -
+ * ingen tekst-sniffing, ingen fare for at layout og innhold kommer ut av
+ * synk. Gjenbruker samme visuelle språk (farger, marger, fonter,
+ * topptekst/bunntekst) som den eksisterende rapport-PDF-en, jf. kravet om
+ * å bevare eksisterende visuelt uttrykk.
+ */
+async function createStructuredReportPdf({
+  caseTitle,
+  version,
+  createdAt,
+  sections,
+}: {
+  caseTitle: string;
+  version: number | null | undefined;
+  createdAt: string | null | undefined;
+  sections: ReportSection[];
+}) {
+  const pdfDoc = await PDFDocument.create();
+  const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const pageWidth = 595.28;
+  const pageHeight = 841.89;
+  const margin = 54;
+  const contentWidth = pageWidth - margin * 2;
+  const fontSize = 10.5;
+  const lineHeight = 16;
+  const maxCharacters = 86;
+
+  let page = pdfDoc.addPage([pageWidth, pageHeight]);
+  let y = 700;
+
+  const dark = rgb(0.02, 0.05, 0.09);
+  const slate = rgb(0.39, 0.45, 0.55);
+  const lightSlate = rgb(0.93, 0.96, 0.98);
+  const border = rgb(0.82, 0.87, 0.92);
+  const cyan = rgb(0.04, 0.45, 0.55);
+  const lightCyan = rgb(0.90, 0.98, 1);
+  const amber = rgb(0.55, 0.35, 0.02);
+
+  function drawHeader(currentPage: PDFPage) {
+    currentPage.drawRectangle({ x: 0, y: pageHeight - 82, width: pageWidth, height: 82, color: lightCyan });
+    currentPage.drawText("PresseSjekk", { x: margin, y: pageHeight - 42, size: 23, font: boldFont, color: dark });
+    currentPage.drawText("Din kontroll av media", { x: margin, y: pageHeight - 60, size: 9, font: boldFont, color: cyan });
+    currentPage.drawText("KONFIDENSIELL / VEILEDENDE RAPPORT", {
+      x: pageWidth - margin - 190,
+      y: pageHeight - 48,
+      size: 8,
+      font: boldFont,
+      color: cyan,
+    });
+    currentPage.drawLine({ start: { x: margin, y: pageHeight - 82 }, end: { x: pageWidth - margin, y: pageHeight - 82 }, thickness: 1, color: border });
+  }
+
+  function addPageIfNeeded(extraSpace = 40) {
+    if (y < 70 + extraSpace) {
+      page = pdfDoc.addPage([pageWidth, pageHeight]);
+      drawHeader(page);
+      y = 700;
+    }
+  }
+
+  function drawLineText(line: string, options?: { bold?: boolean; size?: number; color?: Color; x?: number; lineHeight?: number }) {
+    addPageIfNeeded();
+    page.drawText(line, {
+      x: options?.x ?? margin,
+      y,
+      size: options?.size ?? fontSize,
+      font: options?.bold ? boldFont : regularFont,
+      color: options?.color ?? dark,
+    });
+    y -= options?.lineHeight ?? lineHeight;
+  }
+
+  function drawWrappedText(textValue: string, options?: { indent?: number; color?: Color; bold?: boolean }) {
+    const indent = options?.indent ?? 0;
+    const adjustedMaxCharacters = maxCharacters - Math.round(indent / 6);
+    const lines = wrapLine(safeText(textValue), adjustedMaxCharacters);
+    for (const line of lines) {
+      drawLineText(line, { x: margin + indent, color: options?.color ?? dark, bold: options?.bold });
+    }
+  }
+
+  function drawSectionHeading(heading: string) {
+    addPageIfNeeded(70);
+    y -= 8;
+    page.drawRectangle({ x: margin, y: y - 6, width: contentWidth, height: 26, color: lightSlate, borderColor: border, borderWidth: 0.7 });
+    page.drawText(heading, { x: margin + 12, y: y + 2, size: 11, font: boldFont, color: dark });
+    y -= 24;
+  }
+
+  function drawSubLabel(label: string, value: string, options?: { color?: Color }) {
+    drawWrappedText(`${label}: ${value}`, { indent: 10, color: options?.color });
+  }
+
+  function drawDocRefs(label: string, refs: { label: string }[]) {
+    if (refs.length === 0) return;
+    drawWrappedText(`${label}: ${refs.map((r) => r.label).join(", ")}`, { indent: 10, color: slate });
+  }
+
+  drawHeader(page);
+
+  page.drawText("PresseSjekk-rapport", { x: margin, y, size: 24, font: boldFont, color: dark });
+  y -= 26;
+  page.drawText("Strukturert kontroll av medieomtale, bygget på sakens registrerte grunnlag.", {
+    x: margin,
+    y,
+    size: 10.5,
+    font: regularFont,
+    color: slate,
+  });
+  y -= 20;
+  page.drawText(safeText(`Sak: ${caseTitle} - Rapport v${version ?? 1} - ${formatDate(createdAt)}`), {
+    x: margin,
+    y,
+    size: 9,
+    font: regularFont,
+    color: slate,
+  });
+  y -= 20;
+
+  page.drawRectangle({ x: margin, y: y - 10, width: contentWidth, height: 1, color: border });
+  y -= 30;
+
+  for (const section of sections) {
+    drawSectionHeading(section.heading);
+
+    switch (section.kind) {
+      case "summary":
+      case "background":
+      case "conclusion": {
+        drawWrappedText(section.text);
+        break;
+      }
+
+      case "timeline": {
+        if (section.entries.length === 0) drawWrappedText("Ingen hendelser registrert.");
+        for (const entry of section.entries) {
+          drawWrappedText(`${entry.dateLabel} - ${entry.title}`, { bold: true });
+          if (entry.description) drawWrappedText(entry.description, { indent: 10 });
+          drawDocRefs("Dokumenter", entry.documentRefs);
+          if (entry.witnessLabels.length > 0) drawWrappedText(`Vitner: ${entry.witnessLabels.join(", ")}`, { indent: 10, color: slate });
+          if (entry.hasDateConflict && entry.conflictNote) drawWrappedText(`Merk - ${entry.conflictNote}`, { indent: 10, color: amber, bold: true });
+          y -= 4;
+        }
+        break;
+      }
+
+      case "key_user_statements": {
+        for (const statement of section.statements) {
+          drawWrappedText(`Brukeren opplyser: «${statement.text}»`, { indent: 4 });
+          y -= 2;
+        }
+        break;
+      }
+
+      case "documented_findings":
+      case "partially_documented":
+      case "conflicts": {
+        if (section.findings.length === 0) drawWrappedText("Ingen forhold i denne kategorien.");
+        for (const finding of section.findings) {
+          drawWrappedText(`«${finding.claimText}» (${STATUS_LABELS[finding.status] ?? finding.status})`, { bold: true });
+          if (finding.whatItShows) drawSubLabel("Hva dokumentasjonen viser", finding.whatItShows);
+          if (finding.supportsSummary) drawSubLabel("Støtter", finding.supportsSummary);
+          if (finding.contradictsSummary) drawSubLabel("Motsier", finding.contradictsSummary);
+          if (finding.conflictsBetweenEvidence) drawSubLabel("Konflikt", finding.conflictsBetweenEvidence, { color: amber });
+          if (finding.notDocumentedSummary) drawSubLabel("Ikke dokumentert", finding.notDocumentedSummary);
+          if (finding.timelineNote) drawSubLabel("Tidslinje", finding.timelineNote);
+          if (finding.corroborationNote) drawSubLabel("Samlet støtte", finding.corroborationNote);
+          if (finding.confidence) drawSubLabel("Sikkerhet", `${CONFIDENCE_LABELS[finding.confidence] ?? finding.confidence} - ${finding.confidenceReasoning ?? ""}`);
+          drawDocRefs("Dokumentreferanser", finding.documentRefs);
+          y -= 4;
+        }
+        break;
+      }
+
+      case "witnesses": {
+        for (const witness of section.witnesses) {
+          const witnessLabel = witness.identityStatus === "named" ? (witness.name ?? "Navngitt vitne") : IDENTITY_LABELS[witness.identityStatus];
+          drawWrappedText(`${witnessLabel}${witness.relationshipToCase ? ` (${witness.relationshipToCase})` : ""}`, { bold: true });
+          for (const account of witness.accounts) {
+            drawSubLabel(
+              account.observationType === "direct" ? "Direkte observasjon" : "Annenhåndsinformasjon",
+              account.hasWrittenStatement ? "Skriftlig erklæring finnes" : "Kun brukerens opplysning om hva vitnet kan si"
+            );
+            drawWrappedText(account.description, { indent: 10 });
+            if (account.linkedClaimTexts.length > 0) {
+              drawWrappedText(`Knyttet til: ${account.linkedClaimTexts.join(" / ")}`, { indent: 10, color: slate });
+            }
+          }
+          y -= 4;
+        }
+        break;
+      }
+
+      case "documentation_gaps": {
+        for (const gap of section.gaps) {
+          drawWrappedText(`${GAP_TYPE_LABELS[gap.type] ?? gap.type}: ${gap.description}`, { indent: 4 });
+        }
+        if (section.confirmedNoEvidenceCount > 0) {
+          y -= 4;
+          drawWrappedText(
+            `${section.confirmedNoEvidenceCount} ${section.confirmedNoEvidenceCount === 1 ? "forhold er" : "forhold er"} bekreftet av brukeren å ikke ha mer tilgjengelig dokumentasjon.`,
+            { color: slate }
+          );
+        }
+        break;
+      }
+
+      case "legal_assessment": {
+        for (const item of section.items) {
+          drawWrappedText(item.ruleTitle, { bold: true });
+          drawWrappedText(item.commentary, { indent: 10 });
+          drawDocRefs("Se", item.documentRefs);
+          y -= 4;
+        }
+        break;
+      }
+
+      case "ai_assessment": {
+        if (section.bestDocumented) drawSubLabel("Best dokumentert", section.bestDocumented);
+        if (section.partiallyDocumented) drawSubLabel("Delvis dokumentert", section.partiallyDocumented);
+        if (section.conflicts) drawSubLabel("Konflikter", section.conflicts);
+        if (section.keyGaps) drawSubLabel("Sentrale hull", section.keyGaps);
+        if (section.strengthenAreas) drawSubLabel("Kan styrkes", section.strengthenAreas);
+        break;
+      }
+    }
+
+    y -= 6;
+  }
+
+  const pages = pdfDoc.getPages();
+
+  pages.forEach((pdfPage, index) => {
+    pdfPage.drawLine({ start: { x: margin, y: 52 }, end: { x: pageWidth - margin, y: 52 }, thickness: 0.7, color: border });
+    pdfPage.drawText(`Side ${index + 1} av ${pages.length}`, { x: margin, y: 35, size: 8, font: regularFont, color: slate });
+    pdfPage.drawText("PresseSjekk.no", { x: pageWidth - margin - 74, y: 35, size: 8, font: boldFont, color: cyan });
+    pdfPage.drawText("Veiledende rapport. Erstatter ikke advokat, PFU, redaktøransvar eller domstolene.", {
+      x: margin,
+      y: 22,
+      size: 7.5,
+      font: regularFont,
+      color: slate,
+    });
+  });
+
+  return await pdfDoc.save();
+}
+
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { id, reportId } = await context.params;
@@ -971,6 +1250,32 @@ export async function GET(request: NextRequest, context: RouteContext) {
     .eq("case_id", id)
     .is("deleted_at", null)
     .order("created_at", { ascending: true });
+
+  // Fase 4: strukturerte rapporter (report_kind === "structured") rendres
+  // direkte fra typede seksjoner - ingen tekst-sniffing. Eldre rapporter og
+  // de andre rapporttypene (pfu/politi/utredning) er URØRT og går videre
+  // gjennom den eksisterende tekstbaserte stien under.
+  if (report.report_kind === "structured") {
+    const sections = normalizeReportSections(report.sections);
+
+    if (sections.length > 0) {
+      const structuredPdfBytes = await createStructuredReportPdf({
+        caseTitle: caseItem.title || "Ukjent sak",
+        version: report.version,
+        createdAt: report.created_at,
+        sections,
+      });
+
+      return new NextResponse(Buffer.from(structuredPdfBytes), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="pressesjekk-rapport-v${report.version ?? "1"}.pdf"`,
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+  }
 
   const reportText =
     report.report_type === "investigation_draft"

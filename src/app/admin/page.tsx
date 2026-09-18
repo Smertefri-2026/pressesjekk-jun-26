@@ -7,6 +7,7 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminAccountBox } from "@/components/admin/AdminAccountBox";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { packagePlanName } from "@/data/packagePlans";
 import { supabase } from "@/lib/supabase/client";
 
 type AdminProfile = {
@@ -78,13 +79,7 @@ function reportTypeLabel(type: string) {
   return type;
 }
 
-function packageLabel(packageId: string) {
-  if (packageId === "report_pack") return "Rapportpakke";
-  if (packageId === "pfu_pack") return "PFU-pakke";
-  if (packageId === "full_pack") return "Full dokumentpakke";
-  if (packageId === "investigation_pack") return "Utredningspakke";
-  return packageId;
-}
+const packageLabel = packagePlanName;
 
 export default function AdminPage() {
   const [user, setUser] = useState<User | null>(null);

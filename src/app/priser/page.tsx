@@ -5,6 +5,7 @@ import { useState } from "react";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { monthlyPackages, singlePackages } from "@/data/packagePlans";
+import { PackagePlanCard } from "@/components/design-system";
 
 type PricingTab = "single" | "bundles" | "monthly";
 
@@ -157,52 +158,18 @@ export default function PriserPage() {
         {activeTab === "single" ? (
           <section className="mt-8 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
             {singlePackages.map((plan) => (
-              <article
+              <PackagePlanCard
                 key={plan.id}
-                className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
-                  plan.id === "investigation_pack"
-                    ? "border-amber-300 bg-amber-50"
-                    : plan.id === "full_pack"
-                      ? "border-red-300 bg-red-50"
-                      : "border-slate-200 bg-white"
-                }`}
-              >
-                <p className="inline-flex w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-red-800">
-                  {plan.tag}
-                </p>
-
-                <h3 className="mt-5 text-2xl font-black text-slate-950">
-                  {plan.name}
-                </h3>
-
-                <p className="mt-3 text-4xl font-black text-slate-950">
-                  {plan.price}
-                </p>
-
-                <p className="mt-4 leading-8 text-slate-700">
-                  {plan.description}
-                </p>
-
-                <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-2">
-                      <span className="text-red-700">✓</span>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href={
-                    plan.id === "investigation_pack"
-                      ? "/kontakt"
-                      : `/utsjekk?plan=${plan.id}`
-                  }
-                  className="mt-auto block rounded-xl bg-orange-400 px-5 py-4 text-center font-black text-slate-950 hover:bg-orange-400"
-                >
-                  {plan.button}
-                </Link>
-              </article>
+                tag={plan.tag}
+                name={plan.name}
+                price={plan.price}
+                description={plan.description}
+                features={plan.features}
+                ctaHref={plan.href}
+                ctaLabel={plan.button}
+                ctaVariant="filled-accent"
+                tone={plan.id === "investigation_pack" ? "highlight" : plan.id === "full_pack" ? "accent" : "default"}
+              />
             ))}
           </section>
         ) : null}
@@ -210,46 +177,19 @@ export default function PriserPage() {
         {activeTab === "bundles" ? (
           <section className="mt-8 grid gap-6 md:grid-cols-3">
             {caseBundles.map((bundle) => (
-              <article
+              <PackagePlanCard
                 key={bundle.name}
-                className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-              >
-                <p className="inline-flex w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-red-800">
-                  {bundle.tag}
-                </p>
-
-                <h3 className="mt-5 text-3xl font-black text-slate-950">
-                  {bundle.name}
-                </h3>
-
-                <p className="mt-3 text-4xl font-black text-slate-950">
-                  {bundle.price}
-                </p>
-
-                <p className="mt-2 text-sm font-black text-red-800">
-                  {bundle.perCase}
-                </p>
-
-                <p className="mt-4 leading-8 text-slate-700">
-                  {bundle.description}
-                </p>
-
-                <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
-                  {bundle.features.map((feature) => (
-                    <li key={feature} className="flex gap-2">
-                      <span className="text-red-700">✓</span>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href={bundle.href}
-                  className="mt-auto block rounded-xl border border-slate-300 bg-white px-5 py-4 text-center font-black text-slate-950 hover:bg-slate-100"
-                >
-                  {bundle.button}
-                </Link>
-              </article>
+                tag={bundle.tag}
+                name={bundle.name}
+                price={bundle.price}
+                perCase={bundle.perCase}
+                description={bundle.description}
+                features={bundle.features}
+                ctaHref={bundle.href}
+                ctaLabel={bundle.button}
+                ctaVariant="outline"
+                nameSize="lg"
+              />
             ))}
           </section>
         ) : null}
@@ -257,56 +197,27 @@ export default function PriserPage() {
         {activeTab === "monthly" ? (
           <section className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             {monthlyPackages.map((plan) => (
-              <article
+              <PackagePlanCard
                 key={plan.id}
-                className={`flex h-full flex-col rounded-3xl border p-6 shadow-sm ${
-                  plan.id === "monthly_pro"
-                    ? "border-red-300 bg-red-50"
-                    : "border-slate-200 bg-white"
-                }`}
-              >
-                <p className="inline-flex w-fit rounded-full bg-red-100 px-3 py-1 text-xs font-black uppercase tracking-[0.15em] text-red-800">
-                  {plan.tag}
-                </p>
-
-                <h3 className="mt-5 text-2xl font-black text-slate-950">
-                  {plan.name}
-                </h3>
-
-                <p className="mt-3 text-3xl font-black text-slate-950">
-                  {plan.price}
-                </p>
-
-                <p className="mt-4 leading-8 text-slate-700">
-                  {plan.description}
-                </p>
-
-                <ul className="mb-8 mt-6 grid flex-1 content-start gap-3 text-sm font-medium text-slate-700">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-2">
-                      <span className="text-red-700">✓</span>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <Link
-                  href={
-                    plan.id === "monthly_enterprise"
-                      ? "/kontakt"
-                      : `/utsjekk?plan=${plan.id}`
-                  }
-                  className="mt-auto block rounded-xl bg-slate-950 px-5 py-4 text-center font-black text-white hover:bg-slate-800"
-                >
-                  {plan.id === "monthly_enterprise"
+                tag={plan.tag}
+                name={plan.name}
+                price={plan.price}
+                description={plan.description}
+                features={plan.features}
+                ctaHref={plan.id === "monthly_enterprise" ? "/kontakt" : `/utsjekk?plan=${plan.id}`}
+                ctaLabel={
+                  plan.id === "monthly_enterprise"
                     ? "Be om tilbud"
                     : plan.id === "monthly_start"
                       ? "Start abonnement"
                       : plan.id === "monthly_pro"
                         ? "Start Pro"
-                        : "Start Byrå"}
-                </Link>
-              </article>
+                        : "Start Byrå"
+                }
+                ctaVariant="filled-dark"
+                tone={plan.id === "monthly_pro" ? "accent" : "default"}
+                priceSize="sm"
+              />
             ))}
           </section>
         ) : null}
@@ -328,7 +239,7 @@ export default function PriserPage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/min-side/saker/ny"
-              className="rounded-xl bg-orange-400 px-6 py-4 font-bold text-slate-950 hover:bg-orange-400"
+              className="rounded-xl bg-red-500 px-6 py-4 font-bold text-white hover:bg-red-600"
             >
               Start sak
             </Link>

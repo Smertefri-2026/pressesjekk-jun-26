@@ -7,7 +7,9 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminAccountBox } from "@/components/admin/AdminAccountBox";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { packagePlanName } from "@/data/packagePlans";
 import { supabase } from "@/lib/supabase/client";
+import type { PurchaseRow as FullPurchaseRow } from "@/lib/purchases/types";
 
 type AdminProfile = {
   id: string;
@@ -18,30 +20,31 @@ type AdminProfile = {
   created_at: string | null;
 };
 
-type PurchaseRow = {
-  id: string;
-  user_id: string;
-  case_id: string | null;
-  package_id: string;
-  purchase_type: string;
-  status: string;
-  amount_paid: number;
-  amount_original: number | null;
-  amount_credit: number;
-  currency: string;
-  included_cases: number | null;
-  used_cases: number;
-  source: string;
-  stripe_payment_intent_id: string | null;
-  stripe_checkout_session_id: string | null;
-  stripe_customer_id: string | null;
-  stripe_subscription_id: string | null;
-  stripe_invoice_id: string | null;
-  stripe_receipt_url: string | null;
-  refund_status: string;
-  refunded_amount: number;
-  created_at: string;
-};
+type PurchaseRow = Pick<
+  FullPurchaseRow,
+  | "id"
+  | "user_id"
+  | "case_id"
+  | "package_id"
+  | "purchase_type"
+  | "status"
+  | "amount_paid"
+  | "amount_original"
+  | "amount_credit"
+  | "currency"
+  | "included_cases"
+  | "used_cases"
+  | "source"
+  | "stripe_payment_intent_id"
+  | "stripe_checkout_session_id"
+  | "stripe_customer_id"
+  | "stripe_subscription_id"
+  | "stripe_invoice_id"
+  | "stripe_receipt_url"
+  | "refund_status"
+  | "refunded_amount"
+  | "created_at"
+>;
 
 type SubscriptionRow = {
   id: string;
@@ -81,17 +84,7 @@ function formatOre(amount: number | null | undefined, currency = "nok") {
   }).format(value);
 }
 
-function packageLabel(packageId: string) {
-  if (packageId === "report_pack") return "Rapportpakke";
-  if (packageId === "pfu_pack") return "PFU-pakke";
-  if (packageId === "full_pack") return "Full dokumentpakke";
-  if (packageId === "investigation_pack") return "Utredningspakke";
-  if (packageId === "monthly_start") return "Månedsavtale Start";
-  if (packageId === "monthly_pro") return "Månedsavtale Pro";
-  if (packageId === "monthly_agency") return "Månedsavtale Byrå";
-  if (packageId === "monthly_enterprise") return "Enterprise";
-  return packageId;
-}
+const packageLabel = packagePlanName;
 
 function purchaseTypeLabel(type: string) {
   if (type === "new_purchase") return "Nytt kjøp";

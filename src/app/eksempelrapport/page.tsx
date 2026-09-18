@@ -246,8 +246,8 @@ export default function EksempelrapportPage() {
                 }`}
               >
                 <p
-                  className={`text-xs font-black uppercase tracking-[0.18em] ${
-                    activeTab === item.key ? "text-orange-300" : "text-red-700"
+                  className={`text-xs font-bold uppercase tracking-[0.18em] ${
+                    activeTab === item.key ? "text-red-300" : "text-red-700"
                   }`}
                 >
                   {item.step}
@@ -356,7 +356,7 @@ export default function EksempelrapportPage() {
             </div>
 
             <div className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                 Test selv
               </p>
               <h2 className="mt-3 text-3xl font-black">
@@ -368,7 +368,7 @@ export default function EksempelrapportPage() {
               </p>
               <Link
                 href="/pressesjekk"
-                className="mt-6 block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600"
+                className="mt-6 block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-red-600"
               >
                 Start sjekk
               </Link>
@@ -380,7 +380,7 @@ export default function EksempelrapportPage() {
           <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_460px] lg:items-stretch">
             <div className="grid content-start gap-6">
               <div>
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                   Eksempel på tidslinje
                 </p>
                 <h2 className="mt-3 text-4xl font-black">
@@ -399,7 +399,7 @@ export default function EksempelrapportPage() {
                     key={item}
                     className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-slate-200"
                   >
-                    <span className="mr-2 text-orange-300">{index + 1}.</span>
+                    <span className="mr-2 text-red-300">{index + 1}.</span>
                     {item}
                   </div>
                 ))}
@@ -433,7 +433,7 @@ export default function EksempelrapportPage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/pressesjekk"
-              className="rounded-xl bg-red-500 px-6 py-4 font-bold text-slate-950 hover:bg-red-500"
+              className="rounded-xl bg-red-500 px-6 py-4 font-bold text-white hover:bg-red-600"
             >
               Start sjekk
             </Link>

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { TurnstileBox } from "@/components/contact/TurnstileBox";
 
 const roleOptions = [
   { value: "reader", label: "Leser – rask sjekk" },
@@ -58,6 +59,10 @@ export function QuickCheckBox() {
   const [quickCheck, setQuickCheck] = useState<QuickCheck | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [quickError, setQuickError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [pendingAutoUrl, setPendingAutoUrl] = useState("");
+  const autoTriggeredRef = useRef(false);
 
   useEffect(() => {
     const incomingUrl = getSearchParam("url");
@@ -77,11 +82,21 @@ export function QuickCheckBox() {
         incomingRole === "reader" || !incomingRole ? "reader" : incomingRole;
 
       if (startRole === "reader") {
-        registerQuickCheck(incomingUrl, "reader");
+        // Kan ikke kjøres før Turnstile har levert en token (kostnadsvern).
+        // Turnstile løses normalt automatisk i "managed"-modus uten at
+        // brukeren merker noe, så dette skjer som regel innen et par sekund.
+        setPendingAutoUrl(incomingUrl);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!pendingAutoUrl || !turnstileToken || autoTriggeredRef.current) return;
+
+    autoTriggeredRef.current = true;
+    registerQuickCheck(pendingAutoUrl, "reader");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingAutoUrl, turnstileToken]);
 
   const quickDomain = useMemo(
     () => getDomain(quickCheck?.url ?? ""),
@@ -94,6 +109,11 @@ export function QuickCheckBox() {
   const missingPoints = toPointList(quickCheck?.ai_missing_context);
 
   async function registerQuickCheck(targetUrl: string, targetRole: string) {
+    if (!turnstileToken) {
+      setQuickError("Vent til menneske-bekreftelsen er fullført, og prøv igjen.");
+      return false;
+    }
+
     setIsChecking(true);
     setQuickError("");
 
@@ -106,6 +126,7 @@ export function QuickCheckBox() {
         body: JSON.stringify({
           url: targetUrl,
           role: targetRole,
+          turnstileToken,
         }),
       });
 
@@ -135,6 +156,11 @@ export function QuickCheckBox() {
       return false;
     } finally {
       setIsChecking(false);
+      // Turnstile-tokens er engangsbruk - nullstill slik at widgeten henter
+      // en ny token til neste forsøk, i stedet for å vise en "klar"-knapp
+      // som uansett vil feile på serveren.
+      setTurnstileToken("");
+      setTurnstileResetKey((key) => key + 1);
     }
   }
 
@@ -205,16 +231,28 @@ export function QuickCheckBox() {
           ))}
         </select>
 
+        {role === "reader" ? (
+          <div className="mt-4">
+            <TurnstileBox
+              key={turnstileResetKey}
+              onVerify={setTurnstileToken}
+              onExpire={() => setTurnstileToken("")}
+            />
+          </div>
+        ) : null}
+
         <button
           type="submit"
-          disabled={isChecking}
-          className="mt-4 block w-full rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={isChecking || (role === "reader" && !turnstileToken)}
+          className="mt-4 block w-full rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isChecking
             ? "Sjekker..."
-            : role === "reader"
-              ? "Kjør rask sjekk"
-              : "Gå videre til sak"}
+            : role === "reader" && !turnstileToken
+              ? "Bekrefter at du er menneske..."
+              : role === "reader"
+                ? "Kjør rask sjekk"
+                : "Gå videre til sak"}
         </button>
 
         {role === "reader" ? (
@@ -257,7 +295,7 @@ export function QuickCheckBox() {
           </p>
 
           <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
               Artikkel
             </p>
             <p className="mt-2 text-sm font-bold text-slate-950">
@@ -300,7 +338,7 @@ export function QuickCheckBox() {
 
           {quickCheck.ai_summary ? (
             <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
                 Kort vurdering
               </p>
               <p className="mt-2 text-sm leading-7 text-slate-800">
@@ -358,7 +396,7 @@ export function QuickCheckBox() {
           ) : null}
 
           <div className="mt-5 rounded-3xl border border-slate-950 bg-slate-950 p-5 text-white">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-orange-300">
+            <p className="text-sm font-black uppercase tracking-[0.18em] text-red-300">
               Gå videre
             </p>
             <h3 className="mt-3 text-2xl font-black">
@@ -385,7 +423,7 @@ export function QuickCheckBox() {
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <Link
                 href={`/utsjekk?plan=report_pack&url=${encodedQuickUrl}`}
-                className="rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600"
+                className="rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-red-600"
               >
                 Kjøp rapportpakke
               </Link>

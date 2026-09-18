@@ -335,7 +335,7 @@ export default function ProfilePage() {
               Kontoinformasjon
             </p>
 
-            <h2 className="mt-3 text-4xl font-black text-slate-950">
+            <h2 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">
               Profilopplysninger
             </h2>
 

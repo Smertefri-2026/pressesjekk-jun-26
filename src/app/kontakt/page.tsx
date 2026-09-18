@@ -138,7 +138,7 @@ export default function KontaktPage() {
 
               <button
                 type="button"
-                className="rounded-xl bg-red-500 px-6 py-4 font-black text-slate-950 hover:bg-red-500"
+                className="rounded-xl bg-red-500 px-6 py-4 font-black text-white hover:bg-red-600"
               >
                 Send melding
               </button>
@@ -160,7 +160,7 @@ export default function KontaktPage() {
               </p>
               <Link
                 href="/pressesjekk"
-                className="mt-6 block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600"
+                className="mt-6 block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-red-600"
               >
                 Start rask sjekk
               </Link>
@@ -191,7 +191,7 @@ export default function KontaktPage() {
               </figure>
 
               <div className="p-5 sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                   Proff og utredning
                 </p>
                 <h2 className="mt-3 text-2xl font-black">
@@ -204,7 +204,7 @@ export default function KontaktPage() {
               </p>
                 <Link
                   href="/proff"
-                  className="mt-6 inline-block rounded-xl bg-red-500 px-5 py-3 font-black text-white hover:bg-orange-600"
+                  className="mt-6 inline-block rounded-xl bg-red-500 px-5 py-3 font-black text-white hover:bg-red-600"
                 >
                   Les om proff
                 </Link>

@@ -66,7 +66,7 @@ export function StripePaymentElementBox({
       <button
         type="submit"
         disabled={!stripe || !elements || isPaying}
-        className="mt-5 w-full rounded-xl bg-amber-500 px-5 py-4 text-center font-black text-white hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 w-full rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isPaying ? "Fullfører betaling ..." : "Betal nå"}
       </button>

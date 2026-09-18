@@ -8,8 +8,12 @@ import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import {
   caseBundles,
   monthlyPackages,
+  packagePlanName,
+  packagePlanRank,
+  singlePackages,
   type PackagePlanId,
 } from "@/data/packagePlans";
+import { getStripeCheckoutPlan } from "@/lib/stripe/plans";
 import { supabase } from "@/lib/supabase/client";
 
 type CaseRow = {
@@ -35,62 +39,17 @@ type UpgradeOption = {
   features: string[];
 };
 
-const upgradeOptions: UpgradeOption[] = [
-  {
-    id: "report_pack",
-    name: "Rapportpakke",
-    price: 490,
-    tag: "Start",
-    description:
-      "For deg som vil få struktur, vurdering og en ryddig rapport på saken.",
-    features: [
-      "Rapport basert på saksopplysninger",
-      "Mulige presseetiske punkter",
-      "Ryddig PDF-grunnlag",
-    ],
-  },
-  {
-    id: "pfu_pack",
-    name: "PFU-pakke",
-    price: 1490,
-    tag: "Mest relevant",
-    description:
-      "For deg som vil gå videre fra rapport til strukturert PFU-klage.",
-    features: [
-      "Alt i rapportpakke",
-      "Utkast til PFU-klage",
-      "Kobling mot relevante VVP-punkter",
-    ],
-  },
-  {
-    id: "full_pack",
-    name: "Full dokumentpakke",
-    price: 2990,
-    tag: "Best verdi",
-    description:
-      "For deg som også vil ha videre dokumenter som politianmeldelse og mer komplett saksgrunnlag.",
-    features: [
-      "Alt i PFU-pakke",
-      "Utkast til politianmeldelse",
-      "Videre dokumentgrunnlag for saken",
-    ],
-  },
-  {
-    id: "investigation_pack",
-    name: "Utredningspakke",
-    price: 100000,
-    tag: "Manuell hjelp",
-    description:
-      "For større eller mer alvorlige saker der du ønsker manuell gjennomgang, strukturering og videre strategi.",
-    features: [
-      "Alt i full dokumentpakke",
-      "Manuell vurdering av saken",
-      "Gjennomgang av dokumentasjon",
-      "Kvalitetssikring av rapport og dokumentpakke",
-      "Forslag til videre strategi",
-    ],
-  },
-];
+// Avledet fra singlePackages (packagePlans.ts) - samme kilde som /priser -
+// slik at navn, pris og funksjonsliste aldri kan gli fra hverandre mellom
+// prisside og oppgraderingsside inne i saken (jf. "Rødstreken"-rapporten).
+const upgradeOptions: UpgradeOption[] = singlePackages.map((plan) => ({
+  id: plan.id,
+  name: plan.name,
+  price: (getStripeCheckoutPlan(plan.id)?.amount ?? 0) / 100,
+  tag: plan.tag,
+  description: plan.description,
+  features: plan.features,
+}));
 
 const tabText = {
   upgrade: {
@@ -113,21 +72,6 @@ const tabText = {
   },
 } as const;
 
-function packageLabel(packageId: PackagePlanId | null) {
-  if (packageId === "report_pack") return "Rapportpakke";
-  if (packageId === "pfu_pack") return "PFU-pakke";
-  if (packageId === "full_pack") return "Full dokumentpakke";
-  if (packageId === "investigation_pack") return "Utredningspakke";
-  if (packageId === "case_bundle_3") return "3 saker";
-  if (packageId === "case_bundle_5") return "5 saker";
-  if (packageId === "case_bundle_10") return "10 saker";
-  if (packageId === "monthly_start") return "Månedsavtale Start";
-  if (packageId === "monthly_pro") return "Månedsavtale Pro";
-  if (packageId === "monthly_agency") return "Månedsavtale Byrå";
-  if (packageId === "monthly_enterprise") return "Enterprise";
-  return "Ingen aktiv pakke";
-}
-
 function journalistPackageLabel(packageId: PackagePlanId | null) {
   if (packageId === "report_pack") return "Redaksjonell rapport";
   if (packageId === "pfu_pack") return "VVP-risiko og forbedringspunkter";
@@ -143,21 +87,9 @@ function journalistPackageLabel(packageId: PackagePlanId | null) {
   return "Ingen aktiv tilgang";
 }
 
-function packageRank(packageId: PackagePlanId | null) {
-  if (!packageId) return 0;
-  if (packageId === "report_pack") return 1;
-  if (packageId === "pfu_pack") return 2;
-  if (packageId === "full_pack") return 3;
-  if (packageId === "investigation_pack") return 4;
-  return 1;
-}
-
 function packagePrice(packageId: PackagePlanId | null) {
-  if (packageId === "report_pack") return 490;
-  if (packageId === "pfu_pack") return 1490;
-  if (packageId === "full_pack") return 2990;
-  if (packageId === "investigation_pack") return 100000;
-  return 0;
+  if (!packageId) return 0;
+  return (getStripeCheckoutPlan(packageId)?.amount ?? 0) / 100;
 }
 
 function formatKr(amount: number) {
@@ -227,12 +159,18 @@ export default function CasePackagePage() {
 
       setCaseItem(caseData as CaseRow);
 
-      const { data: accessData } = await supabase
+      const { data: accessData, error: accessError } = await supabase
         .from("case_access")
         .select("package_id,status")
         .eq("case_id", params.id)
         .eq("status", "active")
         .maybeSingle();
+
+      if (accessError) {
+        setErrorMessage(accessError.message);
+        setIsLoading(false);
+        return;
+      }
 
       const access = accessData as CaseAccessRow | null;
       setCurrentPackageId(access?.package_id ?? null);
@@ -258,7 +196,7 @@ export default function CasePackagePage() {
     }
   }, [params.id, checkoutStatus]);
 
-  const currentRank = packageRank(currentPackageId);
+  const currentRank = packagePlanRank(currentPackageId);
   const currentPrice = packagePrice(currentPackageId);
 
   const visibleUpgradeOptions = upgradeOptions;
@@ -279,7 +217,7 @@ export default function CasePackagePage() {
 
   const currentPackageLabel = isJournalistWorkflow
     ? journalistPackageLabel(currentPackageId)
-    : packageLabel(currentPackageId);
+    : packagePlanName(currentPackageId);
 
   const tabIntro =
     isJournalistWorkflow && activeTab === "bundles"
@@ -558,7 +496,7 @@ export default function CasePackagePage() {
             <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
               {visibleUpgradeOptions.map((option) => {
                 const displayOption = displayUpgradeOption(option);
-                const optionRank = packageRank(option.id);
+                const optionRank = packagePlanRank(option.id);
                 const upgradeAmount = Math.max(option.price - currentPrice, 0);
                 const isCurrent = currentPackageId === option.id;
                 const isIncluded = currentRank > optionRank;
@@ -722,7 +660,7 @@ export default function CasePackagePage() {
 
                 <Link
                   href={`/utsjekk?plan=${bundle.id}`}
-                  className="mt-auto block rounded-xl bg-orange-400 px-5 py-4 text-center font-black text-slate-950 hover:bg-orange-500"
+                  className="mt-auto block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-red-600"
                 >
                   {bundle.button}
                 </Link>

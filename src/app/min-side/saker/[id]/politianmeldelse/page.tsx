@@ -5,10 +5,13 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
-import { CaseWorkflowCard } from "@/components/cases/CaseWorkflowCard";
+import { CaseSidebar } from "@/components/cases/CaseSidebar";
+import { JournalistWorkflowGate } from "@/components/cases/JournalistWorkflowGate";
+import { CaseAttachmentPanel } from "@/components/cases/CaseAttachmentPanel";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
 import { supabase } from "@/lib/supabase/client";
 import type { PackagePlanId } from "@/data/packagePlans";
+import type { CaseReportRow as FullCaseReportRow } from "@/lib/report/mappers";
 
 type CaseAccessRow = {
   package_id: PackagePlanId;
@@ -24,14 +27,10 @@ type CaseRow = {
   short_description: string | null;
 };
 
-type CaseReportRow = {
-  id: string;
-  version: number;
-  report_type: "free_check" | "full_report" | "pfu_draft" | "police_draft" | "investigation_draft";
-  police_draft: string | null;
-  status: "draft" | "ready" | "archived";
-  created_at: string;
-};
+type CaseReportRow = Pick<
+  FullCaseReportRow,
+  "id" | "version" | "report_type" | "police_draft" | "status" | "created_at"
+>;
 
 type CaseInputRow = {
   id: string;
@@ -50,6 +49,14 @@ function statusLabel(status: CaseRow["status"]) {
   if (status === "closed") return "Lukket";
   return status;
 }
+
+const policeDocumentTypeOptions = [
+  { value: "police_response", label: "Svar fra politiet" },
+  { value: "article", label: "Artikkel" },
+  { value: "journalist_email", label: "E-post fra journalist" },
+  { value: "legal_document", label: "Juridisk dokument" },
+  { value: "other", label: "Annet" },
+];
 
 function formatDate(date: string | null) {
   if (!date) return "Ikke satt";
@@ -97,12 +104,18 @@ export default function PoliceReportPage() {
 
       setUser(user);
 
-      const { data: accessData } = await supabase
+      const { data: accessData, error: accessError } = await supabase
         .from("case_access")
         .select("package_id,status")
         .eq("case_id", params.id)
         .eq("status", "active")
         .maybeSingle();
+
+      if (accessError) {
+        setErrorMessage(accessError.message);
+        setIsLoading(false);
+        return;
+      }
 
       const caseAccess = accessData as CaseAccessRow | null;
 
@@ -363,102 +376,24 @@ export default function PoliceReportPage() {
 
   if (isJournalistWorkflow) {
     return (
-      <main className="min-h-screen bg-slate-50 text-slate-950">
-        <LightPublicHeader />
-
-        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-          <Link
-            href={`/min-side/saker/${params.id}`}
-            className="text-sm font-semibold text-red-700 hover:text-red-900"
-          >
-            ← Tilbake til saken
-          </Link>
-
-          <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
-            <section className="rounded-3xl border border-red-200 bg-red-50 p-6 shadow-sm sm:p-10">
-              <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-800">
-                Redaksjonell sjekk
-              </p>
-
-              <h1 className="mt-4 max-w-4xl [text-wrap:balance] text-4xl font-black sm:text-5xl tracking-tight text-slate-950 md:text-6xl">
-                Politianmeldelse er ikke del av redaksjonelt forhåndsløp
-              </h1>
-
-              <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-700">
-                Denne siden er laget for saker etter publisering der en omtalt
-                person, virksomhet eller pårørende vurderer politianmeldelse.
-                For journalist og redaksjon bør hovedløpet være
-                publiseringsgrunnlag, redaksjonell rapport, VVP-risiko og
-                kvalitetssikring før publisering.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href={`/min-side/saker/${params.id}/rapport`}
-                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
-                >
-                  Gå til redaksjonell rapport
-                </Link>
-
-                <Link
-                  href={`/min-side/saker/${params.id}/opplysninger`}
-                  className="rounded-2xl border border-red-300 bg-white px-6 py-4 font-black text-red-900 hover:bg-red-50"
-                >
-                  Gå til publiseringsgrunnlag
-                </Link>
-
-                <Link
-                  href={`/min-side/saker/${params.id}/pakke`}
-                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
-                >
-                  Se redaksjonelle pakker
-                </Link>
-              </div>
-            </section>
-
-            <aside className="grid content-start gap-6">
-              <CaseWorkflowCard
-                caseId={params.id}
-                statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
-                activeStep="rapport"
-                workflowType="journalist"
-                currentPackageId={caseAccessPackageId ?? undefined}
-                stepsDone={{
-                  caseRegistered: true,
-                  caseInputs: Boolean(caseInput),
-                  report: reports.some(
-                    (report) =>
-                      report.report_type === "free_check" ||
-                      report.report_type === "full_report"
-                  ),
-                  pfuDraft: false,
-                  pfuDecision: false,
-                  policeReport: false,
-                  investigation: reports.some(
-                    (report) => report.report_type === "investigation_draft"
-                  ),
-                }}
-              />
-
-              <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-                <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
-                  Riktig arbeidsflyt
-                </p>
-                <h2 className="mt-3 text-3xl font-black">
-                  Før publisering
-                </h2>
-                <p className="mt-4 leading-8 text-slate-300">
-                  For redaksjoner bør vurderingen handle om fakta,
-                  kildegrunnlag, samtidig imøtegåelse, identifisering og
-                  presseetisk risiko før saken publiseres.
-                </p>
-              </div>
-            </aside>
-          </div>
-        </section>
-
-        <LightPublicFooter />
-      </main>
+      <JournalistWorkflowGate
+        caseId={params.id}
+        heading="Politianmeldelse er ikke del av redaksjonelt forhåndsløp"
+        description="Denne siden er laget for saker etter publisering der en omtalt person, virksomhet eller pårørende vurderer politianmeldelse. For journalist og redaksjon bør hovedløpet være publiseringsgrunnlag, redaksjonell rapport, VVP-risiko og kvalitetssikring før publisering."
+        statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+        currentPackageId={caseAccessPackageId ?? undefined}
+        stepsDone={{
+          caseRegistered: true,
+          caseInputs: Boolean(caseInput),
+          report: reports.some(
+            (report) => report.report_type === "free_check" || report.report_type === "full_report"
+          ),
+          pfuDraft: false,
+          pfuDecision: false,
+          policeReport: false,
+          investigation: reports.some((report) => report.report_type === "investigation_draft"),
+        }}
+      />
     );
   }
 
@@ -513,7 +448,7 @@ export default function PoliceReportPage() {
                   type="button"
                   onClick={handleGeneratePoliceDraft}
                   disabled={isGeneratingPoliceDraft}
-                  className="col-span-2 w-full rounded-2xl bg-red-500 px-5 py-4 text-center text-base font-black text-slate-950 hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
+                  className="col-span-2 w-full rounded-2xl bg-red-500 px-5 py-4 text-center text-base font-black text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1 sm:w-auto sm:py-3 sm:text-sm"
                 >
                   {isGeneratingPoliceDraft
                     ? "Genererer..."
@@ -554,147 +489,108 @@ export default function PoliceReportPage() {
                 </div>
               ) : null}
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href={`/min-side/saker/${params.id}/utredning`}
-                  className="rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
-                >
-                  Gå til utredning
-                </Link>
-
-                <Link
-                  href={`/min-side/saker/${params.id}`}
-                  className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-950 hover:bg-slate-100"
-                >
-                  Til saken
-                </Link>
-              </div>
-            </div>
-
-            <div className="mt-8 rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-8">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-800">
-                7. Gå til utredningspakke
-              </p>
-
-              <h2 className="mt-3 text-4xl font-black text-slate-950">
-                Erstatning og videre utredning
-              </h2>
-
-              <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-700">
-                I større saker kan det være aktuelt å vurdere økonomisk tap,
-                omdømmeskade, oppreisning og årsakssammenheng. Dette er normalt
-                et eget sivilt spor som krever grundig dokumentasjon og manuell
-                gjennomgang.
-              </p>
-
-              <p className="mt-4 max-w-3xl leading-8 text-slate-700">
-                En utredningspakke kan gjennomgå publisering, tidslinje,
-                dokumentasjon, mulig tap, PFU-klage, PFU-avgjørelse, rettslige spørsmål og
-                grunnlag for videre oppfølging. Pris fra kr 100 000 eks. mva.
-                for større saker.
-              </p>
-
-              <Link
-                href={`/min-side/saker/${params.id}/utredning`}
-                className="mt-8 inline-flex rounded-2xl bg-slate-950 px-6 py-4 font-black text-white hover:bg-slate-800"
-              >
-                Gå til utredningspakke
-              </Link>
             </div>
           </section>
 
-          <aside className="grid content-start gap-6">
-            <CaseWorkflowCard
-              caseId={params.id}
-              statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
-              activeStep="politianmeldelse"
-              workflowType={workflowType}
-              currentPackageId={caseAccessPackageId ?? undefined}
-              stepsDone={{
-                caseRegistered: true,
-                caseInputs: Boolean(caseInput),
-                report: reports.some(
-                  (report) =>
-                    report.report_type === "free_check" ||
-                    report.report_type === "full_report"
-                ),
-                pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
-                pfuDecision: Boolean(
-                  pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
-                ),
-                policeReport: policeDrafts.length > 0,
-                investigation: reports.some(
-                  (report) => report.report_type === "investigation_draft"
-                ),
-              }}
-            />
-
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-700">
-                Lagrede politianmeldelser
-              </p>
-              <h2 className="mt-3 text-3xl font-black text-slate-950">
-                {policeDrafts.length > 1
-                  ? `${policeDrafts.length} lagret`
-                  : policeDrafts.length === 1
-                    ? "1 lagret"
-                    : "Ingen lagret"}
-              </h2>
-
-              <div className="mt-5 grid gap-3">
+          <CaseSidebar
+            caseId={params.id}
+            statusLabel={caseItem ? statusLabel(caseItem.status) : "Utkast"}
+            activeStep="politianmeldelse"
+            workflowType={workflowType}
+            currentPackageId={caseAccessPackageId ?? undefined}
+            stepsDone={{
+              caseRegistered: true,
+              caseInputs: Boolean(caseInput),
+              report: reports.some(
+                (report) =>
+                  report.report_type === "free_check" ||
+                  report.report_type === "full_report"
+              ),
+              pfuDraft: reports.some((report) => report.report_type === "pfu_draft"),
+              pfuDecision: Boolean(
+                pfuDecision?.decision_received || pfuDecision?.uploaded_file_name
+              ),
+              policeReport: policeDrafts.length > 0,
+              investigation: reports.some(
+                (report) => report.report_type === "investigation_draft"
+              ),
+            }}
+            statusTitle="Politianmeldelse"
+            statusItems={[
+              {
+                label: "Utkast",
+                value: policeDrafts.length > 0 ? `${policeDrafts.length} lagret` : "Finnes ikke",
+                tone: policeDrafts.length > 0 ? "success" : "neutral",
+              },
+            ]}
+            statusContent={
+              <div className="grid gap-4">
                 {policeDrafts.length === 0 ? (
-                  <p className="leading-8 text-slate-700">
+                  <p className="text-sm leading-7 text-slate-700">
                     Ingen politianmeldelser er lagret ennå. Generer et KI-utkast
                     når saken er klar for videre vurdering.
                   </p>
                 ) : (
-                  policeDrafts.map((draft) => {
-                    const isSelected = activePoliceDraft?.id === draft.id;
+                  <div className="grid gap-3">
+                    {policeDrafts.map((draft) => {
+                      const isSelected = activePoliceDraft?.id === draft.id;
 
-                    return (
-                      <button
-                        key={`${draft.id}-${draft.version}`}
-                        type="button"
-                        onClick={() => setSelectedPoliceDraftId(draft.id)}
-                        className={`rounded-2xl border p-4 text-left transition ${
-                          isSelected
-                            ? "border-red-500 bg-red-50 shadow-sm"
-                            : "border-slate-200 bg-slate-50 hover:bg-red-50"
-                        }`}
-                      >
-                        <p className="font-black text-slate-950">
-                          Politianmeldelse v{draft.version}
-                        </p>
-                        <p className="mt-1 text-sm font-semibold text-slate-600">
-                          {formatDate(draft.created_at)}
-                        </p>
-                        {isSelected ? (
-                          <p className="mt-2 text-xs font-black uppercase tracking-[0.18em] text-red-700">
-                            Vises nå
+                      return (
+                        <button
+                          key={`${draft.id}-${draft.version}`}
+                          type="button"
+                          onClick={() => setSelectedPoliceDraftId(draft.id)}
+                          className={`rounded-2xl border p-4 text-left transition ${
+                            isSelected
+                              ? "border-red-500 bg-red-50 shadow-sm"
+                              : "border-slate-200 bg-slate-50 hover:bg-red-50"
+                          }`}
+                        >
+                          <p className="font-black text-slate-950">
+                            Politianmeldelse v{draft.version}
                           </p>
-                        ) : null}
-                      </button>
-                    );
-                  })
+                          <p className="mt-1 text-sm font-semibold text-slate-600">
+                            {formatDate(draft.created_at)}
+                          </p>
+                          {isSelected ? (
+                            <p className="mt-2 text-xs font-bold uppercase tracking-[0.18em] text-red-700">
+                              Vises nå
+                            </p>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
-              </div>
-            </div>
 
-            <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-sm sm:p-7">
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
-                Viktig forbehold
-              </p>
-              <h2 className="mt-3 text-3xl font-black">
-                En anmeldelse kan bli henlagt
-              </h2>
-              <p className="mt-4 leading-8 text-slate-300">
-                Dersom saken vurderes videre som politianmeldelse eller annen
-                oppfølging, bør grunnlaget være ryddig, dokumentert og nøkternt.
-                En anmeldelse gir ingen garanti for etterforskning eller
-                resultat.
-              </p>
-            </div>
-          </aside>
+                <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold leading-5 text-amber-900">
+                  Viktig forbehold: en anmeldelse kan bli henlagt og gir ingen
+                  garanti for etterforskning eller resultat. Grunnlaget bør
+                  være ryddig, dokumentert og nøkternt.
+                </p>
+
+                <CaseAttachmentPanel
+                  caseId={params.id}
+                  title="Svar fra politiet og nye dokumenter"
+                  description="Last opp svar fra politiet eller annen dokumentasjon som kommer til etter anmeldelsen. Filene leses automatisk inn i saken, sammen med det øvrige dokumentasjonsgrunnlaget."
+                  documentTypeOptions={policeDocumentTypeOptions}
+                  defaultDocumentType="police_response"
+                  emptyStateTitle="Ingen svar eller vedlegg lastet opp ennå"
+                  emptyStateDescription="Last opp svar fra politiet her når det kommer, eller andre dokumenter som er relevante etter anmeldelsen."
+                />
+              </div>
+            }
+            nextStep={{
+              title: "Erstatning og videre utredning",
+              description:
+                "I større saker kan det være aktuelt å vurdere økonomisk tap, omdømmeskade, oppreisning og årsakssammenheng - normalt et eget sivilt spor som krever grundig dokumentasjon og manuell gjennomgang. Utredningspakken går gjennom publisering, tidslinje, dokumentasjon, mulig tap, PFU-klage, PFU-avgjørelse, rettslige spørsmål og grunnlag for videre oppfølging.",
+              primary: {
+                label: "Gå til utredning",
+                href: `/min-side/saker/${params.id}/utredning`,
+              },
+              secondary: { label: "Til saken", href: `/min-side/saker/${params.id}` },
+            }}
+          />
         </div>
       </section>
 

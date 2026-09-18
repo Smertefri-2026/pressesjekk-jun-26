@@ -1,16 +1,11 @@
-import { DocumentOverviewPage } from "@/components/dashboard/DocumentOverviewPage";
+import { redirect } from "next/navigation";
 
-export default function UtredningerPage() {
-  return (
-    <DocumentOverviewPage
-      eyebrow="Utredninger"
-      title="Utredninger"
-      description="Oversikt over utredningsutkast og større saksgrunnlag som er laget i dine saker."
-      reportTypes={["investigation_draft"]}
-      emptyTitle="Ingen utredninger ennå"
-      emptyText="Når du genererer et utredningsutkast i en sak, vises det her."
-      primaryHref="/min-side"
-      primaryLabel="Se saker"
-    />
-  );
+/**
+ * Fase 6.3 — de fire arkiv-sidene (rapporter/pfu-klager/politianmeldelser/
+ * utredninger) er slått sammen til én side med faner på /min-side/rapporter.
+ * Denne ruten beholdes som en varig omdirigering slik at gamle lenker og
+ * bokmerker fortsatt fungerer.
+ */
+export default function UtredningerRedirectPage() {
+  redirect("/min-side/rapporter?tab=utredning");
 }

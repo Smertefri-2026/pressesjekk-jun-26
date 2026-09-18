@@ -234,7 +234,7 @@ export default function ProffPage() {
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link
                   href="/priser"
-                  className="rounded-xl bg-orange-400 px-5 py-3 font-black text-slate-950 hover:bg-orange-500"
+                  className="rounded-xl bg-red-500 px-5 py-3 font-black text-white hover:bg-red-600"
                 >
                   Se priser
                 </Link>

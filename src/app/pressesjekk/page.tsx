@@ -261,7 +261,7 @@ export default function PresseSjekkPage() {
 
               <Link
                 href="/min-side/saker/ny"
-                className="mt-5 block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-red-700"
+                className="mt-5 block rounded-xl bg-red-500 px-5 py-4 text-center font-black text-white hover:bg-red-600"
               >
                 Start ny sak
               </Link>

@@ -1,9 +1,36 @@
 "use client";
 
 import Script from "next/script";
+import { useEffect, useId } from "react";
 
-export function TurnstileBox() {
+type TurnstileBoxProps = {
+  onVerify?: (token: string) => void;
+  onExpire?: () => void;
+};
+
+declare global {
+  interface Window {
+    [key: `turnstileCallback_${string}`]: ((token: string) => void) | undefined;
+    [key: `turnstileExpireCallback_${string}`]: (() => void) | undefined;
+  }
+}
+
+export function TurnstileBox({ onVerify, onExpire }: TurnstileBoxProps = {}) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const rawId = useId();
+  const callbackId = rawId.replace(/[^a-zA-Z0-9]/g, "");
+  const verifyCallbackName = `turnstileCallback_${callbackId}` as const;
+  const expireCallbackName = `turnstileExpireCallback_${callbackId}` as const;
+
+  useEffect(() => {
+    window[verifyCallbackName] = (token: string) => onVerify?.(token);
+    window[expireCallbackName] = () => onExpire?.();
+
+    return () => {
+      delete window[verifyCallbackName];
+      delete window[expireCallbackName];
+    };
+  }, [verifyCallbackName, expireCallbackName, onVerify, onExpire]);
 
   if (!siteKey) {
     return (
@@ -31,6 +58,8 @@ export function TurnstileBox() {
           data-sitekey={siteKey}
           data-theme="light"
           data-size="compact"
+          data-callback={verifyCallbackName}
+          data-expired-callback={expireCallbackName}
         />
       </div>
     </div>

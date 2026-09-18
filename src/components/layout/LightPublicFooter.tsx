@@ -120,16 +120,12 @@ export function LightPublicFooter() {
                 </Link>
               ))}
             </nav>
-
-  
           </section>
 
           <section>
             <h2 className="text-sm font-black uppercase tracking-[0.22em] text-white">
               Følg oss
             </h2>
-            <p className="mt-5 text-sm leading-7 text-slate-300">
-            </p>
 
             <nav className="mt-5 grid gap-3 text-sm font-semibold text-slate-300">
               {socialLinks.map((item) => (

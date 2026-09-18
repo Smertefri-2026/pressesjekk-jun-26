@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { BrandLogo } from "@/components/layout/BrandLogo";
@@ -18,6 +19,7 @@ const navLinks = [
 const mobileLinks = navLinks;
 
 export function LightPublicHeader() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
@@ -66,7 +68,12 @@ export function LightPublicHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="hover:text-white"
+                  aria-current={pathname === item.href ? "page" : undefined}
+                  className={
+                    pathname === item.href
+                      ? "text-white underline decoration-red-500 decoration-2 underline-offset-8"
+                      : "hover:text-white"
+                  }
                 >
                   {item.label}
                 </Link>
@@ -82,7 +89,7 @@ export function LightPublicHeader() {
               </Link>
               <Link
                 href="/pressesjekk"
-                className="rounded-xl bg-orange-500 px-4 py-3 text-sm font-bold text-white hover:bg-orange-600"
+                className="rounded-xl bg-red-500 px-4 py-3 text-sm font-bold text-white hover:bg-red-600"
               >
                 Start sjekk
               </Link>
@@ -94,25 +101,18 @@ export function LightPublicHeader() {
               <BrandLogo size="header" tone="dark" />
             </div>
 
-            <div className="flex shrink-0 items-center justify-end gap-1.5">
-              <Link
-                href={accountHref}
-                className="rounded-xl border border-slate-600 bg-white/5 px-2.5 py-2 text-[11px] font-black text-white hover:bg-white/10"
-              >
-                {accountLabel}
-              </Link>
-
+            <div className="flex shrink-0 items-center justify-end gap-2">
               <Link
                 href="/pressesjekk"
-                className="rounded-xl bg-orange-500 px-2.5 py-2 text-[11px] font-black text-white hover:bg-orange-600"
+                className="rounded-xl bg-red-500 px-3 py-2 text-xs font-black text-white hover:bg-red-600"
               >
-                Start
+                Start sjekk
               </Link>
 
               <button
                 type="button"
                 onClick={() => setIsOpen((value) => !value)}
-                className="flex h-10 w-8 shrink-0 items-center justify-center bg-transparent text-2xl font-black leading-none text-white hover:text-orange-400"
+                className="flex h-10 w-8 shrink-0 items-center justify-center bg-transparent text-2xl font-black leading-none text-white hover:text-red-400"
                 aria-expanded={isOpen}
                 aria-label={isOpen ? "Lukk meny" : "Åpne meny"}
               >
@@ -124,6 +124,14 @@ export function LightPublicHeader() {
           {isOpen ? (
             <nav className="border-t border-slate-700 py-4 sm:hidden">
               <div className="grid gap-2">
+                <Link
+                  href={accountHref}
+                  onClick={() => setIsOpen(false)}
+                  className="rounded-xl bg-white/10 px-4 py-3 text-sm font-black text-white hover:bg-white/15"
+                >
+                  {accountLabel}
+                </Link>
+
                 {mobileLinks.map((item) => (
                   <Link
                     key={item.href}

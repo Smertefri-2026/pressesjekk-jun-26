@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe/server";
 import { getStripeCheckoutPlan } from "@/lib/stripe/plans";
-import type { PackagePlanId } from "@/data/packagePlans";
+import { isV1Purchasable, packagePlanRank, type PackagePlanId } from "@/data/packagePlans";
 
 const paymentIntentPackageIds: PackagePlanId[] = [
   "report_pack",
@@ -13,15 +13,6 @@ const paymentIntentPackageIds: PackagePlanId[] = [
   "case_bundle_5",
   "case_bundle_10",
 ];
-
-function packageRank(packageId: PackagePlanId | null) {
-  if (!packageId) return 0;
-  if (packageId === "report_pack") return 1;
-  if (packageId === "pfu_pack") return 2;
-  if (packageId === "full_pack") return 3;
-  if (packageId === "investigation_pack") return 4;
-  return 1;
-}
 
 function getPackageAmount(packageId: PackagePlanId | null) {
   if (!packageId) return 0;
@@ -45,6 +36,19 @@ export async function POST(request: NextRequest) {
     if (!plan || !isPaymentIntentPackage(packageId)) {
       return NextResponse.json(
         { error: "Denne pakken kan ikke betales her ennå." },
+        { status: 400 }
+      );
+    }
+
+    // Server-side håndheving av v1-omfanget. UI kan foreslå andre pakker,
+    // men manipulert frontend/direkte API-kall skal aldri kunne betale for
+    // en pakke som ikke er en del av v1 sin offentlige checkout.
+    if (!isV1Purchasable(packageId)) {
+      return NextResponse.json(
+        {
+          error:
+            "Denne pakken er ikke tilgjengelig for kjøp ennå. Ta kontakt for tilgang.",
+        },
         { status: 400 }
       );
     }
@@ -95,6 +99,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const stripe = getStripe();
+
     let amountToPay = plan.amount;
     let currentPackageId: PackagePlanId | null = null;
     let caseTitle = "PresseSjekk-sak";
@@ -119,16 +125,20 @@ export async function POST(request: NextRequest) {
 
       caseTitle = caseItem.title || caseTitle;
 
-      const { data: accessData } = await supabase
+      const { data: accessData, error: accessError } = await supabase
         .from("case_access")
         .select("package_id,status")
         .eq("case_id", caseId)
         .eq("status", "active")
         .maybeSingle();
 
+      if (accessError) {
+        return NextResponse.json({ error: "Kunne ikke lese tilgangen for saken." }, { status: 500 });
+      }
+
       currentPackageId = (accessData?.package_id as PackagePlanId | null) ?? null;
 
-      if (packageRank(packageId) <= packageRank(currentPackageId)) {
+      if (packagePlanRank(packageId) <= packagePlanRank(currentPackageId)) {
         return NextResponse.json(
           {
             error:
@@ -146,9 +156,57 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-    }
 
-    const stripe = getStripe();
+      // Kanseller alle andre ubetalte PaymentIntents for denne saken før vi
+      // lager en ny. Uten dette kan et gammelt, forlatt betalingsforsøk
+      // (f.eks. fra en tidligere fane, eller et dobbeltklikk) stå betalbart
+      // på ubestemt tid og senere bli bekreftet ved en feil - selv etter at
+      // saken allerede har fått tilgangen gjennom et nyere kjøp. Dette er
+      // hoved­sperren mot dobbeltbelastning; webhooken har i tillegg en
+      // uavhengig kontroll rett før case_access oppdateres.
+      //
+      // Bruker paymentIntents.list (sterkt konsistent, direkte oppslag) i
+      // stedet for Search-API-et - Search bruker en indeks som kan henge
+      // noen sekunder etter en nyopprettet PaymentIntent, noe som ville gjort
+      // denne sperren upålitelig akkurat i det tilfellet den skal dekke.
+      const cancelableStatuses = new Set([
+        "requires_payment_method",
+        "requires_confirmation",
+        "requires_action",
+      ]);
+
+      try {
+        const ninetyDaysAgo = Math.floor(Date.now() / 1000) - 90 * 24 * 60 * 60;
+        const recentIntents = await stripe.paymentIntents.list({
+          created: { gte: ninetyDaysAgo },
+          limit: 100,
+        });
+
+        const staleForThisCase = recentIntents.data.filter(
+          (pi) => pi.metadata?.case_id === caseId && cancelableStatuses.has(pi.status)
+        );
+
+        for (const stale of staleForThisCase) {
+          try {
+            await stripe.paymentIntents.cancel(stale.id, {
+              cancellation_reason: "abandoned",
+            });
+          } catch (cancelError) {
+            console.warn("Kunne ikke kansellere gammel PaymentIntent", {
+              staleIntentId: stale.id,
+              caseId,
+              error: cancelError,
+            });
+          }
+        }
+      } catch (listError) {
+        // Opprydningen skal aldri blokkere et legitimt kjøp - logg og fortsett.
+        console.warn("Kunne ikke liste opp gamle PaymentIntents for saken", {
+          caseId,
+          error: listError,
+        });
+      }
+    }
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountToPay,

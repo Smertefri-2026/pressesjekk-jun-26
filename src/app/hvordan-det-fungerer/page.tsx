@@ -241,7 +241,7 @@ export default function HvordanDetFungererPage() {
         <section className="mt-16 rounded-3xl bg-slate-950 p-8 text-white shadow-sm">
           <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-start">
             <div>
-              <p className="text-sm font-bold uppercase tracking-[0.25em] text-orange-300">
+              <p className="text-sm font-bold uppercase tracking-[0.25em] text-red-300">
                 Hva får du?
               </p>
               <h2 className="mt-3 text-4xl font-black">
@@ -298,7 +298,7 @@ export default function HvordanDetFungererPage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/pressesjekk"
-              className="rounded-xl bg-red-500 px-6 py-4 font-bold text-slate-950 hover:bg-red-500"
+              className="rounded-xl bg-red-500 px-6 py-4 font-bold text-white hover:bg-red-600"
             >
               Start sjekk
             </Link>

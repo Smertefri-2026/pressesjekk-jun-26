@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/server";
 import { getStripeCheckoutPlan } from "@/lib/stripe/plans";
 import { getSupabaseServiceClient } from "@/lib/supabase/service";
-import type { PackagePlanId } from "@/data/packagePlans";
+import { packagePlanRank, type PackagePlanId } from "@/data/packagePlans";
 
 function entitlementExpiresAt(packageId: PackagePlanId) {
   const expiringPackages: PackagePlanId[] = [
@@ -360,12 +360,15 @@ async function recordPaymentIntentPurchase({
   caseId,
   packageId,
   includedCases,
+  likelyDuplicate = false,
 }: {
   paymentIntent: Stripe.PaymentIntent;
   userId: string;
   caseId: string | null;
   packageId: PackagePlanId;
   includedCases: number | null;
+  /** Saken hadde allerede denne pakken (eller høyere) fra et annet, tidligere PaymentIntent - trolig en dobbeltbetaling som bør refunderes manuelt. */
+  likelyDuplicate?: boolean;
 }) {
   const metadata = paymentIntent.metadata ?? {};
   const supabase = getSupabaseServiceClient();
@@ -436,6 +439,13 @@ async function recordPaymentIntentPurchase({
       metadata: {
         stripe_metadata: metadata,
         payment_method_types: paymentIntent.payment_method_types,
+        ...(likelyDuplicate
+          ? {
+              likely_duplicate: true,
+              duplicate_reason:
+                "Saken hadde allerede denne pakken (eller høyere) fra et annet PaymentIntent da denne betalingen ble bekreftet. Bør sjekkes for refusjon.",
+            }
+          : {}),
       },
     },
     {
@@ -484,7 +494,7 @@ async function activatePaymentIntentEntitlement(
   if (caseId) {
     const { data: existingAccess, error: existingError } = await supabase
       .from("case_access")
-      .select("id, stripe_checkout_session_id")
+      .select("id, package_id, status, stripe_checkout_session_id")
       .eq("case_id", caseId)
       .maybeSingle();
 
@@ -504,6 +514,37 @@ async function activatePaymentIntentEntitlement(
         caseId,
         packageId,
         includedCases: 1,
+      });
+
+      return;
+    }
+
+    // Server-side sperre: saken har allerede denne pakken (eller høyere) fra
+    // et ANNET, tidligere PaymentIntent. Dette er en reell, fullført
+    // dobbeltbetaling (pengene er allerede tatt av Stripe) - vi kan ikke
+    // late som betalingen ikke skjedde, men vi skal aldri la den overskrive
+    // eller "re-aktivere" case_access. Kjøpet registreres for sporbarhet og
+    // flagges tydelig for manuell refusjon i stedet.
+    if (
+      existingAccess &&
+      existingAccess.status === "active" &&
+      packagePlanRank(existingAccess.package_id as PackagePlanId) >= packagePlanRank(packageId)
+    ) {
+      console.error("Mulig dobbeltbetaling oppdaget - case_access IKKE overskrevet", {
+        paymentIntentId: paymentIntent.id,
+        caseId,
+        packageId,
+        existingPackageId: existingAccess.package_id,
+        existingPaymentIntentId: existingAccess.stripe_checkout_session_id,
+      });
+
+      await recordPaymentIntentPurchase({
+        paymentIntent,
+        userId,
+        caseId,
+        packageId,
+        includedCases: 1,
+        likelyDuplicate: true,
       });
 
       return;

@@ -7,6 +7,7 @@ import { AdminNav } from "@/components/admin/AdminNav";
 import { AdminAccountBox } from "@/components/admin/AdminAccountBox";
 import { LightPublicFooter } from "@/components/layout/LightPublicFooter";
 import { LightPublicHeader } from "@/components/layout/LightPublicHeader";
+import { packagePlanName, singlePackages } from "@/data/packagePlans";
 import { supabase } from "@/lib/supabase/client";
 
 type AdminProfile = {
@@ -39,18 +40,12 @@ type AdminCaseAccess = {
   updated_at: string | null;
 };
 
-const packageOptions = [
-  { id: "report_pack", label: "Rapportpakke" },
-  { id: "pfu_pack", label: "PFU-pakke" },
-  { id: "full_pack", label: "Full dokumentpakke" },
-  { id: "investigation_pack", label: "Utredningspakke" },
-];
+// Manuell tildeling gjelder kun enkeltpakkene, ikke sakspakker/abonnement.
+const packageOptions = singlePackages.map((plan) => ({ id: plan.id, label: plan.name }));
 
 const PAGE_SIZE = 10;
 
-function packageLabel(packageId: string) {
-  return packageOptions.find((item) => item.id === packageId)?.label ?? packageId;
-}
+const packageLabel = packagePlanName;
 
 function formatDateTime(value: string | null) {
   if (!value) return "Ukjent";
@@ -306,29 +301,39 @@ export default function AdminPackagesPage() {
     setErrorMessage("");
     setSuccessMessage("");
 
-    const { data, error } = await supabase
-      .from("case_access")
-      .upsert(
-        {
-          case_id: caseItem.id,
-          user_id: caseItem.user_id,
-          package_id: packageId,
-          status: "active",
-          source: reason,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "case_id" }
-      )
-      .select("id,user_id,case_id,package_id,status,source,created_at,updated_at")
-      .single();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    if (error) {
-      setErrorMessage(error.message);
+    if (!session?.access_token) {
+      setErrorMessage("Innloggingen kunne ikke bekreftes. Last siden på nytt.");
       setSavingCaseId(null);
       return;
     }
 
-    const savedAccess = data as AdminCaseAccess;
+    const response = await fetch("/api/admin/case-access", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        caseId: caseItem.id,
+        userId: caseItem.user_id,
+        packageId,
+        source: reason,
+      }),
+    });
+
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setErrorMessage(result?.error ?? "Kunne ikke lagre tilgang.");
+      setSavingCaseId(null);
+      return;
+    }
+
+    const savedAccess = result.access as AdminCaseAccess;
 
     setAccessByCaseId((current) => ({
       ...current,

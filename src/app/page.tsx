@@ -289,7 +289,7 @@ export default function HomePage() {
           <div className="mt-7 flex flex-wrap justify-center gap-3">
             <Link
               href="/pressesjekk"
-              className="rounded-xl bg-red-500 px-6 py-4 font-bold text-slate-950 hover:bg-red-500"
+              className="rounded-xl bg-red-500 px-6 py-4 font-bold text-white hover:bg-red-600"
             >
               Start gratis sjekk
             </Link>

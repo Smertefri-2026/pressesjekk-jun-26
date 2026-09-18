@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { getSupabaseServiceClient } from "@/lib/supabase/service";
+import { jsonError, getClientIp } from "@/lib/api/http";
+import { verifyTurnstileToken } from "@/lib/turnstile";
+import { checkRateLimit } from "@/lib/rateLimit";
+import { callAiChatJson } from "@/lib/ai/openai";
 import {
   formatRulesForPrompt,
   getPfuRelevantRules,
@@ -12,9 +15,10 @@ import {
   getPoliceReportContextRules,
 } from "@/lib/legal/norwegianLaw";
 
-function jsonError(message: string, status = 400) {
-  return NextResponse.json({ error: message }, { status });
-}
+// Sekundært forsvar mot automatisert misbruk (Turnstile er hovedforsvaret).
+// Se src/lib/rateLimit.ts for begrensninger ved denne tilnærmingen.
+const RATE_LIMIT_MAX = 12;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
 function normalizeUrl(value: string) {
   try {
@@ -62,8 +66,6 @@ async function generateQuickAnalysis({
     };
   }
 
-  const openai = new OpenAI({ apiKey });
-
   const mediaEthicsRules = [
     ...getPfuRelevantRules(),
     ...pfuContextRules,
@@ -107,25 +109,11 @@ Lag JSON med disse feltene:
 }
 `;
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
-    temperature: 0.2,
-    response_format: { type: "json_object" },
-    messages: [
-      {
-        role: "system",
-        content:
-          "Du lager korte, forsiktige og tydelig forbeholdne raskrapporter om mediesaker.",
-      },
-      {
-        role: "user",
-        content: prompt,
-      },
-    ],
+  const parsed = await callAiChatJson<Record<string, unknown>>({
+    systemPrompt:
+      "Du lager korte, forsiktige og tydelig forbeholdne raskrapporter om mediesaker.",
+    userPrompt: prompt,
   });
-
-  const raw = completion.choices[0]?.message?.content ?? "{}";
-  const parsed = JSON.parse(raw);
 
   return {
     ai_status: "ready",
@@ -146,10 +134,30 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const url = String(body?.url ?? "").trim();
   const role = String(body?.role ?? "reader").trim() || "reader";
-  const forceAnalyze = Boolean(body?.forceAnalyze);
+  const turnstileToken = typeof body?.turnstileToken === "string" ? body.turnstileToken : "";
 
   if (!url) {
     return jsonError("URL mangler.");
+  }
+
+  const clientIp = getClientIp(request);
+
+  const rateLimit = checkRateLimit(`quick-check:${clientIp}`, {
+    max: RATE_LIMIT_MAX,
+    windowMs: RATE_LIMIT_WINDOW_MS,
+  });
+
+  if (!rateLimit.allowed) {
+    return jsonError(
+      "For mange forespørsler akkurat nå. Vent litt og prøv igjen.",
+      429
+    );
+  }
+
+  const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIp);
+
+  if (!turnstileResult.success) {
+    return jsonError(turnstileResult.error, 400);
   }
 
   const normalizedUrl = normalizeUrl(url);
@@ -219,8 +227,10 @@ export async function POST(request: NextRequest) {
     quickCheck = created;
   }
 
+  // Merk: forceAnalyze er bevisst ikke et klientstyrt felt. Reanalyse skjer
+  // kun automatisk når forrige forsøk manglet resultat/feilet - klienten kan
+  // ikke tvinge fram nye KI-kall på en URL som allerede er analysert.
   const shouldAnalyze =
-    forceAnalyze ||
     !quickCheck.ai_summary ||
     quickCheck.ai_status === "not_started" ||
     quickCheck.ai_status === "failed";
