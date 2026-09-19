@@ -210,13 +210,7 @@ export default function MinSidePage() {
 
       setUser(user);
 
-      const [
-        casesResult,
-        foldersResult,
-        reportsResult,
-        pfuDraftCountResult,
-        profileResult,
-      ] = await Promise.all([
+      const [casesResult, foldersResult, profileResult] = await Promise.all([
           supabase
             .from("cases")
             .select(
@@ -237,19 +231,6 @@ export default function MinSidePage() {
             .limit(100),
 
           supabase
-            .from("case_reports")
-            .select("id,case_id,version,report_type,created_at", {
-              count: "exact",
-            })
-            .order("created_at", { ascending: false })
-            .limit(50),
-
-          supabase
-            .from("case_reports")
-            .select("id", { count: "exact", head: true })
-            .eq("report_type", "pfu_draft"),
-
-          supabase
             .from("profiles")
             .select("full_name,role_type,is_admin")
             .eq("id", user.id)
@@ -268,12 +249,6 @@ export default function MinSidePage() {
         return;
       }
 
-      if (reportsResult.error) {
-        setErrorMessage(reportsResult.error.message);
-        setIsLoading(false);
-        return;
-      }
-
       const caseRows = (casesResult.data ?? []) as CaseRow[];
       const folderRows = (foldersResult.data ?? []) as CaseFolderRow[];
       const activeCaseIds = new Set(
@@ -281,9 +256,24 @@ export default function MinSidePage() {
           .filter((caseItem) => !caseItem.deleted_at)
           .map((caseItem) => caseItem.id)
       );
-      const reportRows = ((reportsResult.data ?? []) as ReportRow[]).filter(
-        (report) => activeCaseIds.has(report.case_id)
-      );
+
+      const reportsResult =
+        activeCaseIds.size > 0
+          ? await supabase
+              .from("case_reports")
+              .select("id,case_id,version,report_type,created_at")
+              .in("case_id", Array.from(activeCaseIds))
+              .order("created_at", { ascending: false })
+              .limit(50)
+          : { data: [] as ReportRow[], error: null };
+
+      if (reportsResult.error) {
+        setErrorMessage(reportsResult.error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      const reportRows = (reportsResult.data ?? []) as ReportRow[];
 
       const activeAccessRows =
         caseRows.length > 0
